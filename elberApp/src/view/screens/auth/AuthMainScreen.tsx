@@ -8,23 +8,47 @@ import Button from '../../components/ui/Button';
 import CustomText from '../../components/ui/CustomText';
 import authStyles from '../../../styles/auth.style';
 import { appColors } from '../../../styles/main.style';
+import { useEffect } from 'react';
+import useFadeIn from '../../../hooks/animation/useFadeIn';
+import { Animated } from 'react-native';
+import useAnimateText from '../../../hooks/animation/useAnimateText';
 
 type  AuthMainScreenProps = NativeStackScreenProps<RootStackParamList, 'AuthMain'>;
 
+const phrases = [
+    "Hola, soy Elber",
+    "Listo para ayudarte",
+    "Trabajemos juntos",
+    "Cuenta conmigo",
+];
+
 const AuthMainScreen = ({navigation}: AuthMainScreenProps) => {
+    
+    const {fadeIn,  setFadeIn} = useFadeIn();
+    const {animatedElements, setAnimatedText} = useAnimateText(phrases)
+    const {interval, displayedText, phrase} = animatedElements
+    
+    useEffect(() => {
+        setFadeIn();
+    }, []);
+
+    useEffect(() => {
+        setAnimatedText()
+        return () => clearInterval(interval);
+    }, [phrase]);
+
     return (
         <LinearGradient
             colors={[appColors.primary, appColors.secondary]}
             style={{flex: 1}}
         >
-            <View style={authStyles.container}>
+            <Animated.View style={[authStyles.container, { opacity: fadeIn }]}>
                 <View style={authStyles.centerContent}>
                     <Image
                         source={require('../../../assets/images/dot.png')}
                         style={authStyles.logo}
                     />
-                    <CustomText type='title' text='Elber'  />
-                    <CustomText type='subtitle' text='Tu asistente de IA para todo' />
+                    <CustomText type='title' text={displayedText} style={{textAlign: 'center', marginHorizontal: 40}}/>
                 </View>
                 <View style={authStyles.bottomContent}>
                     <Button
@@ -42,7 +66,7 @@ const AuthMainScreen = ({navigation}: AuthMainScreenProps) => {
                         />
                     </View>
                 </View>
-            </View>
+            </Animated.View>
         </LinearGradient>
     );
 }

@@ -3,5 +3,6 @@ export const appColors = {
     secondary: '#222222',
     contrast: '#FFFFFF',
     text: '#fff',
-    subtitle: '#A0A0A0'
+    subtitle: '#A0A0A0',
+    error: '#FF0000'
 }

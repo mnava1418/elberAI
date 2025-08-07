@@ -53,8 +53,8 @@ const AuthMainScreen = ({navigation}: AuthMainScreenProps) => {
                 <View style={authStyles.bottomContent}>
                     <Button
                         type="primary"
-                        title="Crear cuenta"
-                        onPress={() => navigation.navigate('SignUp')}                        
+                        title="Crea tu cuenta"
+                        onPress={() => navigation.navigate('RequestAccess')}                        
                     />
                     <View style={authStyles.footer}>
                         <CustomText type='text' text='¿Ya tienes cuenta?' style={{marginRight: 5}} />

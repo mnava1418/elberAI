@@ -23,6 +23,13 @@ const textStyles = StyleSheet.create({
       letterSpacing: 0.1,
       lineHeight: 22,
     },
+    error: {
+      fontSize: 18,
+      fontWeight: '400',
+      color: appColors.error,
+      letterSpacing: 0.1,
+      lineHeight: 22,
+    },
   });
 
   export default textStyles;

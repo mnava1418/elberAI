@@ -3,7 +3,6 @@ import React from 'react'
 import { View } from 'react-native';
 import { RootStackParamList } from '../../Elber';
 import { Image } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import Button from '../../components/ui/Button';
 import CustomText from '../../components/ui/CustomText';
 import authStyles from '../../../styles/auth.style';
@@ -12,13 +11,13 @@ import { useEffect } from 'react';
 import useFadeIn from '../../../hooks/animation/useFadeIn';
 import { Animated } from 'react-native';
 import useAnimateText from '../../../hooks/animation/useAnimateText';
+import MainView from '../../components/ui/MainView';
 
 type  AuthMainScreenProps = NativeStackScreenProps<RootStackParamList, 'AuthMain'>;
 
 const phrases = [
     "Hola, soy Elber",
-    "Listo para ayudarte",
-    "Trabajemos juntos",
+    "Tu asistente de IA",
     "Cuenta conmigo",
 ];
 
@@ -38,10 +37,7 @@ const AuthMainScreen = ({navigation}: AuthMainScreenProps) => {
     }, [phrase]);
 
     return (
-        <LinearGradient
-            colors={[appColors.primary, appColors.secondary]}
-            style={{flex: 1}}
-        >
+       <MainView>
             <Animated.View style={[authStyles.container, { opacity: fadeIn }]}>
                 <View style={authStyles.centerContent}>
                     <Image
@@ -67,7 +63,7 @@ const AuthMainScreen = ({navigation}: AuthMainScreenProps) => {
                     </View>
                 </View>
             </Animated.View>
-        </LinearGradient>
+        </MainView>
     );
 }
 

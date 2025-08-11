@@ -11,6 +11,7 @@ import * as validation from '../../../services/validation.service';
 import Spinner from '../../components/ui/Spinner';
 import MainView from '../../components/ui/MainView';
 import useRequestAccess from '../../../hooks/auth/useRequestAccess';
+import { requestAccess } from '../../../services/auth.service';
 
 type  RequestAccessScreenProps = NativeStackScreenProps<RootStackParamList, 'RequestAccess'>;
 
@@ -39,10 +40,16 @@ const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
         setIsProcessing(true);
         cleanTexts();
         
-        setTimeout(() => {
+        requestAccess(email)
+        .then((message) => {
+            setMessage(message);
+        })
+        .catch((error) => {
+            setError(error.message);
+        })
+        .finally(() => {
             setIsProcessing(false);
-            setMessage('Solicitud enviada. Revisa tu correo electrónico para más instrucciones.');
-        }, 2000);
+        });
     };
 
     const handleEmailChange = (text: string) => {

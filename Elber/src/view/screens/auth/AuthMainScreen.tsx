@@ -41,7 +41,7 @@ const AuthMainScreen = ({navigation}: AuthMainScreenProps) => {
             <Animated.View style={[authStyles.container, { opacity: fadeIn }]}>
                 <View style={authStyles.centerContent}>
                     <Image
-                        source={require('../../../assets/images/dot.png')}
+                        source={require('../../../assets/images/elber.png')}
                         style={authStyles.logo}
                     />
                     <CustomText type='title' text={displayedText} style={{textAlign: 'center', marginHorizontal: 40}}/>

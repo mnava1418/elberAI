@@ -1,4 +1,4 @@
-package com.elberapp
+package tech.namart.elber
 
 import android.app.Application
 import com.facebook.react.PackageList

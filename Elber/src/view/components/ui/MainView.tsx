@@ -15,7 +15,7 @@ const MainView = ({ style, children }: MainViewProps) => {
                 <View
                     style={[
                         StyleSheet.absoluteFillObject,
-                        {backgroundColor: appColors.primary,zIndex: 1, opacity: 0.4}
+                        {backgroundColor: appColors.primary,zIndex: 1, opacity: 0.6}
                     ]}
                     pointerEvents="none"
                 />

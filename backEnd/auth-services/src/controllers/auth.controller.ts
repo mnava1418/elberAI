@@ -21,3 +21,13 @@ export const reviewAccess = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+export const validateAccessCode = async (req: Request, res: Response) => {
+    try {
+        const { email, accessCode } = req.body;
+        const result = await authService.validateAccessCode(email, accessCode);
+        res.status(200).json(result);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+}

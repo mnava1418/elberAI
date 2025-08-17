@@ -57,6 +57,18 @@ const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
         cleanTexts();
     }
 
+    const handleContinue = () => {
+        if(!validation.validateMandatoryField(email)) {
+            setError('Campo obligatorio.');
+            return;
+        } else if (!validation.validateEmail(email)) {
+            setError('Email no válido.');
+            return;
+        }
+        cleanTexts();
+        navigation.navigate('AccessCode', {email})
+    }
+
     const getActionsView = () => {
         return (
             <>
@@ -66,7 +78,7 @@ const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
                 <Button 
                     type="secondary"
                     title="Continuar"
-                    onPress={() => navigation.navigate('Login')}
+                    onPress={handleContinue}
                     textColor={appColors.subtitle}
                 />
             </View>

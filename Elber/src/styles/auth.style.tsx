@@ -18,8 +18,8 @@ const authStyles = StyleSheet.create({
         alignItems: 'center',
     },
     logo: {
-        width: 250,
-        height: 250,        
+        width: 220,
+        height: 220,        
     },    
     footer: {
         flexDirection: 'row',

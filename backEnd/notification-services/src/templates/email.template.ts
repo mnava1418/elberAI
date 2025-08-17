@@ -8,7 +8,7 @@ export const userRequestAccessTemplate = () => {
             </head>
             <body>
                 <div>
-                    <h1>¡Quiúbole!</h1>
+                    <h3>¡Quiúbole!</h3>
                     <p>
                     ¿Cómo estás? Nomás para avisarte que ya recibimos tu solicitud de acceso.<br>
                     La vamos a revisar con lupa (y con cafecito en mano, porque así rinde más). No te me desesperes, en cuanto la procesemos te avisamos.
@@ -27,6 +27,36 @@ export const userRequestAccessTemplate = () => {
             </body>
         </html>
         `;
+
+    return message
+}
+
+export const adminRequestAccessTemplate = (userEmail: string, approveUrl: string, rejectUrl: string) => {
+    const message = `
+        <!DOCTYPE html>
+        <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <title>¡Alerta de nuevo solicitante!</title>
+            </head>
+            <body>
+                <div>
+                    <h3>¡Jefe, tenemos un nuevo valiente!</h3>
+                    <p>
+                        El usuario <b>${userEmail}</b> acaba de pedir acceso al sistema.<br>
+                        ¿Qué hacemos, lo dejamos pasar o le decimos "ahí pa' la otra"?<br>
+                    </p>
+                    <p>
+                        <a href="${approveUrl}">¡Órale, aprobar!</a>
+                        <a href="${rejectUrl}">Nel, rechazar</a>
+                    </p>
+                    <div >
+                        ¡Ánimo, jefe!
+                    </div>
+                </div>
+            </body>
+        </html>
+    `;
 
     return message
 }

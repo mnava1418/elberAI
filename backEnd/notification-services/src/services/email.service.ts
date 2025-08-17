@@ -1,20 +1,26 @@
 import fs from 'fs'
-import { adminRequestAccessTemplate, userRequestAccessTemplate } from '../templates/email.template'
+import { 
+    acceptAccessTemplate, 
+    adminRequestAccessTemplate, 
+    rejectAccessTemplate, 
+    userRequestAccessTemplate 
+} from '../templates/email.template'
 import { email } from '../config/index.config'
 import nodemailer from 'nodemailer'
-import { EmailMessageType, MailOptions, SendEmailInput } from '../types/email.type'
+import { EmailMessageType, MailOptions, RequestAccessPayload, RequestCodePayload, SendEmailInput } from '../types/email.type'
 
 const getMessage = ({messageType, payload}: SendEmailInput) => {
     switch (messageType) {
         case EmailMessageType.UserRequestAccess:
             return userRequestAccessTemplate()           
         case EmailMessageType.AdminRequestAccess:
-            if (payload) {
-                const {userEmail, approveURL, rejectURL} = payload
-                return adminRequestAccessTemplate(userEmail, approveURL, rejectURL)
-            } else {
-                return ''
-            }
+            const {userEmail, approveURL, rejectURL} = payload as RequestAccessPayload
+            return adminRequestAccessTemplate(userEmail, approveURL, rejectURL)
+        case EmailMessageType.UserAccessGranted:
+            const { code } = payload as RequestCodePayload
+            return acceptAccessTemplate(code)
+        case EmailMessageType.UserAccessDenied:
+            return rejectAccessTemplate()
         default:
             return ''
     }

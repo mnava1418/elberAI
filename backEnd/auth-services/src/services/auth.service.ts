@@ -6,11 +6,7 @@ import { server, notification, auth } from '../config/index.config';
 import jwt from 'jsonwebtoken';
 
 export const generateToken = (payload: object) => {
-    if (auth.token && typeof auth.token === 'string') {
-          return jwt.sign(payload, auth.token);
-    }
-
-    throw new Error('Token is not defined or not a string.');
+    return jwt.sign(payload, auth.token as string);
 };
 
 export const requestAccess = async (email: string) => {
@@ -21,8 +17,6 @@ export const requestAccess = async (email: string) => {
         
         const requestMessage: RequestAccessModel = {
             requestTime: Date.now(),
-            approvedTime: null,
-            code: null,
             isApproved: false
         }
 
@@ -31,6 +25,27 @@ export const requestAccess = async (email: string) => {
     } catch (error) {
         console.error(error)
         throw new Error('Unable to request access')
+    }
+};
+
+export const reviewAccess = async (email: string, isApproved: boolean) => {
+    try {
+        const emailKey = email.replace('@', '').replace('.', '');
+        const db = admin.database();
+        const ref = db.ref(`/auth/request/${emailKey}`);
+        const accessCode = isApproved ? generateAccessCode() : null;
+
+        const requestMessage: RequestAccessModel = {
+            approvedTime: isApproved ? Date.now() : null,
+            code: accessCode,
+            isApproved
+        }
+
+        await ref.update(requestMessage);
+        sendAccessResponseEmail(email, isApproved, accessCode);
+    } catch (error) {
+        console.error(error);
+        throw new Error('Unable to review access');
     }
 };
 
@@ -58,3 +73,18 @@ const sendRequestEmails = (email: string) => {
     sendEmail(userRequestInput)
     sendEmail(adminRequestInput)
 }
+
+const sendAccessResponseEmail = (email: string, isApproved: boolean, accessCode: number | null) => {
+    const adminResponseInput: SendEmailInput = {
+        to: email,
+        subject: isApproved ? '¡Felicidades, tu acceso fue aprobado!' : '¡Chale, tu acceso fue rechazado!',
+        messageType: isApproved ? EmailMessageType.UserAccessGranted : EmailMessageType.UserAccessDenied,
+        payload: isApproved && accessCode !== null ? { code: accessCode } : undefined
+    };
+
+    sendEmail(adminResponseInput);
+};
+
+const generateAccessCode = () => {
+    return Math.floor(1000 + Math.random() * 9000);
+};

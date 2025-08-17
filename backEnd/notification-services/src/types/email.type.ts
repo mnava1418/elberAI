@@ -1,6 +1,8 @@
 export enum EmailMessageType {
     UserRequestAccess,
-    AdminRequestAccess
+    AdminRequestAccess,
+    UserAccessGranted,
+    UserAccessDenied
 }
 
 export type MailOptions = {
@@ -17,9 +19,13 @@ export type RequestAccessPayload = {
     rejectURL: string
 }
 
+export type RequestCodePayload = {
+    code: number
+}
+
 export type SendEmailInput = {
     to: string,
     subject: string,
     messageType: EmailMessageType
-    payload?: RequestAccessPayload
+    payload?: RequestAccessPayload | RequestCodePayload | undefined
 }

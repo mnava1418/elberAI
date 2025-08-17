@@ -1,24 +1,20 @@
 import fs from 'fs'
-import { userRequestAccessTemplate } from '../templates/email.template'
+import { adminRequestAccessTemplate, userRequestAccessTemplate } from '../templates/email.template'
 import { email } from '../config/index.config'
 import nodemailer from 'nodemailer'
+import { EmailMessageType, MailOptions, SendEmailInput } from '../types/email.type'
 
-export enum EmailMessage {
-    UserRequestAccess
-}
-
-type MailOptions = {
-    from: string,
-    subject: string
-    html: string
-    bcc?: string[],
-    to? : string
-}
-
-const getMessage = (messageType: EmailMessage) => {
+const getMessage = ({messageType, payload}: SendEmailInput) => {
     switch (messageType) {
-        case EmailMessage.UserRequestAccess:
+        case EmailMessageType.UserRequestAccess:
             return userRequestAccessTemplate()           
+        case EmailMessageType.AdminRequestAccess:
+            if (payload) {
+                const {userEmail, approveURL, rejectURL} = payload
+                return adminRequestAccessTemplate(userEmail, approveURL, rejectURL)
+            } else {
+                return ''
+            }
         default:
             return ''
     }
@@ -44,10 +40,11 @@ const createTransporter = () => {
     return transporter
 }
 
-export const sendEmail = async (to: string, subject: string, messageType: EmailMessage ) => {
-    const html = getMessage(messageType)    
+export const sendEmail = async (input: SendEmailInput) => {
+    const { to, subject } = input
+    const html = getMessage(input)    
     const from = `"Elber" <${email.from}>`
-    const mailOptions: MailOptions = { from, subject, html}
+    const mailOptions: MailOptions = { from, subject, html }
 
     const addresses = to.split(',')
 

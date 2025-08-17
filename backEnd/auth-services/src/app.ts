@@ -18,7 +18,7 @@ const setMiddlewares = () => {
 }
 
 const setRoutes = () => {
-    app.use('/api/auth', authRoutes);
+    app.use('/auth', authRoutes);
 }
 
 setMiddlewares()

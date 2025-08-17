@@ -49,6 +49,10 @@ export const reviewAccess = async (email: string, isApproved: boolean) => {
     }
 };
 
+export const validateAccessCode = (email: string, accessCode: string) => {
+    return {isValid: false, message: 'Código de acceso no válido'}
+}
+
 const sendRequestEmails = (email: string) => {
     const approveToken = generateToken({ email, isApproved: true })
     const rejectToken = generateToken({ email, isApproved: false })

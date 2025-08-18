@@ -4,8 +4,8 @@ import { validateToken } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.post('/requestAccess', requestAccess);
-router.get('/reviewAccess', validateToken, reviewAccess);
-router.post('/validateAccessCode', validateAccessCode);
+router.post('/request', requestAccess);
+router.post('/validateCode', validateAccessCode);
+router.get('/review', validateToken, reviewAccess);
 
 export default router;

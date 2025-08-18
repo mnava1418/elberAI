@@ -49,8 +49,13 @@ export const reviewAccess = async (email: string, isApproved: boolean) => {
     }
 };
 
-export const validateAccessCode = (email: string, accessCode: string) => {
-    return {isValid: false, message: 'Código de acceso no válido'}
+export const validateAccessCode = async (email: string, accessCode: number) => {
+    const requestStatus = await getRequestStatus(email);
+    if (requestStatus && requestStatus.code === accessCode) {
+        return { isValid: true, message: '' };
+    }
+    
+    return { isValid: false, message: 'Tu código no es válido, chécalo bien o pide uno nuevo.' };    
 }
 
 const sendRequestEmails = (email: string) => {
@@ -69,14 +74,34 @@ const sendRequestEmails = (email: string) => {
         messageType: EmailMessageType.AdminRequestAccess,
         payload: {
             userEmail: email,
-            approveURL: `${server.host}/auth/reviewAccess?token=${approveToken}`,
-            rejectURL: `${server.host}/auth/reviewAccess?token=${rejectToken}`
+            approveURL: `${server.host}/access/review?token=${approveToken}`,
+            rejectURL: `${server.host}/access/review?token=${rejectToken}`
         }
     }
 
     sendEmail(userRequestInput)
     sendEmail(adminRequestInput)
 }
+
+const getRequestStatus = async (email: string) => {
+    try {
+        const emailKey = email.replace('@', '').replace('.', '');
+        const db = admin.database();
+        const ref = db.ref(`/auth/request/${emailKey}`);
+
+        const snapshot = await ref.once('value');
+        const data = snapshot.val();
+
+        if(data) {
+            return {isApproved: data.isApproved, code: data.code};
+        } else {
+            return undefined
+        }
+    } catch (error) {
+        console.error(error);
+        throw new Error('Unable to check user approval status');
+    }
+};
 
 const sendAccessResponseEmail = (email: string, isApproved: boolean, accessCode: number | null) => {
     const adminResponseInput: SendEmailInput = {

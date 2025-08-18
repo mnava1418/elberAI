@@ -11,17 +11,22 @@ export const generateToken = (payload: object) => {
 
 export const requestAccess = async (email: string) => {
     try {
-        const emailKey = email.replace('@', '').replace('.', '')
-        const db = admin.database()        
-        const ref = db.ref(`/auth/request/${emailKey}`)
-        
-        const requestMessage: RequestAccessModel = {
-            requestTime: Date.now(),
-            isApproved: false
-        }
+        const requestStatus = await getRequestStatus(email);
+        if (requestStatus && requestStatus.isApproved) {
+            await reviewAccess(email, true);
+        } else {
+            const emailKey = email.replace('@', '').replace('.', '')
+            const db = admin.database()        
+            const ref = db.ref(`/auth/request/${emailKey}`)
+            
+            const requestMessage: RequestAccessModel = {
+                requestTime: Date.now(),
+                isApproved: false
+            }
 
-        await ref.update(requestMessage)
-        sendRequestEmails(email)
+            await ref.update(requestMessage)
+            sendRequestEmails(email)
+        }
     } catch (error) {
         console.error(error)
         throw new Error('Unable to request access')

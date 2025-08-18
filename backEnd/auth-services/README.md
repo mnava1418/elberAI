@@ -8,7 +8,10 @@ Servicio de autenticación y registro de usuarios para Elber.
 - `npm start`: Ejecuta el servidor compilado.
 
 ## Endpoints principales
-- `POST /api/auth/requestAccess` — Solicitar acceso al app
+- `POST /access/request` — Solicitar acceso al app
+- `POST /access/validateCode` — Validar código de acceso
+- `GET /access/review` — Aceptar o rechazar acceso
+
 
 ## Variables de entorno
 - `PORT`: Puerto del servidor

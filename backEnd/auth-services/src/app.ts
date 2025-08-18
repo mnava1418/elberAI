@@ -2,7 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
-import authRoutes from './routes/auth.routes';
+import authRoutes from './routes/index.routes';
 
 const app = express();
 
@@ -18,7 +18,7 @@ const setMiddlewares = () => {
 }
 
 const setRoutes = () => {
-    app.use('/auth', authRoutes);
+    app.use('/', authRoutes);
 }
 
 setMiddlewares()

@@ -2,16 +2,20 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import React from 'react'
 import AuthMainScreen from './screens/auth/AuthMainScreen';
 import LoginScreen from './screens/auth/LoginScreen';
-import SignUpScreen from './screens/auth/SignUpScreen';
 import RequestAccessScreen from './screens/auth/RequestAccessScreen';
 import AccessCodeScreen from './screens/auth/AccessCodeScreen';
+import SignUpNameScreen from './screens/auth/SignUpNameScreen';
+import SignUpPasswordScreen from './screens/auth/SignUpPasswordScreen';
 
 export type RootStackParamList = {
   AuthMain: undefined;
   Login: undefined;
-  SignUp: undefined;
+  
+  /*SIGN UP SCREENS */
   RequestAccess: undefined;
-  AccessCode: {email: string}
+  AccessCode: undefined;
+  SignUpName: undefined;
+  SignUpPassword: undefined;
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -28,8 +32,9 @@ const Elber = () => {
             <Stack.Screen name="AuthMain" component={AuthMainScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="RequestAccess" component={RequestAccessScreen} />
-            <Stack.Screen name="AccessCode" component={AccessCodeScreen} />
-            <Stack.Screen name="SignUp" component={SignUpScreen} />            
+            <Stack.Screen name="AccessCode" component={AccessCodeScreen} />            
+            <Stack.Screen name="SignUpName" component={SignUpNameScreen} />            
+            <Stack.Screen name="SignUpPassword" component={SignUpPasswordScreen} />            
         </Stack.Navigator>
     );  
 }

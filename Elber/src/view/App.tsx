@@ -1,11 +1,14 @@
 import { NavigationContainer } from '@react-navigation/native';
 import Elber from './Elber';
+import { GlobalProvider } from '../store/GlobalProvider'
 
 function App() {  
   return (
-    <NavigationContainer>
-      <Elber />
-    </NavigationContainer>
+    <GlobalProvider>
+      <NavigationContainer>
+        <Elber />
+      </NavigationContainer>
+    </GlobalProvider>
   );
 }
 

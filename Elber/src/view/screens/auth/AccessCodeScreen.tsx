@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import MainView from '../../components/ui/MainView'
 import { TextInput, View } from 'react-native'
 import inputStyles from '../../../styles/inputs.style'
@@ -6,24 +6,26 @@ import { appColors } from '../../../styles/main.style'
 import CustomText from '../../components/ui/CustomText'
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner'
-import useAccessCode from '../../../hooks/auth/useAccessCode'
 import { RootStackParamList } from '../../Elber'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { RouteProp, useRoute } from '@react-navigation/native'
 import * as validation from '../../../services/validation.service';
 import { validateAccessCode } from '../../../services/auth.service'
+import useForm from '../../../hooks/auth/useForm'
+import { GlobalContext } from '../../../store/GlobalProvider'
+import { selectSignUpInfo } from '../../../store/selectors/signup.selector'
 
 type AccessCodeScreenProps = NativeStackScreenProps<RootStackParamList, 'AccessCode'>
 
 const AccessCodeScreen = ({navigation}: AccessCodeScreenProps) => {
-    const { email } = useRoute<RouteProp<RootStackParamList, 'AccessCode'>>().params
-    
-    const { 
-        accessCode, setAccessCode,
+    const { state } = useContext(GlobalContext)
+    const { email } = selectSignUpInfo(state.signUp)
+    const [accessCode, setAccessCode] = useState('')    
+
+    const {
         error, setError,
         isProcessing, setIsProcessing
-    } = useAccessCode()
-
+    } = useForm()
+    
     const handleCodeChange = (code: string) => {
         const numericCode = code.replace(/[^0-9]/g, '');
         setAccessCode(numericCode)
@@ -32,10 +34,10 @@ const AccessCodeScreen = ({navigation}: AccessCodeScreenProps) => {
 
     const handleValidateCode = () => {
         if(!validation.validateMandatoryField(accessCode)) {
-            setError('Campo obligatorio.');
+            setError('El código es obligatorio.');
             return;
         } else if (!validation.validateLength(accessCode, 6) || !validation) {
-            setError('Código no válido.');
+            setError('El código no es válido.');
             return;
         }
 
@@ -45,7 +47,7 @@ const AccessCodeScreen = ({navigation}: AccessCodeScreenProps) => {
         validateAccessCode(email, accessCode)
         .then((response) => {
             if (response.isValid) {
-                navigation.navigate('Login');
+                navigation.navigate('SignUpName');
             } else {
                 setError(response.message);
             }

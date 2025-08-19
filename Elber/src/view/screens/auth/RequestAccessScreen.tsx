@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React from 'react'
+import React, { useContext } from 'react'
 import { TextInput, View } from 'react-native'
 import { RootStackParamList } from '../../Elber';
 import CustomText from '../../components/ui/CustomText';
@@ -10,30 +10,31 @@ import inputStyles from '../../../styles/inputs.style';
 import * as validation from '../../../services/validation.service';
 import Spinner from '../../components/ui/Spinner';
 import MainView from '../../components/ui/MainView';
-import useRequestAccess from '../../../hooks/auth/useRequestAccess';
+import useForm from '../../../hooks/auth/useForm';
 import { requestAccess } from '../../../services/auth.service';
+import { GlobalContext } from '../../../store/GlobalProvider';
+import { setSignUpEmail } from '../../../store/actions/signup.actions';
+import { selectSignUpInfo } from '../../../store/selectors/signup.selector';
 
 type  RequestAccessScreenProps = NativeStackScreenProps<RootStackParamList, 'RequestAccess'>;
 
 const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
+    const {state, dispatch} = useContext(GlobalContext)
+    const { email } = selectSignUpInfo(state.signUp)
+
     const {
-        email,
-        setEmail,
-        error,
-        setError,
-        message,
-        setMessage,
-        isProcessing,
-        setIsProcessing,
+        error, setError,
+        message, setMessage,
+        isProcessing, setIsProcessing,
         cleanTexts
-    } = useRequestAccess();
+    } = useForm();
 
     const handleRequestAccess = () => {
         if(!validation.validateMandatoryField(email)) {
-            setError('Campo obligatorio.');
+            setError('El email es obligatorio.');
             return;
         } else if (!validation.validateEmail(email)) {
-            setError('Email no válido.');
+            setError('El email no es válido.');
             return;
         }
 
@@ -52,8 +53,8 @@ const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
         });
     };
 
-    const handleEmailChange = (text: string) => {
-        setEmail(text);
+    const handleEmailChange = (text: string) => {        
+        dispatch(setSignUpEmail(text))
         cleanTexts();
     }
 
@@ -66,7 +67,7 @@ const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
             return;
         }
         cleanTexts();
-        navigation.navigate('AccessCode', {email})
+        navigation.navigate('AccessCode')
     }
 
     const getActionsView = () => {

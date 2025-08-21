@@ -9,3 +9,13 @@ export const setSignUpName = (name: string): SignUpAction => ({
     type: 'SET_NAME',
     name
 })
+
+export const setSignUpPassword = (password: string): SignUpAction => ({
+    type: 'SET_PASSWORD',
+    password
+})
+
+export const setSignUpConfirmPassword = (confirmPassword: string): SignUpAction => ({
+    type: 'SET_CONFIRM_PASSWORD',
+    confirmPassword
+})

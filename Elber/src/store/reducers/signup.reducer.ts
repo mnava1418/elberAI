@@ -15,6 +15,8 @@ export const initialSignUpState: SignUpState = {
 export type SignUpAction = 
 | {type: 'SET_EMAIL', email: string}
 | {type: 'SET_NAME', name: string}
+| {type: 'SET_PASSWORD', password: string}
+| {type: 'SET_CONFIRM_PASSWORD', confirmPassword: string}
 | {type: 'RESET_SIGNUP_STATE'}
 
 export const signUpReducer = (state: SignUpState, action: SignUpAction): SignUpState => {
@@ -23,6 +25,10 @@ export const signUpReducer = (state: SignUpState, action: SignUpAction): SignUpS
             return {...state, email: action.email}
         case 'SET_NAME':
             return {...state, name: action.name}
+        case 'SET_PASSWORD':
+            return {...state, password: action.password}
+        case 'SET_CONFIRM_PASSWORD':
+            return {...state, confirmPassword: action.confirmPassword}
         case 'RESET_SIGNUP_STATE':
             return {...initialSignUpState}
         default:

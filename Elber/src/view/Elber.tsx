@@ -6,6 +6,8 @@ import RequestAccessScreen from './screens/auth/RequestAccessScreen';
 import AccessCodeScreen from './screens/auth/AccessCodeScreen';
 import SignUpNameScreen from './screens/auth/SignUpNameScreen';
 import SignUpPasswordScreen from './screens/auth/SignUpPasswordScreen';
+import SignUpConfirmPasswordScreen from './screens/auth/SignUpConfirmPasswordScreen';
+import SignUpWelcomeScreen from './screens/auth/SignUpWelcomeScreen';
 
 export type RootStackParamList = {
   AuthMain: undefined;
@@ -16,6 +18,8 @@ export type RootStackParamList = {
   AccessCode: undefined;
   SignUpName: undefined;
   SignUpPassword: undefined;
+  SignUpConfirmPassword: undefined;
+  SignUpWelcome: undefined
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,6 +39,8 @@ const Elber = () => {
             <Stack.Screen name="AccessCode" component={AccessCodeScreen} />            
             <Stack.Screen name="SignUpName" component={SignUpNameScreen} />            
             <Stack.Screen name="SignUpPassword" component={SignUpPasswordScreen} />            
+            <Stack.Screen name="SignUpConfirmPassword" component={SignUpConfirmPasswordScreen} />     
+            <Stack.Screen name="SignUpWelcome" component={SignUpWelcomeScreen} />       
         </Stack.Navigator>
     );  
 }

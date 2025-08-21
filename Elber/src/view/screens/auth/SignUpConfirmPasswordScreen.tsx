@@ -3,50 +3,49 @@ import MainView from '../../components/ui/MainView'
 import { TextInput, View } from 'react-native'
 import CustomText from '../../components/ui/CustomText'
 import inputStyles from '../../../styles/inputs.style'
-import { appColors } from '../../../styles/main.style'
 import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectSignUpInfo } from '../../../store/selectors/signup.selector'
-import { setSignUpPassword } from '../../../store/actions/signup.actions'
+import { appColors } from '../../../styles/main.style'
+import { setSignUpConfirmPassword } from '../../../store/actions/signup.actions'
 import useForm from '../../../hooks/auth/useForm'
 import Button from '../../components/ui/Button'
 import * as validation from '../../../services/validation.service';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../../Elber'
 
-type SignUpPasswordScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpPassword'>
+type SignUpConfirmPasswordScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpConfirmPassword'>
 
-const SignUpPasswordScreen = ({navigation}: SignUpPasswordScreenProps) => {
+const SignUpConfirmPasswordScreen = ({navigation}: SignUpConfirmPasswordScreenProps) => {
     const {state, dispatch} = useContext(GlobalContext)
-    const {password} = selectSignUpInfo(state.signUp)
-
+    const {password, confirmPassword} = selectSignUpInfo(state.signUp)
     const {error, setError} = useForm()
 
     const handleChange = (text: string) => {
-        dispatch(setSignUpPassword(text))
+        dispatch(setSignUpConfirmPassword(text))
         setError('')
     }
 
     const handleSubmit = () => {
-        if(!validation.validateMandatoryField(password)) {
+        if(!validation.validateMandatoryField(confirmPassword)) {
             setError('El password es obligatorio.');
             return;
         }
 
-        if(!validation.validatePassword(password)) {
-            setError('El password debe tener al menos 8 caracteres, incluyendo letras y números.');
+        if(!validation.validateConfirmPassword(password, confirmPassword)) {
+            setError('Los passwords no coinciden.');
             return;
         }
 
-        navigation.navigate('SignUpConfirmPassword')
+        navigation.navigate('SignUpWelcome')
     }
 
     return (
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Password" style={{marginTop: 20, marginBottom: 20}} />
+                <CustomText type="title" text="Confirma tu password" style={{marginTop: 20, marginBottom: 20}} />
                 <TextInput
                     style={[inputStyles.text]}
-                    value={password}
+                    value={confirmPassword}
                     onChangeText={handleChange}
                     keyboardType='default'
                     autoCapitalize='none'
@@ -57,10 +56,10 @@ const SignUpPasswordScreen = ({navigation}: SignUpPasswordScreenProps) => {
                 <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                     {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
                 </View>
-                <Button type='primary' title="Continuar" onPress={handleSubmit} style={{marginTop: 48}}/>
+                <Button type='primary' title="Crear cuenta" onPress={handleSubmit} style={{marginTop: 48}}/>
             </View>        
         </MainView>
     )
 }
 
-export default SignUpPasswordScreen
+export default SignUpConfirmPasswordScreen

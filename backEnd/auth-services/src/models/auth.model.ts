@@ -1,6 +1,24 @@
+export enum RequestStatus {
+    PENDING = 'pending',
+    APPROVED = 'approved',
+    REJECTED = 'rejected',
+    REGISTERED = 'registered'
+}
+
 export type RequestAccessModel = {
-    isApproved: boolean,
+    status: RequestStatus,
     requestTime?: number
-    approvedTime?: number | null,
-    code?: number | null,
+    approvedTime?: number,
+    registeredTime?: number,
+    code?: number,
+}
+
+export type RequestStatusModel = {
+    status?: RequestStatus,
+    code?: number
+}
+
+export type RequestResponseModel = {
+    status: RequestStatus,
+    message: string
 }

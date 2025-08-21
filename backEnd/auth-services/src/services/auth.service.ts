@@ -1,5 +1,5 @@
 import admin from 'firebase-admin'
-import { RequestAccessModel } from '../models/auth.model';
+import { RequestAccessModel, RequestResponseModel, RequestStatus, RequestStatusModel } from '../models/auth.model';
 import { sendEmail } from 'notification-services/src/services/email.service';
 import { SendEmailInput, EmailMessageType } from 'notification-services/src/types/email.type';
 import { server, notification, auth } from '../config/index.config';
@@ -9,24 +9,31 @@ export const generateToken = (payload: object) => {
     return jwt.sign(payload, auth.token as string);
 };
 
-export const requestAccess = async (email: string) => {
+export const requestAccess = async (email: string): Promise<RequestResponseModel> => {
     try {
         const requestStatus = await getRequestStatus(email);
-        if (requestStatus && requestStatus.isApproved) {
-            await reviewAccess(email, true);
-        } else {
-            const emailKey = email.replace('@', '').replace('.', '')
-            const db = admin.database()        
-            const ref = db.ref(`/auth/request/${emailKey}`)
-            
-            const requestMessage: RequestAccessModel = {
-                requestTime: Date.now(),
-                isApproved: false
-            }
 
-            await ref.update(requestMessage)
-            sendRequestEmails(email)
+        if (requestStatus && requestStatus.status === RequestStatus.APPROVED) {
+            await reviewAccess(email, true);
+            return { status: RequestStatus.APPROVED, message: '¡Tu solicitud ya está aprobada! Checa tu correo.' };
         }
+
+        if (requestStatus && requestStatus.status === RequestStatus.PENDING) {
+            return { status: RequestStatus.PENDING, message: 'Tu solicitud está en la fila. ¡Aguanta tantito, ahorita te avisamos!' };
+        }
+
+        if (requestStatus && requestStatus.status === RequestStatus.REJECTED) {
+            return { status: RequestStatus.REJECTED, message: 'Tu solicitud fue rechazada, pero si de verdad quieres entrarle, mándanos un correo y la volvemos a checar.' };
+        }
+
+        const emailKey = email.replace('@', '').replace('.', '')
+        const db = admin.database()        
+        const ref = db.ref(`/auth/request/${emailKey}`)
+        
+        const requestMessage: RequestAccessModel = {status: RequestStatus.PENDING, requestTime: Date.now()}
+        await ref.update(requestMessage)
+        sendRequestEmails(email)
+        return { status: RequestStatus.PENDING, message: '¡Listo! Recibimos tu solicitud. Revisa tu correo para más chisme e instrucciones.' };
     } catch (error) {
         console.error(error)
         throw new Error('Unable to request access')
@@ -38,16 +45,17 @@ export const reviewAccess = async (email: string, isApproved: boolean) => {
         const emailKey = email.replace('@', '').replace('.', '');
         const db = admin.database();
         const ref = db.ref(`/auth/request/${emailKey}`);
-        const accessCode = isApproved ? generateAccessCode() : null;
 
-        const requestMessage: RequestAccessModel = {
-            approvedTime: isApproved ? Date.now() : null,
-            code: accessCode,
-            isApproved
+        const accessCode = generateAccessCode();
+        let requestMessage: RequestAccessModel = {status: isApproved ? RequestStatus.APPROVED : RequestStatus.REJECTED}
+
+        if(isApproved) {
+            requestMessage.approvedTime = Date.now();
+            requestMessage.code = accessCode;
         }
 
         await ref.update(requestMessage);
-        sendAccessResponseEmail(email, isApproved, accessCode);
+        sendAccessResponseEmail(email, isApproved, isApproved ? accessCode : null);
     } catch (error) {
         console.error(error);
         throw new Error('Unable to review access');
@@ -88,7 +96,7 @@ const sendRequestEmails = (email: string) => {
     sendEmail(adminRequestInput)
 }
 
-const getRequestStatus = async (email: string) => {
+const getRequestStatus = async (email: string): Promise<RequestStatusModel> => {
     try {
         const emailKey = email.replace('@', '').replace('.', '');
         const db = admin.database();
@@ -98,9 +106,9 @@ const getRequestStatus = async (email: string) => {
         const data = snapshot.val();
 
         if(data) {
-            return {isApproved: data.isApproved, code: data.code};
+            return {status: data.status, code: data.code};
         } else {
-            return undefined
+            return {}
         }
     } catch (error) {
         console.error(error);

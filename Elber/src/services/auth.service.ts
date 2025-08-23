@@ -21,3 +21,13 @@ export const validateAccessCode = async (email: string, accessCode: string): Pro
         throw new Error('Error al validar código de acceso para ' + email);
     }
 };
+
+export const signUp = async(email: string, password: string, displayName: string): Promise<{registered: boolean, message: string}> => {
+    try {
+        const result = await apiPost<{registered: boolean, message: string}>(`${BACK_URL}/user/signUp`, { email, password, displayName });
+        return result        
+    } catch (error) {
+        console.error('Error al crear cuenta:', error)
+        throw new Error('Error al crear cuenta.')
+    }
+}

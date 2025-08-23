@@ -96,7 +96,7 @@ const sendRequestEmails = (email: string) => {
     sendEmail(adminRequestInput)
 }
 
-const getRequestStatus = async (email: string): Promise<RequestStatusModel> => {
+export const getRequestStatus = async (email: string): Promise<RequestStatusModel> => {
     try {
         const emailKey = email.replace('@', '').replace('.', '');
         const db = admin.database();

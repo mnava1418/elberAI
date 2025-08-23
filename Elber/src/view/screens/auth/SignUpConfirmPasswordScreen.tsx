@@ -12,13 +12,18 @@ import Button from '../../components/ui/Button'
 import * as validation from '../../../services/validation.service';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../../Elber'
+import { signUp } from '../../../services/auth.service'
+import Spinner from '../../components/ui/Spinner'
 
 type SignUpConfirmPasswordScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpConfirmPassword'>
 
 const SignUpConfirmPasswordScreen = ({navigation}: SignUpConfirmPasswordScreenProps) => {
     const {state, dispatch} = useContext(GlobalContext)
-    const {password, confirmPassword} = selectSignUpInfo(state.signUp)
-    const {error, setError} = useForm()
+    const {email, name, password, confirmPassword} = selectSignUpInfo(state.signUp)
+    const {
+        error, setError,
+        isProcessing, setIsProcessing
+    } = useForm()
 
     const handleChange = (text: string) => {
         dispatch(setSignUpConfirmPassword(text))
@@ -36,7 +41,22 @@ const SignUpConfirmPasswordScreen = ({navigation}: SignUpConfirmPasswordScreenPr
             return;
         }
 
-        navigation.navigate('SignUpWelcome')
+        setIsProcessing(true);
+
+        signUp(email, password, name)
+        .then(result => {
+            if (result.registered) {
+                navigation.navigate('SignUpWelcome');
+            } else {
+                setError(result.message);
+            }
+        })
+        .catch(error => {
+            setError(error.message);
+        })
+        .finally(() => {
+            setIsProcessing(false)
+        })
     }
 
     return (
@@ -55,8 +75,8 @@ const SignUpConfirmPasswordScreen = ({navigation}: SignUpConfirmPasswordScreenPr
                 />
                 <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                     {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
-                </View>
-                <Button type='primary' title="Crear cuenta" onPress={handleSubmit} style={{marginTop: 48}}/>
+                </View>                
+                {isProcessing ? <Spinner /> :  <Button type='primary' title="Crear cuenta" onPress={handleSubmit} style={{marginTop: 48}}/>}
             </View>        
         </MainView>
     )

@@ -130,3 +130,40 @@ export const rejectAccessTemplate = () => {
 
     return message
 }
+
+export const verifyEmailTemplate = (name: string, link: string) => {
+    const message = `
+        <!DOCTYPE html>
+        <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <title>¡Ya casi eres parte de la banda!</title>
+            </head>
+            <body>
+                <div>
+                    <h3>¡Ey, ${name || 'compa'}!</h3>
+                    <p>
+                        Nomás falta un pasito para que te unas a la fiesta: <b>verifica tu correo electrónico</b>.<br>
+                        Haz clic en el link de abajo (no muerde, lo prometemos):
+                    </p>
+                    <p>
+                        <a href="${link}" style="text-decoration: none; font-size: 1.2em;">
+                            ¡Órale, verificar mi correo!
+                        </a>
+                    </p>
+                    <p>
+                        Una vez que verifiques tu correo, lánzate a la app y échate un login para que ya seas parte del club.
+                    </p>
+                    <p>
+                        Si no fuiste tú, ignora este correo y sigue con tu día (o tu siesta).
+                    </p>
+                    <p>
+                        ¡Gracias por subirte al tren!<br>
+                        <b>Elber</b>
+                    </p>                   
+                </div>
+            </body>
+        </html>
+        `;
+    return message;
+}

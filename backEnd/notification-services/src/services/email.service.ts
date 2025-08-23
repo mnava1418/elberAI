@@ -3,11 +3,12 @@ import {
     acceptAccessTemplate, 
     adminRequestAccessTemplate, 
     rejectAccessTemplate, 
-    userRequestAccessTemplate 
+    userRequestAccessTemplate, 
+    verifyEmailTemplate
 } from '../templates/email.template'
 import { email } from '../config/index.config'
 import nodemailer from 'nodemailer'
-import { EmailMessageType, MailOptions, RequestAccessPayload, RequestCodePayload, SendEmailInput } from '../types/email.type'
+import { EmailMessageType, MailOptions, RequestAccessPayload, RequestCodePayload, SendEmailInput, VerifyEmailPayload } from '../types/email.type'
 
 const getMessage = ({messageType, payload}: SendEmailInput) => {
     switch (messageType) {
@@ -21,6 +22,9 @@ const getMessage = ({messageType, payload}: SendEmailInput) => {
             return acceptAccessTemplate(code)
         case EmailMessageType.UserAccessDenied:
             return rejectAccessTemplate()
+        case EmailMessageType.VerifyEmail:
+            const {name, link} = payload as VerifyEmailPayload
+            return verifyEmailTemplate(name, link)
         default:
             return ''
     }

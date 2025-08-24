@@ -1,16 +1,17 @@
 import React, { useState } from 'react'
-import { Pressable, TextInput, View } from 'react-native'
+import { KeyboardTypeOptions, Pressable, TextInput, View } from 'react-native'
 import inputStyles from '../../../styles/inputs.style'
 import { appColors } from '../../../styles/main.style'
 import AppIcon from './AppIcon'
 
 type SecureTextProps = {
     text: string,
-    placeholder?: string
+    placeholder?: string,
+    keyboardType?: KeyboardTypeOptions | undefined
     handleOnChange: (arg0: string) => void
 }
 
-const SecureText = ({handleOnChange, text, placeholder = ''}: SecureTextProps) => {
+const SecureText = ({handleOnChange, text, placeholder = '', keyboardType = 'default'}: SecureTextProps) => {
     const [showText, setShowText] = useState(false)
 
     return (
@@ -19,7 +20,7 @@ const SecureText = ({handleOnChange, text, placeholder = ''}: SecureTextProps) =
                 style={[inputStyles.text, {flex: 1, marginRight: 10}]}
                 value={text}
                 onChangeText={handleOnChange}
-                keyboardType='default'
+                keyboardType={keyboardType}
                 autoCapitalize='none'
                 placeholder={placeholder}
                 placeholderTextColor={appColors.subtitle}

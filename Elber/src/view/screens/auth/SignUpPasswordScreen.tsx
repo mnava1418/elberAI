@@ -1,9 +1,7 @@
 import React, { useContext } from 'react'
 import MainView from '../../components/ui/MainView'
-import { TextInput, View } from 'react-native'
+import { View } from 'react-native'
 import CustomText from '../../components/ui/CustomText'
-import inputStyles from '../../../styles/inputs.style'
-import { appColors } from '../../../styles/main.style'
 import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectSignUpInfo } from '../../../store/selectors/signup.selector'
 import { setSignUpPassword } from '../../../store/actions/signup.actions'
@@ -12,6 +10,7 @@ import Button from '../../components/ui/Button'
 import * as validation from '../../../services/validation.service';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../../Elber'
+import SecureText from '../../components/ui/SecureText'
 
 type SignUpPasswordScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpPassword'>
 
@@ -43,17 +42,8 @@ const SignUpPasswordScreen = ({navigation}: SignUpPasswordScreenProps) => {
     return (
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Password" style={{marginTop: 20, marginBottom: 20}} />
-                <TextInput
-                    style={[inputStyles.text]}
-                    value={password}
-                    onChangeText={handleChange}
-                    keyboardType='default'
-                    autoCapitalize='none'
-                    placeholder='Password'
-                    placeholderTextColor={appColors.subtitle}
-                    secureTextEntry={true}
-                />
+                <CustomText type="title" text="Crea tu password" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
+                <SecureText text={password} handleOnChange={handleChange} placeholder='Password' />
                 <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                     {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
                 </View>

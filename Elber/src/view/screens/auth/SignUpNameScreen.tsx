@@ -40,17 +40,19 @@ const SignUpNameScreen = ({navigation}: SignUpNameScreenProps) => {
     return (
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Nombre" style={{marginTop: 20, marginBottom: 20}} />
-                <TextInput
-                    style={[inputStyles.text]}
-                    value={name}
-                    onChangeText={handleChange}
-                    keyboardType='default'
-                    autoCapitalize='words'
-                    placeholder='Elber'
-                    placeholderTextColor={appColors.subtitle}
-                    maxLength={30}
-                />
+                <CustomText type="title" text="¿Cómo te llamas?" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
+                <View style={inputStyles.inputView}>
+                    <TextInput
+                        style={[inputStyles.text]}
+                        value={name}
+                        onChangeText={handleChange}
+                        keyboardType='default'
+                        autoCapitalize='words'
+                        placeholder='Elber'
+                        placeholderTextColor={appColors.subtitle}
+                        maxLength={30}
+                    />
+                </View>
                 <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                     {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
                 </View>

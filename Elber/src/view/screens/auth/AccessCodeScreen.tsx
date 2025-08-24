@@ -1,8 +1,6 @@
 import React, { useContext, useState } from 'react'
 import MainView from '../../components/ui/MainView'
-import { TextInput, View } from 'react-native'
-import inputStyles from '../../../styles/inputs.style'
-import { appColors } from '../../../styles/main.style'
+import { View } from 'react-native'
 import CustomText from '../../components/ui/CustomText'
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner'
@@ -13,6 +11,7 @@ import { validateAccessCode } from '../../../services/auth.service'
 import useForm from '../../../hooks/auth/useForm'
 import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectSignUpInfo } from '../../../store/selectors/signup.selector'
+import SecureText from '../../components/ui/SecureText'
 
 type AccessCodeScreenProps = NativeStackScreenProps<RootStackParamList, 'AccessCode'>
 
@@ -63,17 +62,8 @@ const AccessCodeScreen = ({navigation}: AccessCodeScreenProps) => {
     return (
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Código de Acceso" style={{marginTop: 20, marginBottom: 20}} />
-                <TextInput
-                    style={[inputStyles.text]}
-                    value={accessCode}
-                    onChangeText={handleCodeChange}
-                    keyboardType='number-pad'
-                    autoCapitalize='none'
-                    placeholder='123456'
-                    placeholderTextColor={appColors.subtitle}
-                    maxLength={6}
-                />
+                <CustomText type="title" text="Échame el código" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
+                <SecureText text={accessCode} handleOnChange={handleCodeChange} placeholder='123456' />                
                 <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                     {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
                 </View>

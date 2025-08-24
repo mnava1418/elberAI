@@ -19,3 +19,7 @@ export const setSignUpConfirmPassword = (confirmPassword: string): SignUpAction 
     type: 'SET_CONFIRM_PASSWORD',
     confirmPassword
 })
+
+export const cleanSignUpPasswords = (): SignUpAction => ({
+    type: 'CLEAN_PASSWORDS'
+})

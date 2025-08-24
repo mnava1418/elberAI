@@ -6,7 +6,7 @@ import inputStyles from '../../../styles/inputs.style'
 import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectSignUpInfo } from '../../../store/selectors/signup.selector'
 import { appColors } from '../../../styles/main.style'
-import { setSignUpConfirmPassword } from '../../../store/actions/signup.actions'
+import { cleanSignUpPasswords, setSignUpConfirmPassword } from '../../../store/actions/signup.actions'
 import useForm from '../../../hooks/auth/useForm'
 import Button from '../../components/ui/Button'
 import * as validation from '../../../services/validation.service';
@@ -46,6 +46,7 @@ const SignUpConfirmPasswordScreen = ({navigation}: SignUpConfirmPasswordScreenPr
         signUp(email, password, name)
         .then(result => {
             if (result.registered) {
+                dispatch(cleanSignUpPasswords())
                 navigation.navigate('SignUpWelcome');
             } else {
                 setError(result.message);

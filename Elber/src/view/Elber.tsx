@@ -40,7 +40,7 @@ const Elber = () => {
             <Stack.Screen name="SignUpName" component={SignUpNameScreen} />            
             <Stack.Screen name="SignUpPassword" component={SignUpPasswordScreen} />            
             <Stack.Screen name="SignUpConfirmPassword" component={SignUpConfirmPasswordScreen} />     
-            <Stack.Screen name="SignUpWelcome" component={SignUpWelcomeScreen} />       
+            <Stack.Screen name="SignUpWelcome" component={SignUpWelcomeScreen} options={{headerShown: false}} />       
         </Stack.Navigator>
     );  
 }

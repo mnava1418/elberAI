@@ -91,15 +91,17 @@ const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
                 <CustomText type="title" text="Dame tu mail, porfa" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
-                <TextInput
-                    style={[inputStyles.text]}
-                    value={email}
-                    onChangeText={handleEmailChange}
-                    keyboardType='email-address'
-                    autoCapitalize='none'
-                    placeholder='email@elber.com'
-                    placeholderTextColor={appColors.subtitle}
-                />
+                <View style={inputStyles.inputView}>
+                    <TextInput
+                        style={[inputStyles.text]}
+                        value={email}
+                        onChangeText={handleEmailChange}
+                        keyboardType='email-address'
+                        autoCapitalize='none'
+                        placeholder='email@elber.com'
+                        placeholderTextColor={appColors.subtitle}
+                    />
+                </View>
                 <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                     {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
                     {message !== '' ? <CustomText type='text' text={message} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}

@@ -43,7 +43,7 @@ const SignUpPasswordScreen = ({navigation}: SignUpPasswordScreenProps) => {
     return (
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Password" style={{marginTop: 20, marginBottom: 20}} />
+                <CustomText type="title" text="Pon tu password" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
                 <TextInput
                     style={[inputStyles.text]}
                     value={password}

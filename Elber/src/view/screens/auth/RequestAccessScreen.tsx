@@ -90,7 +90,7 @@ const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
     return (
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Email" style={{marginTop: 20, marginBottom: 20}} />
+                <CustomText type="title" text="Dame tu mail, porfa" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
                 <TextInput
                     style={[inputStyles.text]}
                     value={email}

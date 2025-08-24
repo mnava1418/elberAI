@@ -40,7 +40,7 @@ const SignUpNameScreen = ({navigation}: SignUpNameScreenProps) => {
     return (
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Nombre" style={{marginTop: 20, marginBottom: 20}} />
+                <CustomText type="title" text="¿Cómo te llamas?" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
                 <TextInput
                     style={[inputStyles.text]}
                     value={name}

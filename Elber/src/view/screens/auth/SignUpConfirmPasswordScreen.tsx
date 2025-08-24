@@ -63,7 +63,7 @@ const SignUpConfirmPasswordScreen = ({navigation}: SignUpConfirmPasswordScreenPr
     return (
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Confirma tu password" style={{marginTop: 20, marginBottom: 20}} />
+                <CustomText type="title" text="Repítelo, no la riegues" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
                 <TextInput
                     style={[inputStyles.text]}
                     value={confirmPassword}

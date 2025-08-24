@@ -63,7 +63,7 @@ const AccessCodeScreen = ({navigation}: AccessCodeScreenProps) => {
     return (
         <MainView>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Código de Acceso" style={{marginTop: 20, marginBottom: 20}} />
+                <CustomText type="title" text="Échame el código" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
                 <TextInput
                     style={[inputStyles.text]}
                     value={accessCode}

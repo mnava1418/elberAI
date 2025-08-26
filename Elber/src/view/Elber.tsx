@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import React from 'react'
+import React, { useEffect } from 'react'
 import AuthMainScreen from './screens/auth/AuthMainScreen';
 import LoginScreen from './screens/auth/LoginScreen';
 import RequestAccessScreen from './screens/auth/RequestAccessScreen';
@@ -8,6 +8,7 @@ import SignUpNameScreen from './screens/auth/SignUpNameScreen';
 import SignUpPasswordScreen from './screens/auth/SignUpPasswordScreen';
 import SignUpConfirmPasswordScreen from './screens/auth/SignUpConfirmPasswordScreen';
 import SignUpWelcomeScreen from './screens/auth/SignUpWelcomeScreen';
+import { onAuthStateChanged, getAuth } from '@react-native-firebase/auth';
 
 export type RootStackParamList = {
   AuthMain: undefined;
@@ -25,6 +26,14 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const Elber = () => {
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+            console.info(user);
+        });
+        return unsubscribe;
+    }, []);
+    
     return (
         <Stack.Navigator 
             initialRouteName="AuthMain"

@@ -23,8 +23,15 @@ const authStyles = StyleSheet.create({
     },    
     footer: {
         flexDirection: 'row',
+        justifyContent: 'center',
         alignItems: 'center',
         marginTop: 8,
+        width: '100%'
+    },
+    
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: 'center',        
     }    
 });
 

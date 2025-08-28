@@ -102,7 +102,6 @@ const LoginScreen = ({}: LoginScreenProps) => {
                         <View style={{flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
                             {isProcessing ? <Spinner /> :  getActionsView()}                        
                         </View>
-                        
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>

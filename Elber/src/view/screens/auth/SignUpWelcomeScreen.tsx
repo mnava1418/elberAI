@@ -22,7 +22,7 @@ const SignUpWelcomeScreen = ({navigation}: SignUpWelcomeScreenProps) => {
                 </View>
                 <CustomText 
                     type="subtitle" 
-                    text='Ya estás registrado. Échale un ojo al mensajito que te mandamos y regresa para iniciar sesión. ¡Te veo pronto!' 
+                    text='Ya estás registrado. Échale un ojo al mensajito que te mandamos y regresa conmigo para iniciar sesión. ¡Te veo pronto!' 
                     style={{textAlign: 'center'}}
                 />
                 <Button type='primary' title="Iniciar sesión" onPress={() => {navigation.reset({index: 0, routes: [{name: 'AuthMain'}]})}} style={{marginTop: 32}}/>

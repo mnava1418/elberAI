@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import MainView from '../../components/ui/MainView'
-import { View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
 import CustomText from '../../components/ui/CustomText'
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner'
@@ -12,6 +12,7 @@ import useForm from '../../../hooks/auth/useForm'
 import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectSignUpInfo } from '../../../store/selectors/signup.selector'
 import SecureText from '../../components/ui/SecureText'
+import authStyles from '../../../styles/auth.style';
 
 type AccessCodeScreenProps = NativeStackScreenProps<RootStackParamList, 'AccessCode'>
 
@@ -61,14 +62,24 @@ const AccessCodeScreen = ({navigation}: AccessCodeScreenProps) => {
 
     return (
         <MainView>
-            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Échame el código" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
-                <SecureText text={accessCode} handleOnChange={handleCodeChange} placeholder='123456' keyboardType='number-pad' />                
-                <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                    {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
-                </View>
-                {isProcessing ? <Spinner /> :  <Button type='primary' title="Validar código" onPress={handleValidateCode} style={{marginTop: 48}}/>}
-            </View>        
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}>
+                <ScrollView
+                    contentContainerStyle={authStyles.scrollContainer}
+                    keyboardShouldPersistTaps="handled">
+                    <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
+                        <CustomText type="title" text="Checa tu correo y pásame los numeritos que te mandé" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
+                        <SecureText text={accessCode} handleOnChange={handleCodeChange} placeholder='Código de acceso' keyboardType='number-pad' />
+                        <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
+                            {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
+                        </View>
+                        <View style={{flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
+                            {isProcessing ? <Spinner /> :  <Button type='primary' title="Validar código" onPress={handleValidateCode} style={{marginTop: 48}}/>}
+                        </View>
+                    </View>        
+                </ScrollView>
+            </KeyboardAvoidingView>
         </MainView>
     )
 }

@@ -9,6 +9,7 @@ import SignUpPasswordScreen from './screens/auth/SignUpPasswordScreen';
 import SignUpConfirmPasswordScreen from './screens/auth/SignUpConfirmPasswordScreen';
 import SignUpWelcomeScreen from './screens/auth/SignUpWelcomeScreen';
 import { onAuthStateChanged, getAuth } from '@react-native-firebase/auth';
+import { logOut } from '../services/auth.service';
 
 export type RootStackParamList = {
   AuthMain: undefined;
@@ -29,7 +30,14 @@ const Elber = () => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
-            console.info(user);
+            if(user && user.emailVerified) {
+                console.log('Usuario autenticado:', user.email);
+            } else {
+                logOut()
+                .catch((error: any) => {
+                    console.error('Error al cerrar sesión:', error);
+                });
+            }
         });
         return unsubscribe;
     }, []);

@@ -39,8 +39,8 @@ const SignUpNameScreen = ({navigation}: SignUpNameScreenProps) => {
 
     return (
         <MainView>
-            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="¿Cómo te llamas?" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
+            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
+                <CustomText type="title" text="¿Cómo te dicen en tu casa, carnal?" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
                 <View style={inputStyles.inputView}>
                     <TextInput
                         style={[inputStyles.text]}
@@ -48,7 +48,7 @@ const SignUpNameScreen = ({navigation}: SignUpNameScreenProps) => {
                         onChangeText={handleChange}
                         keyboardType='default'
                         autoCapitalize='words'
-                        placeholder='Elber'
+                        placeholder='Nombre'
                         placeholderTextColor={appColors.subtitle}
                         maxLength={30}
                     />

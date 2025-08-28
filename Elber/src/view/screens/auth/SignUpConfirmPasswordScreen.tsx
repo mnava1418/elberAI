@@ -61,13 +61,15 @@ const SignUpConfirmPasswordScreen = ({navigation}: SignUpConfirmPasswordScreenPr
 
     return (
         <MainView>
-            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <CustomText type="title" text="Repítelo, no la riegues" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
+            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
+                <CustomText type="title" text="Va de nuez, confirma tu password" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
                 <SecureText text={confirmPassword} handleOnChange={handleChange} placeholder='Password' />                                
                 <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                     {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
                 </View>                
-                {isProcessing ? <Spinner /> :  <Button type='primary' title="Crear cuenta" onPress={handleSubmit} style={{marginTop: 48}}/>}
+                <View style={{flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
+                    {isProcessing ? <Spinner /> :  <Button type='primary' title="Crear cuenta" onPress={handleSubmit} style={{marginTop: 48}}/>}
+                </View>
             </View>        
         </MainView>
     )

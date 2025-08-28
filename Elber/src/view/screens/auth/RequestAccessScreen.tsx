@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useContext } from 'react'
-import { TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native'
 import { RootStackParamList } from '../../Elber';
 import CustomText from '../../components/ui/CustomText';
 import { appColors } from '../../../styles/main.style';
@@ -89,27 +89,35 @@ const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
 
     return (
         <MainView>
-            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
-                <CustomText type="title" text="Primero tu correo pa' mandarte el chisme" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
-                <View style={inputStyles.inputView}>
-                    <TextInput
-                        style={[inputStyles.text]}
-                        value={email}
-                        onChangeText={handleEmailChange}
-                        keyboardType='email-address'
-                        autoCapitalize='none'
-                        placeholder='Email'
-                        placeholderTextColor={appColors.subtitle}
-                    />
-                </View>
-                <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                    {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
-                    {message !== '' ? <CustomText type='text' text={message} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
-                </View>
-                <View style={{flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
-                    {isProcessing ? <Spinner /> :  getActionsView()}
-                </View>
-            </View>        
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}>
+                <ScrollView
+                    contentContainerStyle={authStyles.scrollContainer}
+                    keyboardShouldPersistTaps="handled">
+                    <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
+                        <CustomText type="title" text="Primero tu correo pa' mandarte el chisme" style={{marginTop: 20, marginBottom: 20, fontSize: 28}} />
+                        <View style={inputStyles.inputView}>
+                            <TextInput
+                                style={[inputStyles.text]}
+                                value={email}
+                                onChangeText={handleEmailChange}
+                                keyboardType='email-address'
+                                autoCapitalize='none'
+                                placeholder='Email'
+                                placeholderTextColor={appColors.subtitle}
+                            />
+                        </View>
+                        <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
+                            {error !== '' ? <CustomText type='error' text={error} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
+                            {message !== '' ? <CustomText type='text' text={message} style={{marginTop: 12, textAlign: 'center'}}/> : <></>}
+                        </View>
+                        <View style={{flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', width: '100%' }}>
+                            {isProcessing ? <Spinner /> :  getActionsView()}
+                        </View>
+                    </View>        
+                </ScrollView>
+            </KeyboardAvoidingView>
         </MainView>
     );
 }

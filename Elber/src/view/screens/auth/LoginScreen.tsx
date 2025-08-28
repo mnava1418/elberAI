@@ -12,6 +12,7 @@ import Button from '../../components/ui/Button';
 import useForm from '../../../hooks/auth/useForm';
 import Spinner from '../../components/ui/Spinner';
 import * as validation from '../../../services/validation.service';
+import { signIn } from '../../../services/auth.service';
 
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -43,7 +44,16 @@ const LoginScreen = ({}: LoginScreenProps) => {
             return
         }
 
+        setError('')
         setIsProcessing(true)
+        
+        signIn(email, password)        
+        .catch((error) => {            
+            setError(error.message);
+        })
+        .finally(() => {
+            setIsProcessing(false);
+        });
     };
 
     const getActionsView = () => {

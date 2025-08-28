@@ -1,6 +1,7 @@
 import { BACK_URL } from '@env'
 import { apiPost } from './network.service';
 import { AuthResponse } from '../types/auth.type';
+import { signInWithEmailAndPassword, getAuth, signOut } from '@react-native-firebase/auth';
 
 export const requestAccess = async (email: string) => {
     try {
@@ -29,5 +30,33 @@ export const signUp = async(email: string, password: string, displayName: string
     } catch (error) {
         console.error('Error al crear cuenta:', error)
         throw new Error('Error al crear cuenta.')
+    }
+}
+
+export const signIn = async (email: string, password: string) => {
+    try {
+        const auth = getAuth();
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        if (!userCredential.user.emailVerified) {
+            throw new Error('¡No has validado tu email carnalito! Echale un vistazo a tu bandeja de entrada.');
+        }
+    } catch (error: any) {
+        if (error.code === 'auth/invalid-credential') {
+            throw new Error('¡Uy papá! Esos datos están más chuecos que un trompo.');
+        }
+        
+        throw new Error(error.message || 'Error al iniciar sesión');
+    }
+}
+
+export const logOut = async () => {
+    try {
+        const auth = getAuth();
+        if(auth.currentUser) {
+            await signOut(auth);
+        }
+    } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        throw new Error('Error al cerrar sesión.');
     }
 }

@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useContext } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native'
-import { RootStackParamList } from '../../Elber';
+import { AuthStackParamList } from '../../Elber';
 import CustomText from '../../components/ui/CustomText';
 import { appColors } from '../../../styles/main.style';
 import Button from '../../components/ui/Button';
@@ -16,7 +16,7 @@ import { GlobalContext } from '../../../store/GlobalProvider';
 import { setSignUpEmail } from '../../../store/actions/signup.actions';
 import { selectSignUpInfo } from '../../../store/selectors/signup.selector';
 
-type  RequestAccessScreenProps = NativeStackScreenProps<RootStackParamList, 'RequestAccess'>;
+type  RequestAccessScreenProps = NativeStackScreenProps<AuthStackParamList, 'RequestAccess'>;
 
 const RequestAccessScreen = ({navigation}: RequestAccessScreenProps) => {
     const {state, dispatch} = useContext(GlobalContext)

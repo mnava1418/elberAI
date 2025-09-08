@@ -4,11 +4,11 @@ import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectSignUpInfo } from '../../../store/selectors/signup.selector'
 import { View } from 'react-native'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { RootStackParamList } from '../../Elber'
+import { AuthStackParamList } from '../../Elber'
 import CustomText from '../../components/ui/CustomText'
 import Button from '../../components/ui/Button'
 
-type SignUpWelcomeScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpWelcome'>
+type SignUpWelcomeScreenProps = NativeStackScreenProps<AuthStackParamList, 'SignUpWelcome'>
 
 const SignUpWelcomeScreen = ({navigation}: SignUpWelcomeScreenProps) => {
     const {state} = useContext(GlobalContext)

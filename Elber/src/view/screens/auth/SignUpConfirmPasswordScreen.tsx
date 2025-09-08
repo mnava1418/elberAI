@@ -9,13 +9,13 @@ import useForm from '../../../hooks/auth/useForm'
 import Button from '../../components/ui/Button'
 import * as validation from '../../../services/validation.service';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { RootStackParamList } from '../../Elber'
+import { AuthStackParamList } from '../../Elber'
 import { signUp } from '../../../services/auth.service'
 import Spinner from '../../components/ui/Spinner'
 import SecureText from '../../components/ui/SecureText'
 import authStyles from '../../../styles/auth.style'
 
-type SignUpConfirmPasswordScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpConfirmPassword'>
+type SignUpConfirmPasswordScreenProps = NativeStackScreenProps<AuthStackParamList, 'SignUpConfirmPassword'>
 
 const SignUpConfirmPasswordScreen = ({navigation}: SignUpConfirmPasswordScreenProps) => {
     const {state, dispatch} = useContext(GlobalContext)

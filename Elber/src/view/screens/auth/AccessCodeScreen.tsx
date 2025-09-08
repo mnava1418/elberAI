@@ -4,7 +4,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
 import CustomText from '../../components/ui/CustomText'
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner'
-import { RootStackParamList } from '../../Elber'
+import { AuthStackParamList } from '../../Elber'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import * as validation from '../../../services/validation.service';
 import { validateAccessCode } from '../../../services/auth.service'
@@ -14,7 +14,7 @@ import { selectSignUpInfo } from '../../../store/selectors/signup.selector'
 import SecureText from '../../components/ui/SecureText'
 import authStyles from '../../../styles/auth.style';
 
-type AccessCodeScreenProps = NativeStackScreenProps<RootStackParamList, 'AccessCode'>
+type AccessCodeScreenProps = NativeStackScreenProps<AuthStackParamList, 'AccessCode'>
 
 const AccessCodeScreen = ({navigation}: AccessCodeScreenProps) => {
     const { state } = useContext(GlobalContext)

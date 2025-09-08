@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react'
 import { View } from 'react-native';
-import { RootStackParamList } from '../../Elber';
+import { AuthStackParamList } from '../../Elber';
 import { Image } from 'react-native';
 import Button from '../../components/ui/Button';
 import CustomText from '../../components/ui/CustomText';
@@ -13,7 +13,7 @@ import { Animated } from 'react-native';
 import useAnimateText from '../../../hooks/animation/useAnimateText';
 import MainView from '../../components/ui/MainView';
 
-type  AuthMainScreenProps = NativeStackScreenProps<RootStackParamList, 'AuthMain'>;
+type  AuthMainScreenProps = NativeStackScreenProps<AuthStackParamList, 'AuthMain'>;
 
 const phrases = [
     "Hola, soy Elber",

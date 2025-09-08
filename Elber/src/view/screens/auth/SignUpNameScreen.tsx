@@ -10,11 +10,11 @@ import { selectSignUpInfo } from '../../../store/selectors/signup.selector'
 import useForm from '../../../hooks/auth/useForm'
 import * as validation from '../../../services/validation.service';
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { RootStackParamList } from '../../Elber'
+import { AuthStackParamList } from '../../Elber'
 import { setSignUpName } from '../../../store/actions/signup.actions'
 import authStyles from '../../../styles/auth.style'
 
-type SignUpNameScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpName'>
+type SignUpNameScreenProps = NativeStackScreenProps<AuthStackParamList, 'SignUpName'>
 
 const SignUpNameScreen = ({navigation}: SignUpNameScreenProps) => {
     const {state, dispatch} = useContext(GlobalContext)

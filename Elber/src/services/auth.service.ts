@@ -2,6 +2,7 @@ import { BACK_URL } from '@env'
 import { apiPost } from './network.service';
 import { AuthResponse } from '../types/auth.type';
 import { signInWithEmailAndPassword, getAuth, signOut } from '@react-native-firebase/auth';
+import { logOutUser } from '../store/actions/user.actions';
 
 export const requestAccess = async (email: string) => {
     try {
@@ -49,11 +50,12 @@ export const signIn = async (email: string, password: string) => {
     }
 }
 
-export const logOut = async () => {
+export const logOut = async (dispatch: React.Dispatch<any>) => {
     try {
         const auth = getAuth();
         if(auth.currentUser) {
             await signOut(auth);
+            dispatch(logOutUser());
         }
     } catch (error) {
         console.error('Error al cerrar sesión:', error);

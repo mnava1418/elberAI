@@ -1,7 +1,5 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { View, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { RootStackParamList } from '../../Elber';
 import MainView from '../../components/ui/MainView';
 import authStyles from '../../../styles/auth.style';
 import inputStyles from '../../../styles/inputs.style';
@@ -14,9 +12,7 @@ import Spinner from '../../components/ui/Spinner';
 import * as validation from '../../../services/validation.service';
 import { signIn } from '../../../services/auth.service';
 
-type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
-
-const LoginScreen = ({}: LoginScreenProps) => {
+const LoginScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 

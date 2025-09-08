@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import AuthMainScreen from './screens/auth/AuthMainScreen';
 import LoginScreen from './screens/auth/LoginScreen';
 import RequestAccessScreen from './screens/auth/RequestAccessScreen';
@@ -10,8 +10,12 @@ import SignUpConfirmPasswordScreen from './screens/auth/SignUpConfirmPasswordScr
 import SignUpWelcomeScreen from './screens/auth/SignUpWelcomeScreen';
 import { onAuthStateChanged, getAuth } from '@react-native-firebase/auth';
 import { logOut } from '../services/auth.service';
+import { GlobalContext } from '../store/GlobalProvider';
+import { selectIsLoggedIn } from '../store/selectors/user.selector';
+import HomeScreen from './screens/app/HomeScreen';
+import { logInUser } from '../store/actions/user.actions';
 
-export type RootStackParamList = {
+export type AuthStackParamList = {
   AuthMain: undefined;
   Login: undefined;
   
@@ -24,16 +28,24 @@ export type RootStackParamList = {
   SignUpWelcome: undefined
 }
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+export type AppStackParamList = {
+  Home: undefined;
+}
+
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
+const AppStack = createNativeStackNavigator<AppStackParamList>();
 
 const Elber = () => {
+    const { state, dispatch } = useContext(GlobalContext);
+    const isLoggedIn = selectIsLoggedIn(state.user)
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
             if(user && user.emailVerified) {
                 console.log('Usuario autenticado:', user.email);
+                dispatch(logInUser({name: user.displayName || '', email: user.email || ''}));
             } else {
-                logOut()
+                logOut(dispatch)
                 .catch((error: any) => {
                     console.error('Error al cerrar sesión:', error);
                 });
@@ -41,24 +53,46 @@ const Elber = () => {
         });
         return unsubscribe;
     }, []);
+
+    const getAuthStack = () => {
+        return (
+            <AuthStack.Navigator 
+                initialRouteName="AuthMain"
+                screenOptions={{
+                    headerStyle: {backgroundColor: '#000'},
+                    headerTintColor: '#fff',
+                }}
+            >
+                <AuthStack.Screen name="AuthMain" component={AuthMainScreen} options={{ headerShown: false }} />
+                <AuthStack.Screen name="Login" component={LoginScreen} />
+                <AuthStack.Screen name="RequestAccess" component={RequestAccessScreen} />
+                <AuthStack.Screen name="AccessCode" component={AccessCodeScreen} />            
+                <AuthStack.Screen name="SignUpName" component={SignUpNameScreen} />            
+                <AuthStack.Screen name="SignUpPassword" component={SignUpPasswordScreen} />            
+                <AuthStack.Screen name="SignUpConfirmPassword" component={SignUpConfirmPasswordScreen} />     
+                <AuthStack.Screen name="SignUpWelcome" component={SignUpWelcomeScreen} options={{headerShown: false}} />       
+            </AuthStack.Navigator>
+        )
+    }
+
+    const getAppStack = () => {
+        return (
+            <AppStack.Navigator
+                initialRouteName="Home"
+                screenOptions={{
+                    headerStyle: {backgroundColor: '#000'},
+                    headerTintColor: '#fff',
+                }}
+            >
+                <AppStack.Screen name="Home" component={HomeScreen} />
+            </AppStack.Navigator>
+        )
+    }
     
     return (
-        <Stack.Navigator 
-            initialRouteName="AuthMain"
-            screenOptions={{
-                headerStyle: {backgroundColor: '#000'},
-                headerTintColor: '#fff',
-            }}
-        >
-            <Stack.Screen name="AuthMain" component={AuthMainScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="RequestAccess" component={RequestAccessScreen} />
-            <Stack.Screen name="AccessCode" component={AccessCodeScreen} />            
-            <Stack.Screen name="SignUpName" component={SignUpNameScreen} />            
-            <Stack.Screen name="SignUpPassword" component={SignUpPasswordScreen} />            
-            <Stack.Screen name="SignUpConfirmPassword" component={SignUpConfirmPasswordScreen} />     
-            <Stack.Screen name="SignUpWelcome" component={SignUpWelcomeScreen} options={{headerShown: false}} />       
-        </Stack.Navigator>
+        <>
+        {isLoggedIn ? getAppStack() : getAuthStack()}
+        </>
     );  
 }
 

@@ -3,7 +3,8 @@ export enum EmailMessageType {
     AdminRequestAccess,
     UserAccessGranted,
     UserAccessDenied,
-    VerifyEmail
+    VerifyEmail,
+    RecoverPassword
 }
 
 export type MailOptions = {
@@ -29,9 +30,13 @@ export type VerifyEmailPayload = {
     link: string
 }
 
+export type RecoverPasswordPayload = {
+    recoverLink: string
+}
+
 export type SendEmailInput = {
     to: string,
     subject: string,
     messageType: EmailMessageType
-    payload?: RequestAccessPayload | RequestCodePayload | VerifyEmailPayload | undefined
+    payload?: RequestAccessPayload | RequestCodePayload | VerifyEmailPayload | RecoverPasswordPayload | undefined
 }

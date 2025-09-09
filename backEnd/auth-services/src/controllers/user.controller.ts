@@ -10,3 +10,13 @@ export const signUp = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const resetPassword = async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body;
+        const message = await userService.resetPassword(email)        
+        res.status(200).json({ message });
+    } catch (error: any) {        
+        res.status(500).json({ error: error.message });
+    }
+}

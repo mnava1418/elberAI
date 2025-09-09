@@ -11,8 +11,12 @@ import useForm from '../../../hooks/auth/useForm';
 import Spinner from '../../components/ui/Spinner';
 import * as validation from '../../../services/validation.service';
 import { signIn } from '../../../services/auth.service';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AuthStackParamList } from '../../Elber';
 
-const LoginScreen = () => {
+type  LoginScreenProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
+
+const LoginScreen = ({navigation}: LoginScreenProps) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -60,7 +64,7 @@ const LoginScreen = () => {
                 <Button 
                     type="secondary"
                     title="¿Olvidaste tu password?"
-                    onPress={() => {}}
+                    onPress={() => {navigation.navigate('RecoverPassword', {email})}}
                     textColor={appColors.text}
                 />
             </View>

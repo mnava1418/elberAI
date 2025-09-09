@@ -2,13 +2,14 @@ import fs from 'fs'
 import { 
     acceptAccessTemplate, 
     adminRequestAccessTemplate, 
+    recoverPasswordTemplate, 
     rejectAccessTemplate, 
     userRequestAccessTemplate, 
     verifyEmailTemplate
 } from '../templates/email.template'
 import { email } from '../config/index.config'
 import nodemailer from 'nodemailer'
-import { EmailMessageType, MailOptions, RequestAccessPayload, RequestCodePayload, SendEmailInput, VerifyEmailPayload } from '../types/email.type'
+import { EmailMessageType, MailOptions, RecoverPasswordPayload, RequestAccessPayload, RequestCodePayload, SendEmailInput, VerifyEmailPayload } from '../types/email.type'
 
 const getMessage = ({messageType, payload}: SendEmailInput) => {
     switch (messageType) {
@@ -25,6 +26,9 @@ const getMessage = ({messageType, payload}: SendEmailInput) => {
         case EmailMessageType.VerifyEmail:
             const {name, link} = payload as VerifyEmailPayload
             return verifyEmailTemplate(name, link)
+        case EmailMessageType.RecoverPassword:
+            const {recoverLink} = payload as RecoverPasswordPayload
+            return recoverPasswordTemplate(recoverLink)
         default:
             return ''
     }

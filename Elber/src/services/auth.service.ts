@@ -34,6 +34,16 @@ export const signUp = async(email: string, password: string, displayName: string
     }
 }
 
+export const resetPassword = async(email: string): Promise<string> => {
+    try {
+        const result = await apiPost<{message: string}>(`${BACK_URL}/user/resetPassword`, { email });
+        return result.message        
+    } catch (error) {
+        console.error('Error al solicitar recuperación de password:', error)
+        throw new Error('Error al solicitar recuperación de password.')
+    }
+}
+
 export const signIn = async (email: string, password: string) => {
     try {
         const auth = getAuth();

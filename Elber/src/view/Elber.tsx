@@ -14,10 +14,12 @@ import { GlobalContext } from '../store/GlobalProvider';
 import { selectIsLoggedIn } from '../store/selectors/user.selector';
 import HomeScreen from './screens/app/HomeScreen';
 import { logInUser } from '../store/actions/user.actions';
+import RecoverPasswordScreen from './screens/auth/RecoverPasswordScreen';
 
 export type AuthStackParamList = {
   AuthMain: undefined;
   Login: undefined;
+  RecoverPassword: { email: string };
   
   /*SIGN UP SCREENS */
   RequestAccess: undefined;
@@ -70,7 +72,8 @@ const Elber = () => {
                 <AuthStack.Screen name="SignUpName" component={SignUpNameScreen} />            
                 <AuthStack.Screen name="SignUpPassword" component={SignUpPasswordScreen} />            
                 <AuthStack.Screen name="SignUpConfirmPassword" component={SignUpConfirmPasswordScreen} />     
-                <AuthStack.Screen name="SignUpWelcome" component={SignUpWelcomeScreen} options={{headerShown: false}} />       
+                <AuthStack.Screen name="SignUpWelcome" component={SignUpWelcomeScreen} options={{headerShown: false}} />
+                <AuthStack.Screen name="RecoverPassword" component={RecoverPasswordScreen} />
             </AuthStack.Navigator>
         )
     }

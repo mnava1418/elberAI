@@ -46,3 +46,26 @@ const sendVerifyEmail = async (email: string, name: string) => {
 
     sendEmail(verifyEmailInput)
 }
+
+export const resetPassword = async (email: string): Promise<string> => {
+    try {
+        const userRecord = await admin.auth().getUserByEmail(email)    
+        if(!userRecord) {
+            return '¡Échale un ojito a tu correo! Si está registrado, ya te mandamos el link para que recuperes tu password.';
+        }
+
+        const recoverLink = await admin.auth().generatePasswordResetLink(email)
+        const recoverPasswordInput: SendEmailInput = {
+            to: email,
+            subject: 'Recupera tu password',
+            messageType: EmailMessageType.RecoverPassword,
+            payload: {recoverLink}
+        }
+    
+        sendEmail(recoverPasswordInput)
+    } catch (error) {
+        console.error(error);
+    } finally {
+        return '¡Échale un ojito a tu correo! Si está registrado, ya te mandamos el link para que recuperes tu password.';
+    }
+}

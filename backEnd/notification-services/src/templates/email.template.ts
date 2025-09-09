@@ -167,3 +167,43 @@ export const verifyEmailTemplate = (name: string, link: string) => {
         `;
     return message;
 }
+
+export const recoverPasswordTemplate = (link: string) => {
+    const message = `
+        <!DOCTYPE html>
+        <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <title>¡Rescatemos tu password!</title>
+            </head>
+            <body>
+                <div>
+                    <h3>¡Buenas buenas!</h3>
+                    <p>
+                        ¿Con que se te olvidó el password, eh? ¡No te preocupes!<br>
+                    </p>
+                    <p>
+                        Dale clic al link de abajo (está más seguro que la receta secreta de la abuela):
+                    </p>
+                    <p>
+                        <a href="${link}" style="text-decoration: none; font-size: 1.2em;">
+                            ¡Ándale, recuperar mi password!
+                        </a>
+                    </p>
+                    <p>
+                        Si tú no solicitaste esto, ignora este correo y sigue disfrutando tu día 
+                        (como si nada hubiera pasado, así como cuando te acabas los tacos y dices que no cenaste).
+                    </p>
+                    <p>
+                        ¡Nos vemos del otro lado!<br>
+                        <b>Elber</b>
+                    </p>
+                    <div>
+                        P.D. La próxima vez guarda tu password como guardaste el número de tu ex :)
+                    </div>
+                </div>
+            </body>
+        </html>
+        `;
+    return message;
+}

@@ -87,8 +87,8 @@ const sendRequestEmails = (email: string) => {
         messageType: EmailMessageType.AdminRequestAccess,
         payload: {
             userEmail: email,
-            approveURL: `${server.host}/access/review?token=${approveToken}`,
-            rejectURL: `${server.host}/access/review?token=${rejectToken}`
+            approveURL: `${server.gateway}/auth/access/review?token=${approveToken}`,
+            rejectURL: `${server.gateway}/auth/access/review?token=${rejectToken}`
         }
     }
 

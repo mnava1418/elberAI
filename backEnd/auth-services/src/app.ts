@@ -1,6 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import {proxy_validate} from './controllers/proxy.controller'
 
 import authRoutes from './routes/index.routes';
 
@@ -12,9 +13,10 @@ const setMiddlewares = () => {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100, // Limite por IP
+        windowMs: 15 * 60 * 1000, // 15 minutos
+        max: 100, // Limite por IP
     }));
+    app.use(proxy_validate)
 }
 
 const setRoutes = () => {

@@ -9,7 +9,6 @@ const app = express();
 const setMiddlewares = () => {
     // Seguridad
     app.use(helmet());
-    app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(rateLimit({
         windowMs: 15 * 60 * 1000, // 15 minutos

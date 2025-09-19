@@ -6,7 +6,7 @@ import { logOutUser } from '../store/actions/user.actions';
 
 export const requestAccess = async (email: string) => {
     try {
-        const data = await apiPost<{message: string}>(`${BACK_URL}/access/request`, { email });
+        const data = await apiPost<{message: string}>(`${BACK_URL}/auth/access/request`, { email });
         return data.message;
     } catch (error) {
         console.error('Error al solicitar acceso:', error);
@@ -16,7 +16,7 @@ export const requestAccess = async (email: string) => {
 
 export const validateAccessCode = async (email: string, accessCode: string): Promise<AuthResponse> => {
     try {
-        const data = await apiPost<{isValid: boolean, message: string}>(`${BACK_URL}/access/validateCode`, { email, accessCode });
+        const data = await apiPost<{isValid: boolean, message: string}>(`${BACK_URL}/auth/access/validateCode`, { email, accessCode });
         return {isValid: data.isValid, message: data.message};
     } catch (error) {
         console.error('Error al validar código de acceso:', error);
@@ -26,7 +26,7 @@ export const validateAccessCode = async (email: string, accessCode: string): Pro
 
 export const signUp = async(email: string, password: string, displayName: string): Promise<{registered: boolean, message: string}> => {
     try {
-        const result = await apiPost<{registered: boolean, message: string}>(`${BACK_URL}/user/signUp`, { email, password, displayName });
+        const result = await apiPost<{registered: boolean, message: string}>(`${BACK_URL}/auth/user/signUp`, { email, password, displayName });
         return result        
     } catch (error) {
         console.error('Error al crear cuenta:', error)
@@ -36,7 +36,7 @@ export const signUp = async(email: string, password: string, displayName: string
 
 export const resetPassword = async(email: string): Promise<string> => {
     try {
-        const result = await apiPost<{message: string}>(`${BACK_URL}/user/resetPassword`, { email });
+        const result = await apiPost<{message: string}>(`${BACK_URL}/auth/user/resetPassword`, { email });
         return result.message        
     } catch (error) {
         console.error('Error al solicitar recuperación de password:', error)

@@ -7,7 +7,8 @@ dotenv.config({
 
 export const server = {
     port: process.env.PORT,
-    host: process.env.HOST || `http://localhost:${process.env.PORT}`
+    host: process.env.HOST || `http://localhost:${process.env.PORT}`,
+    gateway: process.env.API_GATEWAY
 }
 
 export const firebase = {
@@ -23,4 +24,8 @@ export const notification = {
     email: {
         from: 'martin@namart.tech'
     }
+}
+
+export const gateway = {
+    secret: process.env.GATEWAY_SECRET
 }

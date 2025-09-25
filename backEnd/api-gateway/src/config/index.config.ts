@@ -6,8 +6,8 @@ dotenv.config({
 })
 
 export const server = {
-    port: process.env.PORT,
-    host: process.env.HOST || `http://localhost:${process.env.PORT}`
+    port: process.env.GATEWAY_PORT,
+    host: process.env.HOST || `http://localhost:${process.env.GATEWAY_PORT}`
 }
 
 export const paths = {

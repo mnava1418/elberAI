@@ -8,3 +8,8 @@ dotenv.config({
 export const server = {
     port: process.env.AI_PORT,
 }
+
+export const firebase = {
+    cred: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    db: process.env.FIREBASE_DB
+}

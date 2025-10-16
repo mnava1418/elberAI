@@ -11,5 +11,11 @@ export const server = {
 }
 
 export const paths = {
-    auth_services: process.env.AUTH_SERVICE
+    auth_services: process.env.AUTH_SERVICE,
+    ai_services: process.env.AI_SERVICE
+}
+
+export const firebase = {
+    cred: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    db: process.env.FIREBASE_DB
 }

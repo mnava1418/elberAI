@@ -12,9 +12,9 @@ import { onAuthStateChanged, getAuth } from '@react-native-firebase/auth';
 import { logOut } from '../services/auth.service';
 import { GlobalContext } from '../store/GlobalProvider';
 import { selectIsLoggedIn } from '../store/selectors/user.selector';
-import HomeScreen from './screens/app/HomeScreen';
 import { logInUser } from '../store/actions/user.actions';
 import RecoverPasswordScreen from './screens/auth/RecoverPasswordScreen';
+import MainScreen from './screens/app/MainScreen';
 
 export type AuthStackParamList = {
   AuthMain: undefined;
@@ -87,7 +87,7 @@ const Elber = () => {
                     headerTintColor: '#fff',
                 }}
             >
-                <AppStack.Screen name="Home" component={HomeScreen} />
+                <AppStack.Screen name="Home" component={MainScreen} />
             </AppStack.Navigator>
         )
     }

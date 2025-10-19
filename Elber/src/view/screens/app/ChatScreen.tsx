@@ -3,7 +3,7 @@ import MainView from '../../components/ui/MainView'
 import CustomText from '../../components/ui/CustomText'
 import SocketModel from '../../../models/Socket.model'
 
-const HomeScreen = () => {
+const ChatScreen = () => {
     useEffect(() => {
       SocketModel.getInstance().connect()
     
@@ -14,9 +14,9 @@ const HomeScreen = () => {
     
     return (
         <MainView>
-            <CustomText type='title' text='Bienvenido a Elber' />
+            <CustomText type='title' text='Chat' />
         </MainView>
     )
 }
 
-export default HomeScreen
+export default ChatScreen

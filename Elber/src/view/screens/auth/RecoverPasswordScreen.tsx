@@ -12,8 +12,11 @@ import Button from '../../components/ui/Button'
 import { AuthStackParamList } from '../../Elber'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { resetPassword } from '../../../services/auth.service'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
 
-const RecoverPasswordScreen = () => {
+type  RecoverPasswordScreenProps = NativeStackScreenProps<AuthStackParamList, 'RecoverPassword'>;
+
+const RecoverPasswordScreen = ({navigation}: RecoverPasswordScreenProps) => {
     const { email } = useRoute<RouteProp<AuthStackParamList, 'RecoverPassword'>>().params
     const [recoverEmail, setRecoverEmail] = useState(email)
     const { 
@@ -53,7 +56,7 @@ const RecoverPasswordScreen = () => {
     }
 
     return (
-        <MainView>
+        <MainView navigation={navigation}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}>

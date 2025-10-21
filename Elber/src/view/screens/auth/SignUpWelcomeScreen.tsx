@@ -15,7 +15,7 @@ const SignUpWelcomeScreen = ({navigation}: SignUpWelcomeScreenProps) => {
     const {name} = selectSignUpInfo(state.signUp)
     
     return (
-        <MainView>
+        <MainView showNavBar={false}>
              <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
                 <View style={{marginBottom: 24}}>
                     <CustomText type="title" text={`¡Bienvenido, ${name}!`} style={{textAlign: 'center'}} />

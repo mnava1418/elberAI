@@ -44,7 +44,6 @@ const Elber = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
             if(user && user.emailVerified) {
-                console.log('Usuario autenticado:', user.email);
                 dispatch(logInUser({name: user.displayName || '', email: user.email || ''}));
             } else {
                 logOut(dispatch)
@@ -61,11 +60,10 @@ const Elber = () => {
             <AuthStack.Navigator 
                 initialRouteName="AuthMain"
                 screenOptions={{
-                    headerStyle: {backgroundColor: '#000'},
-                    headerTintColor: '#fff',
+                    headerShown: false
                 }}
             >
-                <AuthStack.Screen name="AuthMain" component={AuthMainScreen} options={{ headerShown: false }} />
+                <AuthStack.Screen name="AuthMain" component={AuthMainScreen} />
                 <AuthStack.Screen name="Login" component={LoginScreen} />
                 <AuthStack.Screen name="RequestAccess" component={RequestAccessScreen} />
                 <AuthStack.Screen name="AccessCode" component={AccessCodeScreen} />            
@@ -83,8 +81,7 @@ const Elber = () => {
             <AppStack.Navigator
                 initialRouteName="Home"
                 screenOptions={{
-                    headerStyle: {backgroundColor: '#000'},
-                    headerTintColor: '#fff',
+                    headerShown: false
                 }}
             >
                 <AppStack.Screen name="Home" component={MainScreen} />

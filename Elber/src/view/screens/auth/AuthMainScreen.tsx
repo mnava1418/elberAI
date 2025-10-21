@@ -37,7 +37,7 @@ const AuthMainScreen = ({navigation}: AuthMainScreenProps) => {
     }, [phrase]);
 
     return (
-       <MainView>
+       <MainView showNavBar={false}>
             <Animated.View style={[authStyles.container, { opacity: fadeIn }]}>
                 <View style={authStyles.centerContent}>
                     <Image

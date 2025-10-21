@@ -13,9 +13,7 @@ const ChatScreen = () => {
     }, [])
     
     return (
-        <MainView>
-            <CustomText type='title' text='Chat' />
-        </MainView>
+        <MainView navBarTitle='Chat' />
     )
 }
 

@@ -41,7 +41,7 @@ const SignUpPasswordScreen = ({navigation}: SignUpPasswordScreenProps) => {
     }
 
     return (
-        <MainView>
+        <MainView navigation={navigation}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}>

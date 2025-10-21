@@ -8,7 +8,7 @@ const SettingsScreen = () => {
     const {dispatch} = useContext(GlobalContext)
 
     return (
-        <MainView>
+        <MainView navBarTitle='Settings'>
             <Button type='primary' title='Salir' onPress={() => {logOut(dispatch)}} />
         </MainView>
     )

@@ -13,9 +13,7 @@ const HomeScreen = () => {
     }, [])
     
     return (
-        <MainView>
-            <CustomText type='title' text='Bienvenido a Elber' />
-        </MainView>
+        <MainView navBarTitle='Elber' />
     )
 }
 

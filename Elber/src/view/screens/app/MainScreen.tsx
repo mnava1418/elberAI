@@ -5,13 +5,13 @@ import HomeScreen from './HomeScreen';
 import SettingsScreen from './SettingsScreen';
 import ChatScreen from './ChatScreen';
 
-export type MainScreenTapProps = {
-    Home: undefined
-    Settings: undefined
+export type MainScreenTabProps = {
+    Elber: undefined
+    Ajustes: undefined
     Chat: undefined
 }
 
-const Tab = createBottomTabNavigator<MainScreenTapProps>();
+const Tab = createBottomTabNavigator<MainScreenTabProps>();
 
 const MainScreen = () => {
     const [showTabBar, setShowTabBar] = useState(true)
@@ -20,11 +20,13 @@ const MainScreen = () => {
         <>
             <Tab.Navigator 
                 screenOptions={{headerShown: false,}} 
-                tabBar={(props) => <TabBar {...props} showTabBar={showTabBar} />}
+                tabBar={(props) => <TabBar {...props} showTabBar={showTabBar} setShowTabBar={setShowTabBar} />}
             >
-                <Tab.Screen name='Home' component={HomeScreen} />
-                <Tab.Screen name='Chat' component={ChatScreen}/>
-                <Tab.Screen name='Settings' component={SettingsScreen} />
+                <Tab.Screen name='Elber' component={HomeScreen} />
+                <Tab.Screen name='Chat'>
+                    {(props) => <ChatScreen {...props} setShowTabBar={setShowTabBar} />}
+                </Tab.Screen>
+                <Tab.Screen name='Ajustes' component={SettingsScreen} />
             </Tab.Navigator>
         </>
     )

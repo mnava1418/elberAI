@@ -73,7 +73,7 @@ const LoginScreen = ({navigation}: LoginScreenProps) => {
     }
 
     return (
-        <MainView navigation={navigation}>
+        <MainView leftAction={() => {navigation.goBack()}}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}>

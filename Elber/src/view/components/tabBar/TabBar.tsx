@@ -6,9 +6,10 @@ import tabBarStyles from '../../../styles/tabBar.tyle';
 
 interface TabBarProps extends BottomTabBarProps {
     showTabBar: boolean
+    setShowTabBar: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const TabBar = ({state, navigation, showTabBar}: TabBarProps) => {
+const TabBar = ({state, navigation, showTabBar, setShowTabBar}: TabBarProps) => {
     const {bottom} = useSafeAreaInsets()
 
     return (
@@ -19,7 +20,7 @@ const TabBar = ({state, navigation, showTabBar}: TabBarProps) => {
                 const isSelected = state.index === index;
 
                 switch (route.name) {
-                    case 'Home':
+                    case 'Elber':
                         icon = 'radio-button-off'
                         iconSelected = 'radio-button-on'
                         break;
@@ -27,7 +28,7 @@ const TabBar = ({state, navigation, showTabBar}: TabBarProps) => {
                         icon = 'chatbubbles-outline'
                         iconSelected = 'chatbubbles'
                         break;
-                    case 'Settings':
+                    case 'Ajustes':
                         icon = 'cog-outline'
                         iconSelected = 'cog'
                         break;
@@ -36,6 +37,12 @@ const TabBar = ({state, navigation, showTabBar}: TabBarProps) => {
                 }
 
                 const onPress = () => {
+                    if(route.name === 'Chat') {
+                        setShowTabBar(false)
+                    } else {
+                        setShowTabBar(true)
+                    }
+
                     const event = navigation.emit({
                         type: 'tabPress',
                         target: route.key,
@@ -48,7 +55,14 @@ const TabBar = ({state, navigation, showTabBar}: TabBarProps) => {
                 }
 
                 return (
-                    <TabIcon key={index} icon={icon} iconSelected={iconSelected} isSelected={isSelected} onPress={onPress} />
+                    <TabIcon 
+                        key={index} 
+                        title={route.name}
+                        icon={icon} 
+                        iconSelected={iconSelected} 
+                        isSelected={isSelected} 
+                        onPress={onPress} 
+                    />
                 )
             })}
         </View>

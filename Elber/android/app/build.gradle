@@ -7,6 +7,10 @@ project.ext.vectoricons = [
     iconFontNames: [ 'Ionicons.ttf' ] // Specify font files
 ]
 
+project.ext.react = [
+    enableHermes: true
+]
+
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
 
 /**

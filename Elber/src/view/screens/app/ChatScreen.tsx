@@ -26,7 +26,7 @@ const ChatScreen = ({setShowTabBar}: ChatScreenProps) => {
     }, [])
     
     return (
-        <MainView navBarTitle='Chat' leftAction={goBack}>
+        <MainView navBarTitle='Chat' leftAction={goBack} applyPadding={false}>
           <Chat />
         </MainView>
     )

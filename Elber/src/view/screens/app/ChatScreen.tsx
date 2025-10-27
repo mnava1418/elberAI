@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import MainView from '../../components/ui/MainView'
-import SocketModel from '../../../models/Socket.model'
 import Chat from '../../components/chat/Chat'
 import { useNavigation, NavigationProp } from '@react-navigation/native'
 import { MainScreenTabProps } from './MainScreen'
@@ -16,14 +15,6 @@ const ChatScreen = ({setShowTabBar}: ChatScreenProps) => {
         setShowTabBar(true)
         navigation.goBack()
     }
-
-    useEffect(() => {
-      SocketModel.getInstance().connect()
-    
-      return () => {
-        SocketModel.getInstance().disconnect()
-      }
-    }, [])
     
     return (
         <MainView navBarTitle='Chat' leftAction={goBack} applyPadding={false}>

@@ -18,6 +18,10 @@ const InputToolBar = ({sendMessage}: InputToolBarProps) => {
     } = useChat()
 
     const handleSend = () => {
+        if(inputText.trim() === '') {
+            return
+        }
+
         sendMessage([{
             _id: new Date().getTime(),
             text: inputText,

@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { View } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat'
 import InputToolBar from './InputToolBar';
+import ChatBubble from './ChatBubble';
+import ChatTime from './ChatTime';
 
 const Chat = () => {
     const [messages, setMessages] = useState<IMessage[]>([])
@@ -16,9 +18,13 @@ const Chat = () => {
                 messages={messages}
                 user={{ _id: 'user' }}
                 renderInputToolbar={() => null}
+                renderAvatar ={null}
                 keyboardShouldPersistTaps="never"
                 bottomOffset={0}
                 isKeyboardInternallyHandled={false}
+                renderBubble={ChatBubble}
+                renderTime={ChatTime}
+                showUserAvatar={false}
             />
             <InputToolBar sendMessage={sendMessage} />
         </View>

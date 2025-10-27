@@ -31,6 +31,22 @@ const chatStyles = StyleSheet.create({
         color: appColors.text,
         paddingHorizontal: 8,
         paddingVertical: 8
+    },
+    bubble: {
+        borderRadius: 15,
+        maxWidth: '80%',
+    },
+    bubbleLeft: {
+        backgroundColor: appColors.secondary,
+        marginLeft: 10,
+    },
+    bubbleRight: {
+        backgroundColor: appColors.contrast,
+        marginRight: 10,
+    },
+    bubbleText: {
+        fontSize: 18,
+        fontWeight: '500',
     }
 })
 

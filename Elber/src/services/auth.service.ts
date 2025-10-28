@@ -4,6 +4,7 @@ import { AuthResponse } from '../types/auth.type';
 import { signInWithEmailAndPassword, getAuth, signOut } from '@react-native-firebase/auth';
 import { logOutUser } from '../store/actions/user.actions';
 import SocketModel from '../models/Socket.model';
+import { logOutElber } from '../store/actions/elber.actions';
 
 export const requestAccess = async (email: string) => {
     try {
@@ -68,6 +69,7 @@ export const logOut = async (dispatch: React.Dispatch<any>) => {
             SocketModel.getInstance().disconnect()
             await signOut(auth);
             dispatch(logOutUser());
+            dispatch(logOutElber())
         }
     } catch (error) {
         console.error('Error al cerrar sesión:', error);

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { View, TextInput } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { appColors } from '../../../styles/main.style';
@@ -6,18 +6,30 @@ import useChat from '../../../hooks/chat/useChat';
 import Send from './Send';
 import chatStyles from '../../../styles/chat.style';
 import { IMessage } from 'react-native-gifted-chat';
+import { GlobalContext } from '../../../store/GlobalProvider';
+import { isWaitingForElber } from '../../../store/actions/user.actions';
+import { selectIsWaitingForElber } from '../../../store/selectors/user.selector';
 
 type InputToolBarProps = {
     sendMessage: (newMessage: IMessage[]) => void
 }
 
 const InputToolBar = ({sendMessage}: InputToolBarProps) => {
+    const { state, dispatch } = useContext(GlobalContext);
+    const isWaiting = selectIsWaitingForElber(state.user)
+
     const { 
         inputText, setInputText,
         animatedStyle 
     } = useChat()
 
     const handleSend = () => {
+        if(inputText.trim() === '' || isWaiting) {
+            return
+        }
+
+        dispatch(isWaitingForElber(true))
+
         sendMessage([{
             _id: new Date().getTime(),
             text: inputText,
@@ -39,8 +51,9 @@ const InputToolBar = ({sendMessage}: InputToolBarProps) => {
                     multiline
                     keyboardType='default'
                     autoCapitalize='sentences'
+                    editable={!isWaiting}
                 />  
-                <Send handleSend={handleSend}/>
+                <Send icon={isWaiting ? 'ellipsis-horizontal' : 'arrow-up'} handleSend={handleSend}/>
             </View>
         </Animated.View>
     )

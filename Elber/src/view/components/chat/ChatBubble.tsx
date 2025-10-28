@@ -9,12 +9,12 @@ const ChatBubble = (props: BubbleProps<IMessage>) => {
             {...props}
             wrapperStyle={{
                 right: {
+                    backgroundColor: appColors.contrast,
                     ...chatStyles.bubble,
-                    ...chatStyles.bubbleRight
                 },
                 left: {
+                    backgroundColor: appColors.secondary,
                     ...chatStyles.bubble,
-                    ...chatStyles.bubbleLeft
                 }
             }}
             textStyle={{

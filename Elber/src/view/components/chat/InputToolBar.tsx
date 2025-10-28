@@ -7,17 +7,14 @@ import Send from './Send';
 import chatStyles from '../../../styles/chat.style';
 import { IMessage } from 'react-native-gifted-chat';
 import { GlobalContext } from '../../../store/GlobalProvider';
-import { isWaitingForElber } from '../../../store/actions/user.actions';
-import { selectIsWaitingForElber } from '../../../store/selectors/user.selector';
+import SocketModel from '../../../models/Socket.model';
+import { selectIsWaitingForElber } from '../../../store/selectors/elber.selector';
+import { addChatMessage, isWaitingForElber } from '../../../store/actions/elber.actions';
 
-type InputToolBarProps = {
-    sendMessage: (newMessage: IMessage[]) => void
-}
-
-const InputToolBar = ({sendMessage}: InputToolBarProps) => {
+const InputToolBar = () => {
     const { state, dispatch } = useContext(GlobalContext);
-    const isWaiting = selectIsWaitingForElber(state.user)
-
+    const isWaiting = selectIsWaitingForElber(state.elber)
+    
     const { 
         inputText, setInputText,
         animatedStyle 
@@ -28,16 +25,20 @@ const InputToolBar = ({sendMessage}: InputToolBarProps) => {
             return
         }
 
-        dispatch(isWaitingForElber(true))
-
-        sendMessage([{
-            _id: new Date().getTime(),
+        const timeStamp = new Date().getTime()
+        const newMessage: IMessage = {
+            _id: `user:${timeStamp}`,
             text: inputText,
-            createdAt: new Date().getTime(),
+            createdAt: timeStamp,
             user: {
                 _id: 'user'
             }
-        }])
+        }
+
+        dispatch(isWaitingForElber(true))
+        dispatch(addChatMessage(newMessage))
+
+        SocketModel.getInstance().sendMessage(inputText)
 
         setInputText('')
     }

@@ -1,25 +1,21 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import { View } from 'react-native';
-import { GiftedChat, IMessage,  } from 'react-native-gifted-chat'
+import { GiftedChat } from 'react-native-gifted-chat'
 import InputToolBar from './InputToolBar';
 import ChatBubble from './ChatBubble';
 import ChatTime from './ChatTime';
 import { GlobalContext } from '../../../store/GlobalProvider';
-import { selectIsWaitingForElber } from '../../../store/selectors/user.selector';
+import { selectChatMessages, selectIsWaitingForElber } from '../../../store/selectors/elber.selector';
 
 const Chat = () => {
-    const [messages, setMessages] = useState<IMessage[]>([])
     const { state } = useContext(GlobalContext);
-    const isWaiting = selectIsWaitingForElber(state.user)
-
-    const sendMessage = (newMessage: IMessage[]) => {
-        setMessages(GiftedChat.append(messages, newMessage));
-    }
-
+    const isWaiting = selectIsWaitingForElber(state.elber)
+    const chatMessages = selectChatMessages(state.elber)
+    
     return (
        <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-end'}}>
             <GiftedChat
-                messages={messages}
+                messages={chatMessages}
                 user={{ _id: 'user' }}
                 renderInputToolbar={() => null}
                 renderAvatar ={null}
@@ -34,7 +30,7 @@ const Chat = () => {
                     paddingHorizontal: 10
                 }}
             />
-            <InputToolBar sendMessage={sendMessage} />
+            <InputToolBar />
         </View>
     );    
 };

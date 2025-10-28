@@ -5,10 +5,11 @@ import chatStyles from '../../../styles/chat.style'
 import { appColors } from '../../../styles/main.style'
 
 type SendProps = {
+    icon: string
     handleSend: () => void
 }
 
-const Send = ({handleSend}: SendProps) => {
+const Send = ({icon, handleSend}: SendProps) => {
     return (
         <Pressable
             style={({pressed}) => ([
@@ -17,7 +18,7 @@ const Send = ({handleSend}: SendProps) => {
             onPress={handleSend}
         >
             <View style={chatStyles.send}>
-                <AppIcon name='arrow-up' size={24} color={appColors.primary} />
+                <AppIcon name={icon} size={24} color={appColors.primary} />
             </View>
         </Pressable>
     )

@@ -26,8 +26,8 @@ const chatStyles = StyleSheet.create({
         flex: 1,
         minHeight: 36,
         maxHeight: 120,
-        fontSize: 16,
-        fontWeight: '500',
+        fontSize: 18,
+        fontWeight: '400',
         color: appColors.text,
         paddingHorizontal: 8,
         paddingVertical: 8
@@ -39,13 +39,13 @@ const chatStyles = StyleSheet.create({
         padding: 10
     },
     bubbleText: {
-        fontSize: 16,
-        fontWeight: '500',
+        fontSize: 18,
+        fontWeight: '400',
     },
     actionsContainer: {
         borderRadius: 15, 
-        width: 180, 
-        padding: 16, 
+        width: 250, 
+        padding: 20, 
         backgroundColor: appColors.secondary
     },
     action: {

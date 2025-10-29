@@ -34,11 +34,13 @@ const chatStyles = StyleSheet.create({
     },
     bubble: {
         borderRadius: 15,
-        maxWidth: '80%',
+        maxWidth: '75%',
+        marginBottom: 16,
+        padding: 10
     },
     bubbleText: {
-        fontSize: 18,
-        fontWeight: '500',
+        fontSize: 16,
+        fontWeight: '400',
     }
 })
 

@@ -11,6 +11,7 @@ const useChat = () => {
     const {bottom} = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
     const [inputText, setInputText] = useState('')
+    const [showActions, setShowActions] = useState(false)
     
     const animatedStyle = useAnimatedStyle(() => {
         const targetPadding = keyboard.height.value > 0 ? keyboard.height.value : bottom;
@@ -25,6 +26,7 @@ const useChat = () => {
 
     return {
         inputText, setInputText,
+        showActions, setShowActions,
         animatedStyle
     }
 }

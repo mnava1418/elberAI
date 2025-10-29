@@ -11,19 +11,22 @@ import SocketModel from '../../../models/Socket.model';
 import { selectIsWaitingForElber } from '../../../store/selectors/elber.selector';
 import { addChatMessage, isWaitingForElber } from '../../../store/actions/elber.actions';
 
-const InputToolBar = () => {
+type InputToolBarProps = {
+    inputText: string
+    setInputText: React.Dispatch<React.SetStateAction<string>>
+}
+
+const InputToolBar = ({inputText, setInputText}: InputToolBarProps) => {
     const { state, dispatch } = useContext(GlobalContext);
     const isWaiting = selectIsWaitingForElber(state.elber)
-    
-    const { 
-        inputText, setInputText,
-        animatedStyle 
-    } = useChat()
+    const { animatedStyle } = useChat()
 
     const handleSend = () => {
         if(inputText.trim() === '' || isWaiting) {
             return
         }
+
+        setInputText('')
 
         const timeStamp = new Date().getTime()
         const newMessage: IMessage = {
@@ -38,9 +41,7 @@ const InputToolBar = () => {
         dispatch(isWaitingForElber(true))
         dispatch(addChatMessage(newMessage))
 
-        SocketModel.getInstance().sendMessage(inputText)
-
-        setInputText('')
+        SocketModel.getInstance().sendMessage(inputText)        
     }
 
     return (

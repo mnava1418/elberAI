@@ -1,5 +1,5 @@
 import { IMessage } from "react-native-gifted-chat";
-import { ElberAction } from "../reducers/elber.reducer";
+import { ElberAction, SelectedMessage } from "../reducers/elber.reducer";
 
  export const logOutElber = (): ElberAction => ({
     type: 'LOG_OUT'
@@ -13,4 +13,9 @@ import { ElberAction } from "../reducers/elber.reducer";
  export const addChatMessage = (newMessage: IMessage): ElberAction => ({
    type: 'ADD_CHAT_MESSAGE',
    newMessage
+ })
+
+ export const selectChatMessage = (selectedMessage: SelectedMessage): ElberAction => ({
+   type: 'SELECT_CHAT_MESSAGE',
+   selectedMessage
  })

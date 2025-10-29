@@ -1,13 +1,25 @@
 import { GiftedChat, IMessage } from "react-native-gifted-chat"
 
+export type SelectedMessage = {
+    layout: {
+        px: number,
+        py: number,
+        pv: 'right' | 'left'
+        height: number,
+    },
+    message: IMessage
+}
+
 export type ElberState = {
     isWaiting: boolean
-    chatMessages: IMessage[]
+    chatMessages: IMessage[],
+    selectedMessage: SelectedMessage | null
 }
 
 export const initialElberState: ElberState = {
     isWaiting: false,
-    chatMessages: []
+    chatMessages: [],
+    selectedMessage: null
 }
 
 const addChatMessage = (state: ElberState, newMessage: IMessage): ElberState => {
@@ -18,6 +30,7 @@ const addChatMessage = (state: ElberState, newMessage: IMessage): ElberState => 
 export type ElberAction =
 | { type: 'WAITING_FOR_ELBER', isWaiting: boolean }
 | { type: 'ADD_CHAT_MESSAGE', newMessage: IMessage}
+| { type: 'SELECT_CHAT_MESSAGE', selectedMessage: SelectedMessage }
 | { type: 'LOG_OUT' }
 
 export const elberReducer = (state: ElberState, action: ElberAction): ElberState => {
@@ -28,6 +41,8 @@ export const elberReducer = (state: ElberState, action: ElberAction): ElberState
             return { ...initialElberState };
         case 'ADD_CHAT_MESSAGE':
             return addChatMessage(state, action.newMessage)
+        case 'SELECT_CHAT_MESSAGE':
+            return {...state, selectedMessage: action.selectedMessage}
         default:
             return state;
     }

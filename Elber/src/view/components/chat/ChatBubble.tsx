@@ -16,7 +16,7 @@ const ChatBubble = ({message, align}: ChatBubbleProps) => {
                 {opacity: pressed ? 0.8 : 1.0}
             ])}
         >
-            <View style={{flex: 1, flexDirection: 'row', justifyContent: align == 'left' ? 'flex-start' : 'flex-end'}}>
+            <View style={{flexDirection: 'row', justifyContent: align == 'left' ? 'flex-start' : 'flex-end'}}>
                 <View style={[chatStyles.bubble, {backgroundColor: align == 'left' ? appColors.secondary : appColors.contrast}]}>
                     <Text style={[chatStyles.bubbleText, {color: align == 'left' ? appColors.text : appColors.primary}]}>{message.text}</Text>
                 </View>

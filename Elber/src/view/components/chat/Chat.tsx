@@ -8,13 +8,14 @@ import useChat from '../../../hooks/chat/useChat';
 const Chat = () => {
     const {
         inputText, setInputText,
-        showActions, setShowActions
+        showActions, setShowActions,
+        animatedStyle
     } = useChat()
 
     return (
        <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-end'}}>
             <ChatGrid setShowActions={setShowActions} />
-            <InputToolBar inputText={inputText} setInputText={setInputText} />
+            <InputToolBar inputText={inputText} setInputText={setInputText} animatedStyle={animatedStyle} />
             <ChatActions showActions={showActions} setShowActions={setShowActions} setInputText={setInputText} />
         </View>
     );    

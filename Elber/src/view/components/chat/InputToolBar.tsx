@@ -2,7 +2,6 @@ import React, { useContext } from 'react'
 import { View, TextInput } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { appColors } from '../../../styles/main.style';
-import useChat from '../../../hooks/chat/useChat';
 import Send from './Send';
 import chatStyles from '../../../styles/chat.style';
 import { IMessage } from 'react-native-gifted-chat';
@@ -14,24 +13,23 @@ import { addChatMessage, isWaitingForElber } from '../../../store/actions/elber.
 type InputToolBarProps = {
     inputText: string
     setInputText: React.Dispatch<React.SetStateAction<string>>
+    animatedStyle: { paddingBottom: number }
 }
 
-const InputToolBar = ({inputText, setInputText}: InputToolBarProps) => {
+const InputToolBar = ({inputText, setInputText, animatedStyle}: InputToolBarProps) => {
     const { state, dispatch } = useContext(GlobalContext);
     const isWaiting = selectIsWaitingForElber(state.elber)
-    const { animatedStyle } = useChat()
-
+    
     const handleSend = () => {
         if(inputText.trim() === '' || isWaiting) {
             return
         }
 
-        setInputText('')
-
+        const messageText = inputText.trim();        
         const timeStamp = new Date().getTime()
         const newMessage: IMessage = {
             _id: `user:${timeStamp}`,
-            text: inputText,
+            text: messageText,
             createdAt: timeStamp,
             user: {
                 _id: 'user'
@@ -41,21 +39,22 @@ const InputToolBar = ({inputText, setInputText}: InputToolBarProps) => {
         dispatch(isWaitingForElber(true))
         dispatch(addChatMessage(newMessage))
 
-        SocketModel.getInstance().sendMessage(inputText)        
+        SocketModel.getInstance().sendMessage(messageText)  
+        setInputText('')
     }
 
     return (
         <Animated.View id='inputToolBar' style={[{backgroundColor: appColors.primary, marginTop: 10}, animatedStyle]}>
             <View style={chatStyles.toolBar}>
-                <TextInput style={chatStyles.inputText} 
+                <TextInput 
+                    style={chatStyles.inputText} 
                     value={inputText}
                     onChangeText={setInputText}
                     multiline
                     keyboardType='default'
                     autoCapitalize='sentences'
-                    editable={!isWaiting}
                 />  
-                <Send icon={isWaiting ? 'ellipsis-horizontal' : 'arrow-up'} handleSend={handleSend}/>
+                <Send icon={'arrow-up'} handleSend={handleSend}/>
             </View>
         </Animated.View>
     )

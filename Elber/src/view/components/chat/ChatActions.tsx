@@ -7,6 +7,7 @@ import { selectSelectedChatMessage } from '../../../store/selectors/elber.select
 import { mainStyles } from '../../../styles/main.style';
 import ChatActionItem from './ChatActionItem';
 import chatStyles from '../../../styles/chat.style';
+import ChatBubble from './ChatBubble';
 
 type ChatActionsProps = {
     showActions: boolean,
@@ -19,7 +20,8 @@ const screenHeight = Dimensions.get('window').height
 const ChatActions = ({showActions, setShowActions, setInputText}: ChatActionsProps) => {
     const { state } = useContext(GlobalContext);
     const selectedMessage = selectSelectedChatMessage(state.elber)
-    const [customStyle, setCustomStyle] = useState<StyleProp<ViewStyle>>({})
+    const [actionsStyle, setActionsStyle] = useState<StyleProp<ViewStyle>>({})
+    const [messageStyle, setMessageStyle] = useState<StyleProp<ViewStyle>>({})
 
     useEffect(() => {
         if(showActions && selectedMessage) {            
@@ -32,10 +34,18 @@ const ChatActions = ({showActions, setShowActions, setInputText}: ChatActionsPro
             top = top + 8
             
             if(messageLayout.pv === 'left') {
-                setCustomStyle({position: 'absolute', top, left: 24})
+                setActionsStyle({position: 'absolute', top, left: 24})
             } else {
-                setCustomStyle({position: 'absolute', top, right: 24})
-            }            
+                setActionsStyle({position: 'absolute', top, right: 24})
+            }
+
+            setMessageStyle({
+                position: 'absolute',
+                top: messageLayout.py,
+                left: 0,
+                right: 0,
+                paddingHorizontal: 10,
+            })            
         }
     }, [selectedMessage])
 
@@ -64,7 +74,13 @@ const ChatActions = ({showActions, setShowActions, setInputText}: ChatActionsPro
                 <Modal transparent={true} visible={showActions} animationType="fade">
                     <Pressable style={{flex: 1}} onPress={() => {setShowActions(false)}}>
                         <View style={mainStyles.modal}>
-                            <View style={[customStyle, chatStyles.actionsContainer]}>
+                            <ChatBubble
+                                align={selectedMessage.message.user._id == 'elber' ? 'left' : 'right'} 
+                                message={selectedMessage.message} 
+                                style={messageStyle}
+                                isStatic={true}
+                            />
+                            <View style={[actionsStyle, chatStyles.actionsContainer]}>
                                 <ChatActionItem text='Compartir' icon='share-outline' handleAction={handleShare} />
                                 <ChatActionItem text='Copiar' icon='copy-outline' handleAction={handleCopy} marginTop={10} />
                                 {selectedMessage.message.user._id == 'user' ? <ChatActionItem text='Editar' icon='create-outline' handleAction={handleEdit} marginTop={10} /> : <></>}

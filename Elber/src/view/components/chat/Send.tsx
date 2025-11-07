@@ -1,15 +1,20 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Pressable, View } from 'react-native'
 import AppIcon from '../ui/AppIcon'
 import chatStyles from '../../../styles/chat.style'
 import { appColors } from '../../../styles/main.style'
+import { selectElberIsStreaming, selectIsWaitingForElber } from '../../../store/selectors/elber.selector'
+import { GlobalContext } from '../../../store/GlobalProvider'
 
-type SendProps = {
-    icon: string
+type SendProps = {    
     handleSend: () => void
 }
 
-const Send = ({icon, handleSend}: SendProps) => {
+const Send = ({handleSend}: SendProps) => {
+    const { state } = useContext(GlobalContext);
+    const isWaiting = selectIsWaitingForElber(state.elber)
+    const isStreaming = selectElberIsStreaming(state.elber)
+
     return (
         <Pressable
             style={({pressed}) => ([
@@ -18,7 +23,7 @@ const Send = ({icon, handleSend}: SendProps) => {
             onPress={handleSend}
         >
             <View style={chatStyles.send}>
-                <AppIcon name={icon} size={24} color={appColors.primary} />
+                <AppIcon name={isWaiting || isStreaming ? 'square' : 'arrow-up'} size={24} color={appColors.primary} />
             </View>
         </Pressable>
     )

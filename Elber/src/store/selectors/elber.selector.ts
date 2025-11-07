@@ -5,3 +5,5 @@ export const selectIsWaitingForElber = (state: ElberState): boolean => state.isW
 export const selectChatMessages = (state: ElberState): ElberMessage[] => state.chatMessages
 
 export const selectSelectedChatMessage = (state: ElberState): SelectedMessage | null => state.selectedMessage
+
+export const selectElberIsStreaming = (state: ElberState): boolean => state.isStreaming

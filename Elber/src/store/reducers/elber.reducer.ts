@@ -16,13 +16,15 @@ export type SelectedMessage = {
 }
 
 export type ElberState = {
-    isWaiting: boolean
+    isWaiting: boolean,
+    isStreaming: boolean,    
     chatMessages: ElberMessage[],
     selectedMessage: SelectedMessage | null
 }
 
 export const initialElberState: ElberState = {
-    isWaiting: false,
+    isWaiting: false,    
+    isStreaming: false,
     chatMessages: [],
     selectedMessage: null
 }
@@ -59,6 +61,7 @@ export type ElberAction =
 | { type: 'ADD_CHAT_MESSAGE', newMessage: ElberMessage}
 | { type: 'SELECT_CHAT_MESSAGE', selectedMessage: SelectedMessage }
 | { type: 'PROCESS_STREAM', chunk: string }
+| { type: 'ELBER_IS_STREAMING', isStreaming: boolean }
 | { type: 'LOG_OUT' }
 
 export const elberReducer = (state: ElberState, action: ElberAction): ElberState => {
@@ -73,6 +76,8 @@ export const elberReducer = (state: ElberState, action: ElberAction): ElberState
             return {...state, selectedMessage: action.selectedMessage}
         case 'PROCESS_STREAM':
             return processStream(state, action.chunk)
+        case 'ELBER_IS_STREAMING':
+            return {...state, isStreaming: action.isStreaming}
         default:
             return state;
     }

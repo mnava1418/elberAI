@@ -23,3 +23,8 @@ import { ElberAction, ElberMessage, SelectedMessage } from "../reducers/elber.re
     type: 'PROCESS_STREAM',
     chunk
  })
+
+  export const elberIsStreaming = (isStreaming: boolean): ElberAction => ({
+    type: 'ELBER_IS_STREAMING',
+    isStreaming
+  })

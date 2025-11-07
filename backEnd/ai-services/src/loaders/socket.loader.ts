@@ -4,6 +4,8 @@ import socketSetListeners from "../listeners/socket.listener"
 import { validateFBToken } from "../middlewares/auth.middleware"
 import { gateway } from 'auth-services/src/config/index.config'
 
+const ongoingConvo = new Map<string, { abort?: () => void }>();
+
 const socketLoader = (httpServer: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>) => {
     const io = new Server(httpServer, {
         cors: {
@@ -38,9 +40,10 @@ const socketLoader = (httpServer: http.Server<typeof http.IncomingMessage, typeo
 
         socket.on('disconnect', (reason) => {
             console.info('User disconnected:', uid, reason)
+            ongoingConvo.delete(uid);
         })
 
-        socketSetListeners(io, socket)
+        socketSetListeners(io, socket, ongoingConvo)
     })
 
     console.info('Socket Ready!')

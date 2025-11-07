@@ -50,13 +50,13 @@ const ChatActions = ({showActions, setShowActions, setInputText}: ChatActionsPro
     }, [selectedMessage])
 
     const handleCopy = () => {
-        Clipboard.setString(selectedMessage!.message.text)
+        Clipboard.setString(selectedMessage!.message.content)
         setShowActions(false)
     }
 
     const handleShare = async () => {
         await Share.open({
-            message: selectedMessage!.message.text
+            message: selectedMessage!.message.content
         })
         .catch((error: Error) => {            
         })
@@ -64,7 +64,7 @@ const ChatActions = ({showActions, setShowActions, setInputText}: ChatActionsPro
     }
 
     const handleEdit = () => {
-        setInputText(selectedMessage!.message.text)
+        setInputText(selectedMessage!.message.content)
         setShowActions(false)
     }
 
@@ -75,7 +75,7 @@ const ChatActions = ({showActions, setShowActions, setInputText}: ChatActionsPro
                     <Pressable style={{flex: 1}} onPress={() => {setShowActions(false)}}>
                         <View style={mainStyles.modal}>
                             <ChatBubble
-                                align={selectedMessage.message.user._id == 'elber' ? 'left' : 'right'} 
+                                align={selectedMessage.message.role == 'assistant' ? 'left' : 'right'} 
                                 message={selectedMessage.message} 
                                 style={messageStyle}
                                 isStatic={true}
@@ -83,7 +83,7 @@ const ChatActions = ({showActions, setShowActions, setInputText}: ChatActionsPro
                             <View style={[actionsStyle, chatStyles.actionsContainer]}>
                                 <ChatActionItem text='Compartir' icon='share-outline' handleAction={handleShare} />
                                 <ChatActionItem text='Copiar' icon='copy-outline' handleAction={handleCopy} marginTop={10} />
-                                {selectedMessage.message.user._id == 'user' ? <ChatActionItem text='Editar' icon='create-outline' handleAction={handleEdit} marginTop={10} /> : <></>}
+                                {selectedMessage.message.role == 'user' ? <ChatActionItem text='Editar' icon='create-outline' handleAction={handleEdit} marginTop={10} /> : <></>}
                             </View>
                         </View>
                     </Pressable>

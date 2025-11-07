@@ -1,8 +1,9 @@
 import { io, Socket } from "socket.io-client"
 import { BACK_URL } from "@env"
 import { getAuth } from '@react-native-firebase/auth';
-import { addChatMessage, isWaitingForElber } from "../store/actions/elber.actions";
-import { IMessage } from "react-native-gifted-chat";
+import { elberIsStreaming, isWaitingForElber, processChatStream } from "../store/actions/elber.actions";
+import { ElberAction, ElberResponse } from "./elber.model";
+import { ElberMessage } from "../store/reducers/elber.reducer";
 
 class SocketModel {
     private socket: Socket | null
@@ -79,32 +80,46 @@ class SocketModel {
         if(this.socket && this.socket.connected ) {
             console.info('Setting Elber listeners...')
 
-            this.socket.off('elber:response');
+            //export type ElberEvent = 'elber:error' |''
 
-            this.socket.on('elber:response', (responseText: string) => {
-                const timeStamp = new Date().getTime()
-                const newMessage: IMessage = {
-                    _id: `elber:${timeStamp}`,
-                    text: responseText,
-                    createdAt: timeStamp,
-                    user: {
-                        _id: 'elber'
-                    }
-                }
-                
+            this.socket.off('elber:stream');
+            this.socket.off('elber:response');
+            this.socket.off('elber:canceled')
+
+            this.socket.on('elber:stream', (response: ElberResponse) => {
+                dispatch(elberIsStreaming(true))
                 dispatch(isWaitingForElber(false))
-                dispatch(addChatMessage(newMessage))
+                dispatch(processChatStream(response.payload.delta))                
+            })
+
+            this.socket.on('elber:response', () => {
+                dispatch(elberIsStreaming(false))
+            })
+
+            this.socket.on('elber:canceled', () => {
+                dispatch(elberIsStreaming(false))
             })
         }
     }
 
-    sendMessage(userMessage: string) {
+    sendMessage(userMessages: ElberMessage[]) {
+        const currentUser = getAuth().currentUser
+        const elberRequest = [...userMessages].reverse()
+
+        if(this.socket && this.socket.connected && currentUser) {
+            this.socket.emit('user:ask', currentUser?.displayName, elberRequest.slice(-12))
+        } else {
+            console.log('ERROR')
+        }
+    }
+
+    cancelCall(action: ElberAction) {
         const currentUser = getAuth().currentUser
 
         if(this.socket && this.socket.connected && currentUser) {
-            this.socket.emit('elber:ask', userMessage)
+            this.socket.emit('user:cancel', action )
         } else {
-            console.log('Unable to send message')
+            console.log('ERROR')
         }
     }
 }

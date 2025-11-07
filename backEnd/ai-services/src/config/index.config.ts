@@ -13,3 +13,7 @@ export const firebase = {
     cred: process.env.GOOGLE_APPLICATION_CREDENTIALS,
     db: process.env.FIREBASE_DB
 }
+
+export const openaiCfg = {
+    cred: process.env.OPENAI_API_KEY
+}

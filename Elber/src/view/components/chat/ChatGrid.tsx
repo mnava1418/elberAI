@@ -22,7 +22,7 @@ const ChatGrid = ({setShowActions}: ChatGridProps) => {
                     inverted
                     data={chatMessages}
                     renderItem={({item, index}) => (
-                        <ChatBubble key={index} align={item.user._id == 'elber' ? 'left' : 'right'} message={item} setShowActions={setShowActions} />
+                        <ChatBubble key={index} align={item.role == 'assistant' ? 'left' : 'right'} message={item} setShowActions={setShowActions} />
                     )}                
                     showsVerticalScrollIndicator={false}
                 />           

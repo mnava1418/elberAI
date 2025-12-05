@@ -5,6 +5,13 @@ import { ElberAction, ElberResponse } from "./elber.model";
 import { ElberMessage } from "../store/reducers/elber.reducer";
 import handleElberResponse from "../services/elber.service";
 
+let ERROR_CONNECTION: ElberResponse = {
+    action: ElberAction.CHAT_TEXT,
+    payload: {
+        message: '¡Pinche conexión se hizo la desaparecida y nos dejó tirados! Pero no te agüites, revisa que todo esté en orden y dale otra chance; que aquí seguimos.'
+    }
+} 
+
 class SocketModel {
     private socket: Socket | null
     private static instance: SocketModel
@@ -64,11 +71,13 @@ class SocketModel {
         });
 
         this.socket.on("disconnect", () => {                
-            console.info('Disconnected from socket...')    
+            console.info('Disconnected from socket...')
+            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         });
 
         this.socket.on("connect_error", (err) => {                
             console.error('Error connecting to socket:', err.message);
+            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         });
     }
 
@@ -100,24 +109,24 @@ class SocketModel {
         }
     }
 
-    sendMessage(userMessages: ElberMessage[]) {
+    sendMessage(userMessages: ElberMessage[], dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
         const elberRequest = [...userMessages].reverse()
 
         if(this.socket && this.socket.connected && currentUser) {
             this.socket.emit('user:ask', currentUser?.displayName, elberRequest.slice(-12))
         } else {
-            console.log('ERROR')
+            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         }
     }
 
-    cancelCall(action: ElberAction) {
+    cancelCall(action: ElberAction, dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
 
         if(this.socket && this.socket.connected && currentUser) {
             this.socket.emit('user:cancel', action )
         } else {
-            console.log('ERROR')
+            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         }
     }
 }

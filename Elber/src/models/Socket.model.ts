@@ -8,7 +8,14 @@ import handleElberResponse from "../services/elber.service";
 let ERROR_CONNECTION: ElberResponse = {
     action: ElberAction.CHAT_TEXT,
     payload: {
-        message: '¡Pinche conexión se hizo la desaparecida y nos dejó tirados! Pero no te agüites, revisa que todo esté en orden y dale otra chance; que aquí seguimos.'
+        message: '¡Pinche conexión se hizo la desaparecida y nos dejó tirados!'
+    }
+} 
+
+let ERROR_ELBER: ElberResponse = {
+    action: ElberAction.CHAT_TEXT,
+    payload: {
+        message: "No manches, se me hizo bolas el engrudo! Ándale, dame un minuto pa' recomponerme."
     }
 } 
 
@@ -89,11 +96,10 @@ class SocketModel {
         if(this.socket && this.socket.connected ) {
             console.info('Setting Elber listeners...')
 
-            //export type ElberEvent = 'elber:error' |''
-
             this.socket.off('elber:stream');
             this.socket.off('elber:response');
-            this.socket.off('elber:canceled')
+            this.socket.off('elber:canceled');
+            this.socket.off('elber:error');
 
             this.socket.on('elber:stream', (response: ElberResponse) => {
                 handleElberResponse('elber:stream', dispatch, response)              
@@ -105,6 +111,11 @@ class SocketModel {
 
             this.socket.on('elber:canceled', () => {
                 handleElberResponse('elber:canceled', dispatch)
+            })
+
+            this.socket.on('elber:error', (response: ElberResponse) => {
+                console.error(response)
+                handleElberResponse('elber:error', dispatch, ERROR_ELBER)
             })
         }
     }

@@ -25,7 +25,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle}: InputToolBarProp
     
     const handleSend = () => {
         if(isStreaming) {
-            SocketModel.getInstance().cancelCall(ElberAction.CHAT_TEXT)
+            SocketModel.getInstance().cancelCall(ElberAction.CHAT_TEXT, dispatch)
             return
         }
         
@@ -45,7 +45,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle}: InputToolBarProp
         dispatch(isWaitingForElber(true))
         dispatch(addChatMessage(newMessage))        
 
-        SocketModel.getInstance().sendMessage([newMessage, ...chatMessages])  
+        SocketModel.getInstance().sendMessage([newMessage, ...chatMessages], dispatch)  
         setInputText('')
     }
 

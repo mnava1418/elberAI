@@ -1,9 +1,23 @@
 import { io, Socket } from "socket.io-client"
 import { BACK_URL } from "@env"
 import { getAuth } from '@react-native-firebase/auth';
-import { elberIsStreaming, isWaitingForElber, processChatStream } from "../store/actions/elber.actions";
 import { ElberAction, ElberResponse } from "./elber.model";
 import { ElberMessage } from "../store/reducers/elber.reducer";
+import handleElberResponse from "../services/elber.service";
+
+let ERROR_CONNECTION: ElberResponse = {
+    action: ElberAction.CHAT_TEXT,
+    payload: {
+        message: '¡Pinche conexión se hizo la desaparecida y nos dejó tirados!'
+    }
+} 
+
+let ERROR_ELBER: ElberResponse = {
+    action: ElberAction.CHAT_TEXT,
+    payload: {
+        message: "No manches, se me hizo bolas el engrudo! Ándale, dame un minuto pa' recomponerme."
+    }
+} 
 
 class SocketModel {
     private socket: Socket | null
@@ -64,11 +78,13 @@ class SocketModel {
         });
 
         this.socket.on("disconnect", () => {                
-            console.info('Disconnected from socket...')    
+            console.info('Disconnected from socket...')
+            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         });
 
         this.socket.on("connect_error", (err) => {                
             console.error('Error connecting to socket:', err.message);
+            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         });
     }
 
@@ -80,46 +96,48 @@ class SocketModel {
         if(this.socket && this.socket.connected ) {
             console.info('Setting Elber listeners...')
 
-            //export type ElberEvent = 'elber:error' |''
-
             this.socket.off('elber:stream');
             this.socket.off('elber:response');
-            this.socket.off('elber:canceled')
+            this.socket.off('elber:canceled');
+            this.socket.off('elber:error');
 
             this.socket.on('elber:stream', (response: ElberResponse) => {
-                dispatch(elberIsStreaming(true))
-                dispatch(isWaitingForElber(false))
-                dispatch(processChatStream(response.payload.delta))                
+                handleElberResponse('elber:stream', dispatch, response)              
             })
 
             this.socket.on('elber:response', () => {
-                dispatch(elberIsStreaming(false))
+                handleElberResponse('elber:response', dispatch)
             })
 
             this.socket.on('elber:canceled', () => {
-                dispatch(elberIsStreaming(false))
+                handleElberResponse('elber:canceled', dispatch)
+            })
+
+            this.socket.on('elber:error', (response: ElberResponse) => {
+                console.error(response)
+                handleElberResponse('elber:error', dispatch, ERROR_ELBER)
             })
         }
     }
 
-    sendMessage(userMessages: ElberMessage[]) {
+    sendMessage(userMessages: ElberMessage[], dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
         const elberRequest = [...userMessages].reverse()
 
         if(this.socket && this.socket.connected && currentUser) {
             this.socket.emit('user:ask', currentUser?.displayName, elberRequest.slice(-12))
         } else {
-            console.log('ERROR')
+            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         }
     }
 
-    cancelCall(action: ElberAction) {
+    cancelCall(action: ElberAction, dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
 
         if(this.socket && this.socket.connected && currentUser) {
             this.socket.emit('user:cancel', action )
         } else {
-            console.log('ERROR')
+            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         }
     }
 }

@@ -113,7 +113,6 @@ const quickChat = async (user: ElberUser, messages: ElberRequest[], ongoingConvo
             }
 
             if (event.type === "response.error") {
-                console.log('ERROR')
                 if (isAborted) return;
                 flush();
                 elberResponse.payload = { message: event.error?.message ?? "unknown error" }
@@ -129,7 +128,6 @@ const quickChat = async (user: ElberUser, messages: ElberRequest[], ongoingConvo
         });
 
         stream.on("error", (e: any) => {
-            console.log('ERROR')
             // If it's an abort-related error, handle it gracefully
             if (isAborted || e.name === 'APIUserAbortError' || e.constructor.name === 'APIUserAbortError' || e.message?.includes('abort')) {
                 console.info(`Stream aborted gracefully for ${uid}`);
@@ -144,7 +142,6 @@ const quickChat = async (user: ElberUser, messages: ElberRequest[], ongoingConvo
         });
         
     } catch (err: any) {
-        console.log('ERROR')
         elberResponse.payload = { message: err?.message ?? "init error" }
         emitMessage('elber:error', elberResponse);
         ongoingConvo.delete(uid);

@@ -41,7 +41,7 @@ const processStream = (state: ElberState, chunk: string): ElberState => {
     if(message.role === 'user') {
         const timeStamp = new Date().getTime()
         const newMessage: ElberMessage = {
-            id: `user:${timeStamp}`,
+            id: `assistant:${timeStamp}`,
             createdAt: timeStamp,
             role: 'assistant',
             content: chunk

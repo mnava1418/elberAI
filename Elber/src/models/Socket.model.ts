@@ -1,9 +1,9 @@
 import { io, Socket } from "socket.io-client"
 import { BACK_URL } from "@env"
 import { getAuth } from '@react-native-firebase/auth';
-import { elberIsStreaming, isWaitingForElber, processChatStream } from "../store/actions/elber.actions";
 import { ElberAction, ElberResponse } from "./elber.model";
 import { ElberMessage } from "../store/reducers/elber.reducer";
+import handleElberResponse from "../services/elber.service";
 
 class SocketModel {
     private socket: Socket | null
@@ -87,17 +87,15 @@ class SocketModel {
             this.socket.off('elber:canceled')
 
             this.socket.on('elber:stream', (response: ElberResponse) => {
-                dispatch(elberIsStreaming(true))
-                dispatch(isWaitingForElber(false))
-                dispatch(processChatStream(response.payload.delta))                
+                handleElberResponse('elber:stream', dispatch, response)              
             })
 
             this.socket.on('elber:response', () => {
-                dispatch(elberIsStreaming(false))
+                handleElberResponse('elber:response', dispatch)
             })
 
             this.socket.on('elber:canceled', () => {
-                dispatch(elberIsStreaming(false))
+                handleElberResponse('elber:canceled', dispatch)
             })
         }
     }

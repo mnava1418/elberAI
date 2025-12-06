@@ -79,7 +79,6 @@ class SocketModel {
 
         this.socket.on("disconnect", () => {                
             console.info('Disconnected from socket...')
-            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         });
 
         this.socket.on("connect_error", (err) => {                

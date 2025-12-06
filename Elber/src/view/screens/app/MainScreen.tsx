@@ -1,7 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useState } from 'react';
 import TabBar from '../../components/tabBar/TabBar';
-import HomeScreen from './HomeScreen';
 import SettingsScreen from './SettingsScreen';
 import ChatScreen from './ChatScreen';
 
@@ -14,7 +13,7 @@ export type MainScreenTabProps = {
 const Tab = createBottomTabNavigator<MainScreenTabProps>();
 
 const MainScreen = () => {
-    const [showTabBar, setShowTabBar] = useState(true)
+    const [showTabBar, setShowTabBar] = useState(false)
     
     return (
         <>
@@ -22,7 +21,7 @@ const MainScreen = () => {
                 screenOptions={{headerShown: false,}} 
                 tabBar={(props) => <TabBar {...props} showTabBar={showTabBar} setShowTabBar={setShowTabBar} />}
             >
-                <Tab.Screen name='Elber' component={HomeScreen} />
+                {/* <Tab.Screen name='Elber' component={HomeScreen} /> */}
                 <Tab.Screen name='Chat'>
                     {(props) => <ChatScreen {...props} setShowTabBar={setShowTabBar} />}
                 </Tab.Screen>

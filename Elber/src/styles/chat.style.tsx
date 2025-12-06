@@ -27,7 +27,7 @@ const chatStyles = StyleSheet.create({
         minHeight: 36,
         maxHeight: 120,
         fontSize: 18,
-        fontWeight: '400',
+        fontWeight: '500',
         color: appColors.text,
         paddingHorizontal: 8,
         paddingVertical: 8

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { View, TextInput } from 'react-native';
+import { View, TextInput, FlatList } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { appColors } from '../../../styles/main.style';
 import Send from './Send';
@@ -15,15 +15,20 @@ type InputToolBarProps = {
     inputText: string
     setInputText: React.Dispatch<React.SetStateAction<string>>
     animatedStyle: { paddingBottom: number }
+    flatListRef: React.RefObject<FlatList<any> | null>
 }
 
-const InputToolBar = ({inputText, setInputText, animatedStyle}: InputToolBarProps) => {
+const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: InputToolBarProps) => {
     const { state, dispatch } = useContext(GlobalContext);
     const isWaiting = selectIsWaitingForElber(state.elber)
     const isStreaming = selectElberIsStreaming(state.elber)
     const chatMessages = selectChatMessages(state.elber)
     
     const handleSend = () => {
+        if(chatMessages.length >0) {
+            flatListRef.current?.scrollToIndex({index: 0, animated: true})
+        }
+        
         if(isStreaming) {
             SocketModel.getInstance().cancelCall(ElberAction.CHAT_TEXT, dispatch)
             return

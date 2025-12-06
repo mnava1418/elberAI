@@ -7,9 +7,10 @@ import IsWaiting from './IsWaiting';
 
 type ChatGridProps = {
     setShowActions: React.Dispatch<React.SetStateAction<boolean>>
+    flatListRef: React.RefObject<FlatList<any> | null>
 }
 
-const ChatGrid = ({setShowActions}: ChatGridProps) => {
+const ChatGrid = ({setShowActions, flatListRef}: ChatGridProps) => {
     const { state } = useContext(GlobalContext);
     const chatMessages = selectChatMessages(state.elber)
     const isWaiting = selectIsWaitingForElber(state.elber)
@@ -20,6 +21,7 @@ const ChatGrid = ({setShowActions}: ChatGridProps) => {
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-end', paddingHorizontal: 10}}>
                 <FlatList 
                     inverted
+                    ref={flatListRef}
                     data={chatMessages}
                     renderItem={({item, index}) => (
                         <ChatBubble key={index} align={item.role == 'assistant' ? 'left' : 'right'} message={item} setShowActions={setShowActions} />

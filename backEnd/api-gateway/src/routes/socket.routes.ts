@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { paths } from '../config/index.config'
-import { gateway } from 'auth-services/src/config/index.config'
+import { gateway } from 'auth-services'
 
 const router = Router()
 

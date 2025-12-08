@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { paths } from '../config/index.config'
-import { proxy } from 'auth-services/src/common'
+import { proxy_request, proxy_error } from 'auth-services'
 
 const router = Router()
 
@@ -13,10 +13,10 @@ const authRoutes = () => {
         timeout: 20000,
         pathRewrite: { '/auth':'/' },
         on: {
-            proxyReq: proxy.proxy_request,
-           error: proxy.proxy_error
+            proxyReq: proxy_request,
+            error: proxy_error
         }
-    }))
+    }) as any)
 
     return router
 }

@@ -1,7 +1,6 @@
-import { EmailMessageType, SendEmailInput } from "notification-services/src/types/email.type";
 import { getRequestStatus } from "./auth.service";
 import admin from 'firebase-admin'
-import { sendEmail } from "notification-services/src/services/email.service";
+import { sendEmail, SendEmailInput, EmailMessageType } from 'notification-services'
 
 export const signUp = async (email: string, password: string, displayName: string): Promise<{ registered: boolean, message: string }> => {
     try {

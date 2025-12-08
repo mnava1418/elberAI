@@ -23,6 +23,7 @@ export const proxy_error = (err: any, req: Request, res: any) => {
 
 export const proxy_validate = (req: Request, res: Response, next: NextFunction) => {
     try {
+        console.info('Validating rest call...')
         const headers = req.headers
 
         if(headers['x-api-gateway-secret'] === gateway.secret) {

@@ -1,9 +1,8 @@
 import admin from 'firebase-admin'
 import { RequestAccessModel, RequestResponseModel, RequestStatus, RequestStatusModel } from '../models/auth.model';
-import { sendEmail } from 'notification-services/src/services/email.service';
-import { SendEmailInput, EmailMessageType } from 'notification-services/src/types/email.type';
 import { server, notification, auth } from '../config/index.config';
 import jwt from 'jsonwebtoken';
+import { SendEmailInput, EmailMessageType, sendEmail } from 'notification-services'
 
 export const generateToken = (payload: object) => {
     return jwt.sign(payload, auth.token as string);

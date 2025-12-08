@@ -1,5 +1,5 @@
 # ---------- BUILD STAGE ----------
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /usr/src/elber
 
@@ -24,7 +24,7 @@ RUN cd ./auth-services && npm run build
 
 
 # ---------- RUNTIME STAGE ----------
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /usr/src/elber
 

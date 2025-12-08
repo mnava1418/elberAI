@@ -1,7 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import {proxy} from 'auth-services/src/common'
+import { proxy_validate } from 'auth-services'
 
 import indexRoutes from './routes/index.routes';
 
@@ -16,7 +16,7 @@ const setMiddlewares = () => {
         windowMs: 15 * 60 * 1000, // 15 minutos
         max: 100, // Limite por IP
     }));
-    app.use(proxy.proxy_validate)
+    app.use(proxy_validate)
 }
 
 const setRoutes = () => {

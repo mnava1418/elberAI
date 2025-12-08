@@ -2,7 +2,7 @@ import { Server } from "socket.io"
 import http from 'http'
 import socketSetListeners from "../listeners/socket.listener"
 import { validateFBToken } from "../middlewares/auth.middleware"
-import { gateway } from 'auth-services/src/config/index.config'
+import { gateway } from 'auth-services'
 
 const ongoingConvo = new Map<string, { abort?: () => void }>();
 

@@ -5,8 +5,13 @@ import { proxy_request, proxy_error } from 'auth-services'
 
 const router = Router()
 
+const llegamosrouter = (req: any, res: any, next: any) => {
+    console.log('auth gateway')
+    next()
+}
+
 const authRoutes = () => {
-    router.use('/', createProxyMiddleware({
+    router.use('/', llegamosrouter, createProxyMiddleware({
         target: paths.auth_services,
         changeOrigin: true,
         proxyTimeout: 20000,

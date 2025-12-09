@@ -21,11 +21,10 @@ const chatStyles = StyleSheet.create({
         backgroundColor: appColors.secondary,
         borderRadius: 25,
         paddingHorizontal: 8,
-        paddingVertical: 4
     },
     inputText: {
         flex: 1,
-        minHeight: 48,
+        minHeight: 40,
         maxHeight: 120,
         fontSize: 18,
         fontWeight: '400',

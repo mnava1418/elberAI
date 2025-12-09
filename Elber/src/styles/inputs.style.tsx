@@ -10,7 +10,7 @@ const inputStyles = StyleSheet.create({
     },
     inputView: {
         paddingHorizontal: 20,
-        paddingVertical: 20,
+        paddingVertical: 16,
         backgroundColor: appColors.secondary,
         borderRadius: 20,        
         width: '100%',        

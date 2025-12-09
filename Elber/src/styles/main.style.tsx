@@ -12,7 +12,7 @@ export const appColors = {
 export const mainStyles = StyleSheet.create({
     modal: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',

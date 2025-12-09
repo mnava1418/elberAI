@@ -15,7 +15,7 @@ const SecureText = ({handleOnChange, text, placeholder = '', keyboardType = 'def
     const [showText, setShowText] = useState(false)
 
     return (
-        <View style={[{flexDirection: 'row', backgroundColor: 'red', justifyContent: 'center', alignItems: 'center'},inputStyles.inputView]}>
+        <View style={[{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}, inputStyles.inputView]}>
             <TextInput
                 style={[inputStyles.text, {flex: 1, marginRight: 10}]}
                 value={text}
@@ -33,7 +33,7 @@ const SecureText = ({handleOnChange, text, placeholder = '', keyboardType = 'def
                 )}
                 onPress={() => {setShowText(prev => !prev)}}
             >
-                <AppIcon name={ showText ? 'eye' : 'eye-off'} size={28} />
+                <AppIcon name={ showText ? 'eye' : 'eye-off'} size={24} />
             </Pressable>
         </View>
     )

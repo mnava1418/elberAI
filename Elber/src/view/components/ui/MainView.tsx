@@ -20,7 +20,7 @@ const MainView = ({ style, children, navBarTitle= '', leftAction = undefined, sh
                 <View
                     style={[
                         StyleSheet.absoluteFillObject,
-                        {backgroundColor: appColors.primary,zIndex: 1, opacity: 0.4}
+                        {backgroundColor: appColors.primary,zIndex: 1, opacity: 0.5}
                     ]}
                     pointerEvents="none"
                 />

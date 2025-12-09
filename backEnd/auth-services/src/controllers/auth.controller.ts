@@ -4,10 +4,9 @@ import { AuthRequest } from '../models/http:model';
 
 export const requestAccess = async (req: Request, res: Response) => {
     try {
-        console.log('Request access')
-        // const {email} = req.body
-        // const {message} = await authService.requestAccess(email);
-        res.status(200).json({ message: 'Ok' });
+        const {email} = req.body
+        const {message} = await authService.requestAccess(email);
+        res.status(200).json({ message });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }

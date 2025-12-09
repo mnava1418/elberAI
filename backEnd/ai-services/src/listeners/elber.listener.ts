@@ -15,7 +15,7 @@ const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEve
         const elberRequest: ElberRequest[] = messages.map(message => ({role: message.role, content: message.content}))
         
         if(uid) {
-            console.info(`Processing ask from ${uid}`, messages)
+            console.info(`Processing ask from ${uid}`)
             quickChat(user, elberRequest, ongoingConvo, emitResponse)
         }
     })

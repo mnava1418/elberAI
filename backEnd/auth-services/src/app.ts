@@ -18,7 +18,7 @@ const setMiddlewares = () => {
     }));
 
     app.use((req, res, next) => {
-       console.log('Llegamos a auth service...') 
+       console.info('Call to auth service...') 
        next()
     })
     

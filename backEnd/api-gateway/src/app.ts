@@ -16,7 +16,7 @@ const setMiddlewares = () => {
     }));
 
     app.use((req, res, next) => {
-        console.log('En el api gateway')
+        console.info('Call to api gateway...')
         next()
     })
 }

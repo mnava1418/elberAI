@@ -11,7 +11,6 @@ const authStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         flex: 1,
-        marginBottom: 180,
     },
     bottomContent: {
         width: '100%',

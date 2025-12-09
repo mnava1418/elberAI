@@ -43,6 +43,7 @@ const AuthMainScreen = ({navigation}: AuthMainScreenProps) => {
                     <Image
                         source={require('../../../assets/images/elber.png')}
                         style={authStyles.logo}
+                        resizeMode='contain'
                     />
                     <CustomText type='title' text={displayedText} style={{textAlign: 'center', marginHorizontal: 40}}/>
                 </View>

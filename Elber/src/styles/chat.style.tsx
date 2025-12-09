@@ -10,7 +10,8 @@ const chatStyles = StyleSheet.create({
         width: 36, 
         backgroundColor: appColors.contrast,
         borderRadius: 25,
-        marginLeft: 8
+        marginLeft: 8,
+        marginBottom: 4
     },
     toolBar: {
         flexDirection: 'row',
@@ -24,13 +25,13 @@ const chatStyles = StyleSheet.create({
     },
     inputText: {
         flex: 1,
-        minHeight: 36,
+        minHeight: 48,
         maxHeight: 120,
         fontSize: 18,
-        fontWeight: '500',
+        fontWeight: '400',
         color: appColors.text,
         paddingHorizontal: 8,
-        paddingVertical: 8
+        paddingVertical: 12
     },
     bubble: {
         borderRadius: 15,
@@ -40,7 +41,7 @@ const chatStyles = StyleSheet.create({
     },
     bubbleText: {
         fontSize: 18,
-        fontWeight: '500',
+        fontWeight: '400',
         lineHeight: 28
     },
     actionsContainer: {

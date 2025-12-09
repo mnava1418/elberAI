@@ -26,6 +26,7 @@
     "express-rate-limit": "^8.1.0",
     "firebase-admin": "^13.5.0",
     "helmet": "^8.1.0",
-    "http-proxy-middleware": "^3.0.5"
+    "http-proxy-middleware": "^3.0.5",
+    "notification-services": "file:../notification-services"
   }
 }

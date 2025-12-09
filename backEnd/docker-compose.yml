@@ -1,23 +1,23 @@
 services:
-  # gateway:
-  #   build: 
-  #     context: .
-  #     dockerfile: api-gateway/Dockerfile 
-  #   container_name: gateway
-  #   ports:
-  #     - "4040:4040"
-  #   env_file:
-  #     - ./api-gateway/.env
-  #   environment:
-  #     GOOGLE_APPLICATION_CREDENTIALS: "/usr/src/elber/api-gateway/creds/googleCred.json"
-  #   volumes:
-  #     - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/api-gateway/creds/googleCred.json:ro
-  #   depends_on:
-  #     - ai
-  #     - auth
-  #   expose:
-  #     - "4040"
-  #   restart: always
+  gateway:
+    build: 
+      context: .
+      dockerfile: api-gateway/Dockerfile 
+    container_name: gateway
+    ports:
+      - "4040:4040"
+    env_file:
+      - ./api-gateway/.env
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: "/usr/src/elber/api-gateway/creds/googleCred.json"
+    volumes:
+      - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/api-gateway/creds/googleCred.json:ro
+    depends_on:
+      - ai
+      - auth
+    expose:
+      - "4040"
+    restart: always
   ai:
     build: 
       context: .
@@ -32,20 +32,20 @@ services:
     expose:
       - "4042"
     restart: always
-  # auth:
-  #   build: 
-  #     context: .
-  #     dockerfile: auth-services/Dockerfile 
-  #   container_name: auth
-  #   env_file:
-  #     - ./auth-services/.env
-  #   environment:
-  #     GOOGLE_APPLICATION_CREDENTIALS: "/usr/src/elber/auth-services/creds/googleCred.json"
-  #   volumes:
-  #     - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/auth-services/creds/googleCred.json:ro
-  #   expose:
-  #     - "4041"
-  #   restart: always
+  auth:
+    build: 
+      context: .
+      dockerfile: auth-services/Dockerfile 
+    container_name: auth
+    env_file:
+      - ./auth-services/.env
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: "/usr/src/elber/auth-services/creds/googleCred.json"
+    volumes:
+      - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/auth-services/creds/googleCred.json:ro
+    expose:
+      - "4041"
+    restart: always
 networks:
   default:
     driver: bridge

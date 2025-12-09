@@ -10,13 +10,13 @@ COPY ./auth-services/tsconfig.json ./auth-services/
 COPY ./notification-services/package*.json ./notification-services/
 COPY ./notification-services/tsconfig.json ./notification-services/
 
-# 2. Instalamos dependencias del servicio principal (esto instala deps de módulos locales también)
-RUN cd ./auth-services && npm install
-RUN cd ./notification-services && npm install
-
-# 3. Copiamos el código completo de TODOS los módulos
+# 2. Copiamos el código completo de TODOS los módulos
 COPY ./auth-services ./auth-services
 COPY ./notification-services ./notification-services
+
+# 3. Instalamos dependencias del servicio principal (esto instala deps de módulos locales también)
+RUN cd ./auth-services && npm install
+RUN cd ./notification-services && npm install
 
 # 4. Build de los módulos locales
 RUN cd ./notification-services && npm run build

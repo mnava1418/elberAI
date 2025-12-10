@@ -48,7 +48,7 @@ const chatStyles = StyleSheet.create({
     bubbleText: {
         fontSize: 18,
         fontWeight: '400',
-        lineHeight: 28,
+        lineHeight: 24,
         color: appColors.primary
     },
     actionsContainer: {

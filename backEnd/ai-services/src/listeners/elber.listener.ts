@@ -6,8 +6,12 @@ const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEve
     
     const uid = socket.data.user.uid
 
-    const emitResponse = (event: ElberEvent, response: ElberResponse) => {
-        io.to(uid).emit(event, response);
+    const emitResponse = (event: ElberEvent, response: ElberResponse | string) => {
+        if(event === 'elber:stream' || event === 'elber:response') {
+            io.to(uid).emit(event, response as string);
+        } else {
+            io.to(uid).emit(event, response as ElberResponse);
+        }
     };
     
     socket.on('user:ask', (name: string, messages: ElberMessage[]) => {

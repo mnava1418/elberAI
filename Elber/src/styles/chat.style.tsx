@@ -34,14 +34,22 @@ const chatStyles = StyleSheet.create({
     },
     bubble: {
         borderRadius: 15,
+        marginBottom: 20,
+        padding: 10,
+    },
+    bubbleUser: {
+        maxWidth: '65%',
+        backgroundColor: appColors.contrast
+    },
+    bubbleElber: {
         maxWidth: '90%',
-        marginBottom: 16,
-        padding: 10
+        backgroundColor: appColors.secondary
     },
     bubbleText: {
         fontSize: 18,
         fontWeight: '400',
-        lineHeight: 28
+        lineHeight: 28,
+        color: appColors.primary
     },
     actionsContainer: {
         borderRadius: 15, 
@@ -56,5 +64,36 @@ const chatStyles = StyleSheet.create({
         width: '100%',
     }
 })
+
+export const markdownStyle: StyleSheet.NamedStyles<any> = {
+    body: { 
+        fontSize: 18,
+        fontWeight: '400',
+        lineHeight: 28,
+        color: appColors.text
+    },
+    code_block: { 
+        backgroundColor: appColors.primary, 
+        color: appColors.text, 
+        padding: 10, 
+        borderRadius: 15, 
+        borderWidth: 0,
+        fontSize: 16,
+        lineHeight: 22,
+    },
+    fence: { 
+        backgroundColor: appColors.primary, 
+        color: appColors.text, 
+        padding: 10, 
+        borderRadius: 15, 
+        borderWidth: 0,
+        fontSize: 16,
+        lineHeight: 22,
+    },
+    heading1: { 
+        fontSize: 24, 
+        fontWeight: 'bold' 
+    },
+}; 
 
 export default chatStyles

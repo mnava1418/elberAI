@@ -23,6 +23,8 @@ services:
       context: .
       dockerfile: ai-services/Dockerfile 
     container_name: ai
+    ports:
+      - "4042:4042"
     env_file:
       - ./ai-services/.env
     environment:

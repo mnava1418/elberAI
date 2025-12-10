@@ -22,9 +22,11 @@ let ERROR_ELBER: ElberResponse = {
 class SocketModel {
     private socket: Socket | null
     private static instance: SocketModel
+    private reportDisconnect: boolean
 
     constructor() {
         this.socket = null
+        this.reportDisconnect = false
     }
 
     static getInstance(): SocketModel {
@@ -65,8 +67,10 @@ class SocketModel {
             path: '/socket.io',
             transports: ["websocket"],
             forceNew: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 2000,
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelayMax: 500,
+            timeout: 2000,
             extraHeaders: {
                 Authorization: `Bearer ${token}`
             }
@@ -74,7 +78,8 @@ class SocketModel {
 
         this.socket.on("connect", () => {
             console.info('Connected to socket:', this.socket!.id)    
-            this.setListeners(dispatch)                        
+            this.setListeners(dispatch)       
+            this.reportDisconnect = false                 
         });
 
         this.socket.on("disconnect", () => {                
@@ -83,7 +88,12 @@ class SocketModel {
 
         this.socket.on("connect_error", (err) => {                
             console.error('Error connecting to socket:', err.message);
-            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
+
+            if(!this.reportDisconnect) {
+                handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
+            }
+
+            this.reportDisconnect = true
         });
     }
 

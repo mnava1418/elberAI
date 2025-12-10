@@ -43,6 +43,10 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Elber necesita acceso a tu galería para permitir que puedas seleccionar o compartir imágenes.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Elber necesita permiso para guardar imágenes en tu galería.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

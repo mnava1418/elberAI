@@ -13,8 +13,8 @@ const SettingsScreen = () => {
     const {name, email} = selectUserProfile(state.user)
 
     return (
-        <MainView navBarTitle='     Settings'>
-            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
+        <MainView navBarTitle='Ajustes'>
+            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
                 <View style={settingsStyle.logoContainer}>
                     <Image 
                         source={require('../../../assets/images/elber.png')}

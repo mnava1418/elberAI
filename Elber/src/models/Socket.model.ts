@@ -100,7 +100,7 @@ class SocketModel {
             this.socket.off('elber:canceled');
             this.socket.off('elber:error');
 
-            this.socket.on('elber:stream', (response: ElberResponse) => {
+            this.socket.on('elber:stream', (response: string) => {
                 handleElberResponse('elber:stream', dispatch, response)              
             })
 

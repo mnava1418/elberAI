@@ -1,10 +1,10 @@
 import React, { useContext, useRef } from 'react'
 import { Pressable, StyleProp, Text, View, ViewStyle } from 'react-native'
-import { appColors } from '../../../styles/main.style'
-import chatStyles from '../../../styles/chat.style'
+import chatStyles, { markdownStyle } from '../../../styles/chat.style'
 import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectChatMessage } from '../../../store/actions/elber.actions'
 import { ElberMessage } from '../../../store/reducers/elber.reducer'
+import Markdown from 'react-native-markdown-display'
 
 type ChatBubbleProps = {
     message: ElberMessage
@@ -31,16 +31,24 @@ const ChatBubble = ({message, align, setShowActions, style = {}, isStatic = fals
         }
     }
 
-    const bubbleContent = (
-        <View style={[{flexDirection: 'row', justifyContent: align == 'left' ? 'flex-start' : 'flex-end'}, style]}>
-            <View ref={messageRef} style={[chatStyles.bubble, {backgroundColor: align == 'left' ? appColors.secondary : appColors.contrast}]}>
-                <Text style={[chatStyles.bubbleText, {color: align == 'left' ? appColors.text : appColors.primary}]}>{message.content}</Text>
+    const generateElberMessage = ( 
+        <View style={[{flexDirection: 'row', justifyContent: 'flex-start'}, style]}>
+            <View ref={messageRef} style={[chatStyles.bubble, chatStyles.bubbleElber]}>
+                <Markdown style={markdownStyle}>{message.content}</Markdown>
             </View>
         </View>
-    );
+    )
+    
+    const generateUserMessage = (
+        <View style={[{flexDirection: 'row', justifyContent: 'flex-end'}, style]}>
+            <View ref={messageRef} style={[chatStyles.bubble, chatStyles.bubbleUser]}>
+                <Text style={chatStyles.bubbleText}>{message.content}</Text>
+            </View>
+        </View>
+    )
 
     if (isStatic) {
-        return bubbleContent;
+        return align == 'left' ? generateElberMessage : generateUserMessage;
     }
 
     return (
@@ -50,7 +58,7 @@ const ChatBubble = ({message, align, setShowActions, style = {}, isStatic = fals
             ])}
             onLongPress={handleLongPress}
         >
-            {bubbleContent}
+            {align === 'left' ? generateElberMessage : generateUserMessage}
         </Pressable>
     )
 }

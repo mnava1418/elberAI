@@ -2,7 +2,7 @@ import { ElberEvent, ElberResponse } from "../models/elber.model";
 import { addChatMessage, elberIsStreaming, isWaitingForElber, processChatStream } from "../store/actions/elber.actions";
 import { ElberMessage } from "../store/reducers/elber.reducer";
 
-const handleElberResponse = (event: ElberEvent, dispatch: (value: any) => void, response: ElberResponse | undefined = undefined) => {
+const handleElberResponse = (event: ElberEvent, dispatch: (value: any) => void, response: ElberResponse | string | undefined = undefined) => {
     switch (event) {
         case 'elber:canceled':
             handleCancelEvent(dispatch)
@@ -11,7 +11,7 @@ const handleElberResponse = (event: ElberEvent, dispatch: (value: any) => void, 
             handleResponseEvent(dispatch)
             break;
         case 'elber:stream':
-            handleStreamEvent(dispatch, response as ElberResponse)
+            handleStreamEvent(dispatch, response as string)
             break;
         case 'elber:error':
             handleErrorEvent(dispatch, response as ElberResponse)
@@ -29,10 +29,10 @@ const handleResponseEvent = (dispatch: (value: any) => void) => {
     dispatch(elberIsStreaming(false))
 }
 
-const handleStreamEvent = (dispatch: (value: any) => void, response: ElberResponse) => {
+const handleStreamEvent = (dispatch: (value: any) => void, response: string) => {
     dispatch(elberIsStreaming(true))
     dispatch(isWaitingForElber(false))
-    dispatch(processChatStream(response.payload.delta))  
+    dispatch(processChatStream(response))  
 }
 
 const handleErrorEvent = (dispatch: (value: any) => void, response: ElberResponse) => {

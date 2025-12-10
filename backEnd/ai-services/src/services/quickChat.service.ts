@@ -3,7 +3,7 @@ import { openaiCfg } from "../config/index.config";
 import { ElberAction, ElberEvent, ElberRequest, ElberResponse, ElberUser } from "../models/elber.model";
 import { getSystemPrompt } from "../utils/prompt.utils";
 
-const quickChat = async (user: ElberUser, messages: ElberRequest[], ongoingConvo: Map<string, {abort?: (() => void) | undefined;}>, emitMessage: (event: ElberEvent, response: ElberResponse) => void) => {
+const quickChat = async (user: ElberUser, messages: ElberRequest[], ongoingConvo: Map<string, {abort?: (() => void) | undefined;}>, emitMessage: (event: ElberEvent, response: ElberResponse | string) => void) => {
     const uid = user.uid
     const name = user.name
 
@@ -79,8 +79,7 @@ const quickChat = async (user: ElberUser, messages: ElberRequest[], ongoingConvo
             if (!buffer || isAborted) return;
             const chunk = buffer;
             buffer = "";
-            elberResponse.payload = { delta: chunk }
-            emitMessage('elber:stream', elberResponse)
+            emitMessage('elber:stream', chunk )
         };
 
         stream.on("event", (event: any) => {
@@ -103,12 +102,8 @@ const quickChat = async (user: ElberUser, messages: ElberRequest[], ongoingConvo
             if (event.type === "response.completed") {
                 if (isAborted) return;
                 flush();
-                elberResponse.payload = {
-                    final: { text: event.response?.output_text ?? "" },
-                    usage: event.response?.usage ?? null,
-                }
-
-                emitMessage('elber:response', elberResponse );
+                const response = event.response?.output_text ?? ""
+                emitMessage('elber:response', response );
                 ongoingConvo.delete(uid);
             }
 

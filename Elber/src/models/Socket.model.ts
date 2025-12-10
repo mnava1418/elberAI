@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client"
 import { SOCKET_URL } from "@env"
-import { getAuth } from '@react-native-firebase/auth';
+import { getAuth, getIdToken } from '@react-native-firebase/auth';
 import { ElberAction, ElberResponse } from "./elber.model";
 import { ElberMessage } from "../store/reducers/elber.reducer";
 import handleElberResponse from "../services/elber.service";
@@ -71,7 +71,7 @@ class SocketModel {
             timeout: 2000,
             auth: async (cb) => {
                 const user = getAuth().currentUser
-                const token = user ? await user.getIdToken(true) : null
+                const token = user ? await getIdToken(user, true) : null
                 cb({ token })
             }
         });

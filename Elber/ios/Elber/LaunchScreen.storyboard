@@ -24,8 +24,8 @@
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="6me-44-9Cg" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="0U6-ac-aPv"/>
-                            <constraint firstItem="6me-44-9Cg" firstAttribute="centerY" secondItem="Bcu-3y-fUS" secondAttribute="centerY" id="zCJ-Qb-QGp"/>
+                            <constraint firstItem="6me-44-9Cg" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="Bkz-XY-PBO"/>
+                            <constraint firstItem="6me-44-9Cg" firstAttribute="centerY" secondItem="Bcu-3y-fUS" secondAttribute="centerY" id="FkD-yW-WVl"/>
                         </constraints>
                     </view>
                 </viewController>

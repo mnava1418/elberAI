@@ -2,7 +2,6 @@ import { Server } from "socket.io"
 import http from 'http'
 import socketSetListeners from "../listeners/socket.listener"
 import { validateFBToken } from "../middlewares/auth.middleware"
-import { gateway } from 'auth-services'
 
 const ongoingConvo = new Map<string, { abort?: () => void }>();
 
@@ -16,16 +15,14 @@ const socketLoader = (httpServer: http.Server<typeof http.IncomingMessage, typeo
 
     io.use(async (socket, next) => {
         try {
-            if(socket.handshake.headers['x-api-gateway-secret'] !== gateway.secret) {
-                throw(new Error('Authentication error.'))
-            }
-
-            const user = await validateFBToken(socket.handshake.headers.authorization as string)
+            const token = socket.handshake.auth.token;
+            const user = await validateFBToken(token)
             socket.data.user = user            
             next()
         } catch (error) {
+            console.error(error)
             socket.disconnect()
-            next(new Error('Authentication error.'))
+            next(new Error('Authentication error'))
         }
     })
 

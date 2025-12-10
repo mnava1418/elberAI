@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client"
-import { BACK_URL } from "@env"
+import { SOCKET_URL } from "@env"
 import { getAuth } from '@react-native-firebase/auth';
 import { ElberAction, ElberResponse } from "./elber.model";
 import { ElberMessage } from "../store/reducers/elber.reducer";
@@ -8,14 +8,14 @@ import handleElberResponse from "../services/elber.service";
 let ERROR_CONNECTION: ElberResponse = {
     action: ElberAction.CHAT_TEXT,
     payload: {
-        message: '¡Pinche conexión se hizo la desaparecida y nos dejó tirados!'
+        message: '¡Pinche conexión se hizo la desaparecida y nos dejó tirados! Intenta de nuevo.'
     }
 } 
 
 let ERROR_ELBER: ElberResponse = {
     action: ElberAction.CHAT_TEXT,
     payload: {
-        message: "No manches, se me hizo bolas el engrudo! Ándale, dame un minuto pa' recomponerme."
+        message: "No manches, se me hizo bolas el engrudo! Dame un minuto pa' recomponerme."
     }
 } 
 
@@ -57,13 +57,11 @@ class SocketModel {
             throw new Error('User not authenticated.');
         }                
         
-        const token = await currentUser.getIdToken()
-
         if (this.socket) {
             this.disconnect()
         }
 
-        this.socket = io(BACK_URL, {
+        this.socket = io(SOCKET_URL, {
             path: '/socket.io',
             transports: ["websocket"],
             forceNew: true,
@@ -71,8 +69,10 @@ class SocketModel {
             reconnectionAttempts: Infinity,
             reconnectionDelayMax: 500,
             timeout: 2000,
-            extraHeaders: {
-                Authorization: `Bearer ${token}`
+            auth: async (cb) => {
+                const user = getAuth().currentUser
+                const token = user ? await user.getIdToken(true) : null
+                cb({ token })
             }
         });
 

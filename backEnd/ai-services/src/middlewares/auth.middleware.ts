@@ -1,11 +1,10 @@
 import admin from 'firebase-admin';
 
-export const validateFBToken = async (authToken: string) => {
+export const validateFBToken = async (token: string) => {
     try {
-        const token = authToken.split(' ')[1]
-        const user = await admin.auth().verifyIdToken(token as string)
+        const user = await admin.auth().verifyIdToken(token)
         return user        
     } catch (error) {
-        throw(new Error('Authentication error.'))
+        throw(new Error('Authentication error'))
     }
 }

@@ -64,6 +64,8 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                     multiline
                     keyboardType='default'
                     autoCapitalize='sentences'
+                    placeholder='Preguuuuntame caon...'
+                    placeholderTextColor={appColors.subtitle}
                 />  
                 <Send handleSend={handleSend}/>
             </View>

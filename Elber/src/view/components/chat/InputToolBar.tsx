@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { View, TextInput, FlatList } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { appColors } from '../../../styles/main.style';
-import Send from './Send';
+import ChatBtn from './ChatBtn';
 import chatStyles from '../../../styles/chat.style';
 import { GlobalContext } from '../../../store/GlobalProvider';
 import SocketModel from '../../../models/Socket.model';
@@ -22,6 +22,10 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     const isWaiting = selectIsWaitingForElber(state.elber)
     const isStreaming = selectElberIsStreaming(state.elber)
     const chatMessages = selectChatMessages(state.elber)
+
+    const handleVoice = () => {
+        console.log('Listening....')
+    }
     
     const handleSend = () => {
         if(chatMessages.length >0) {
@@ -61,7 +65,8 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                     placeholder='Preguuuuntame caon...'
                     placeholderTextColor={appColors.subtitle}
                 />  
-                <Send handleSend={handleSend}/>
+                {inputText.trim() === '' ? <ChatBtn type='secondary' icon='mic-outline' onPress={handleVoice} /> : <></>}
+                {inputText.trim() !== '' ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
             </View>
         </Animated.View>
     )

@@ -107,7 +107,6 @@ class SocketModel {
 
             this.socket.off('elber:stream');
             this.socket.off('elber:response');
-            this.socket.off('elber:canceled');
             this.socket.off('elber:error');
 
             this.socket.on('elber:stream', (response: string) => {
@@ -116,10 +115,6 @@ class SocketModel {
 
             this.socket.on('elber:response', () => {
                 handleElberResponse('elber:response', dispatch)
-            })
-
-            this.socket.on('elber:canceled', () => {
-                handleElberResponse('elber:canceled', dispatch)
             })
 
             this.socket.on('elber:error', (response: ElberResponse) => {
@@ -135,16 +130,6 @@ class SocketModel {
 
         if(this.socket && this.socket.connected && currentUser) {
             this.socket.emit('user:ask', currentUser?.displayName, elberRequest.slice(-12))
-        } else {
-            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
-        }
-    }
-
-    cancelCall(action: ElberAction, dispatch: (value: any) => void) {
-        const currentUser = getAuth().currentUser
-
-        if(this.socket && this.socket.connected && currentUser) {
-            this.socket.emit('user:cancel', action )
         } else {
             handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         }

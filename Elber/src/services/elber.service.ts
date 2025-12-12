@@ -4,9 +4,6 @@ import { ElberMessage } from "../store/reducers/elber.reducer";
 
 const handleElberResponse = (event: ElberEvent, dispatch: (value: any) => void, response: ElberResponse | string | undefined = undefined) => {
     switch (event) {
-        case 'elber:canceled':
-            handleCancelEvent(dispatch)
-            break;
         case 'elber:response':
             handleResponseEvent(dispatch)
             break;
@@ -19,10 +16,6 @@ const handleElberResponse = (event: ElberEvent, dispatch: (value: any) => void, 
         default:
             break;
     }
-}
-
-const handleCancelEvent = (dispatch: (value: any) => void) => {
-    dispatch(elberIsStreaming(false))
 }
 
 const handleResponseEvent = (dispatch: (value: any) => void) => {

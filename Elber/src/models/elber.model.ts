@@ -7,4 +7,4 @@ export type ElberResponse = {
     payload: Record<string, any>
 }
 
-export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' |'elber:canceled'
+export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error'

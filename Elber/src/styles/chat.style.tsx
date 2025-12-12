@@ -2,13 +2,12 @@ import { StyleSheet } from "react-native";
 import { appColors } from "./main.style";
 
 const chatStyles = StyleSheet.create({
-    send: {
+    btn: {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
         height: 36, 
         width: 36, 
-        backgroundColor: appColors.contrast,
         borderRadius: 25,
         marginLeft: 8,
         marginBottom: 4

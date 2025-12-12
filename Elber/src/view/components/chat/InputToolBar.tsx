@@ -9,7 +9,6 @@ import SocketModel from '../../../models/Socket.model';
 import { selectChatMessages, selectElberIsStreaming, selectIsWaitingForElber } from '../../../store/selectors/elber.selector';
 import { addChatMessage, isWaitingForElber } from '../../../store/actions/elber.actions';
 import { ElberMessage } from '../../../store/reducers/elber.reducer';
-import { ElberAction } from '../../../models/elber.model';
 
 type InputToolBarProps = {
     inputText: string
@@ -29,12 +28,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
             flatListRef.current?.scrollToIndex({index: 0, animated: true})
         }
         
-        if(isStreaming) {
-            SocketModel.getInstance().cancelCall(ElberAction.CHAT_TEXT, dispatch)
-            return
-        }
-        
-        if(inputText.trim() === '' || isWaiting) {
+        if(inputText.trim() === '' || isWaiting || isStreaming) {
             return
         }
 

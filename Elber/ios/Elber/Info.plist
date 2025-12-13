@@ -43,6 +43,10 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Elber necesita acceso al micrófono para comunicarse contigo.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Elber necesita usar el reconocimiento de voz para comunicarse contigo.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Elber necesita acceso a tu galería para permitir que puedas seleccionar o compartir imágenes.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

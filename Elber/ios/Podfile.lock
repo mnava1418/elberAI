@@ -2356,6 +2356,35 @@ PODS:
     - Firebase/Auth (= 12.1.0)
     - React-Core
     - RNFBApp
+  - RNPermissions (5.4.4):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RNReanimated (4.1.3):
     - boost
     - DoubleConversion
@@ -2738,6 +2767,7 @@ DEPENDENCIES:
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -2916,6 +2946,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/app"
   RNFBAuth:
     :path: "../node_modules/@react-native-firebase/auth"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -3017,6 +3049,7 @@ SPEC CHECKSUMS:
   RNCClipboard: f09308447254536ab20b243607766796efdf210c
   RNFBApp: 6c8580f9f67e50fcfbeee63eb932755ffe20d74c
   RNFBAuth: 801d01f163fb0e66d36e17e33ec1263436bac162
+  RNPermissions: 77e92db1631a0136a47d539296f18f1333c86a66
   RNReanimated: 8b01d982d47570c64522199442251982f0d98a70
   RNScreens: f6675efb7644b6e51c13c2bc3af288f7dd2e4d4e
   RNShare: 0891bf652830fc11404c0b9d8ac9192d6e1ae557
@@ -3025,6 +3058,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: ce248fb32065c9b00451491b06607f1c25b2f1ed
 
-PODFILE CHECKSUM: 18134e0b8f71d7a3645ea3b77e55b407d4606d70
+PODFILE CHECKSUM: a0a4c4c5938cf36029310abe6d4d507a94c8baba
 
 COCOAPODS: 1.16.2

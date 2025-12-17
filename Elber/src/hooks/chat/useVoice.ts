@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { checkVoicePermissions } from "../../services/entitlements.service"
 import { Platform } from "react-native"
 import Voice from '@react-native-voice/voice'
@@ -13,7 +13,7 @@ const ERROR_VOICE: ElberResponse = {
 } 
 
 const useVoice = (dispatch: (value: any) => void, onEnd: React.Dispatch<React.SetStateAction<string>>) => {
-    const isListening = useRef(false)
+    const [isListening, setIsListening] = useState(false)
     const message = useRef('')
 
     const startListening = async () => {
@@ -38,7 +38,7 @@ const useVoice = (dispatch: (value: any) => void, onEnd: React.Dispatch<React.Se
 
     const stopListening = async() => {
         try {
-            isListening.current = false
+            setIsListening(false)
             await Voice.stop()            
         } catch (error) {
             handleElberResponse('elber:error', dispatch, ERROR_VOICE)
@@ -47,22 +47,23 @@ const useVoice = (dispatch: (value: any) => void, onEnd: React.Dispatch<React.Se
 
     const prepareSpeech = () => {
         Voice.onSpeechStart = () => {
-            isListening.current = true
+            setIsListening(true)
         }
 
         Voice.onSpeechEnd = () => {
-            isListening.current = false
+            setIsListening(false)
             onEnd(message.current)
         }
 
         Voice.onSpeechResults = (event) => {
             if(event.value) {
+                onEnd(event.value[0])
                 message.current = event.value[0]
             }
         }
 
         Voice.onSpeechError = (error) => {            
-            isListening.current = false
+            setIsListening(false)
             handleElberResponse('elber:error', dispatch, ERROR_VOICE)
         };
     }

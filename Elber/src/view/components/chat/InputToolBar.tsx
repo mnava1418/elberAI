@@ -86,7 +86,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                     multiline
                     keyboardType='default'
                     autoCapitalize='sentences'
-                    placeholder='Preguuuuntame caon...'
+                    placeholder={isListening ? 'Escuchando...' : 'Preguuuuntame caon...'}
                     placeholderTextColor={appColors.subtitle}
                 />  
                 {inputText.trim() === '' && !isListening ? <ChatBtn type='secondary' icon='mic-outline' onPress={handleVoice} /> : <></>}

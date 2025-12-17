@@ -32,7 +32,11 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     } = useVoice(dispatch, setInputText)
 
     const handleVoice = () => {
-        if(isListening.current) {
+        if(isWaiting || isStreaming) {
+            return
+        }
+
+        if(isListening) {
             stopListening()                
         } else {
             setInputText('')
@@ -85,8 +89,9 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                     placeholder='Preguuuuntame caon...'
                     placeholderTextColor={appColors.subtitle}
                 />  
-                {inputText.trim() === '' ? <ChatBtn type='secondary' icon='mic-outline' onPress={handleVoice} /> : <></>}
-                {inputText.trim() !== '' ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
+                {inputText.trim() === '' && !isListening ? <ChatBtn type='secondary' icon='mic-outline' onPress={handleVoice} /> : <></>}
+                {isListening ? <ChatBtn type='primary' icon='stop' onPress={handleVoice} /> : <></>}
+                {inputText.trim() !== '' && !isListening ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
             </View>
         </Animated.View>
     )

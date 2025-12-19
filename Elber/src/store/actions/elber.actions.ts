@@ -1,4 +1,4 @@
-import { ElberAction, ElberMessage, SelectedMessage } from "../reducers/elber.reducer";
+import { AlertProps, ElberAction, ElberMessage, SelectedMessage } from "../reducers/elber.reducer";
 
   export const logOutElber = (): ElberAction => ({
     type: 'LOG_OUT'
@@ -27,4 +27,13 @@ import { ElberAction, ElberMessage, SelectedMessage } from "../reducers/elber.re
   export const elberIsStreaming = (isStreaming: boolean): ElberAction => ({
     type: 'ELBER_IS_STREAMING',
     isStreaming
+  })
+
+  export const showAlert = (alert: AlertProps): ElberAction => ({
+    type: 'SHOW_ALERT',
+    alert
+  })
+
+  export const hideAlert = (): ElberAction => ({
+    type: 'HIDE_ALERT'
   })

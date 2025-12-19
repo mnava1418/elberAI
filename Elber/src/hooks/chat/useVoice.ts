@@ -2,8 +2,10 @@ import { useRef, useState } from "react"
 import { checkVoicePermissions } from "../../services/entitlements.service"
 import { Platform } from "react-native"
 import Voice from '@react-native-voice/voice'
+import { openSettings } from 'react-native-permissions'
 import { ElberAction, ElberResponse } from "../../models/elber.model"
 import handleElberResponse from "../../services/elber.service"
+import { hideAlert, showAlert } from "../../store/actions/elber.actions"
 
 const ERROR_VOICE: ElberResponse = {
     action: ElberAction.CHAT_TEXT,
@@ -27,12 +29,16 @@ const useVoice = (dispatch: (value: any) => void, onEnd: React.Dispatch<React.Se
                 handleElberResponse('elber:error', dispatch, ERROR_VOICE)
             }
         } else {
-            console.log('no tenemos permisos')
-            // dispatch(setEntitlementsAlert({
-            //     isVisible: true,
-            //     title: 'Micrófono',
-            //     text: 'Elber necesita acceso al micrófono y al reconocimiento de voz para interactuar contigo. Ve a Configuración y habilítalos.'
-            // }))
+            dispatch(showAlert({
+                isVisible: true,
+                title: 'Micrófono',
+                text: 'Elber necesita acceso al micrófono y al reconocimiento de voz para interactuar contigo. Ve a Configuración y habilítalos.',
+                btnText: 'Habilitar',
+                onPress: () => {
+                    openSettings('application')
+                    dispatch(hideAlert())
+                }
+            }))
         }
     }
 

@@ -15,18 +15,34 @@ export type SelectedMessage = {
     message: ElberMessage
 }
 
+export type AlertProps = {
+    isVisible: boolean,
+    title: string,
+    text: string,
+    btnText: string
+    onPress: () => void
+}
+
 export type ElberState = {
     isWaiting: boolean,
     isStreaming: boolean,    
     chatMessages: ElberMessage[],
     selectedMessage: SelectedMessage | null
+    alert: AlertProps
 }
 
 export const initialElberState: ElberState = {
     isWaiting: false,    
     isStreaming: false,
     chatMessages: [],
-    selectedMessage: null
+    selectedMessage: null,
+    alert: {
+        isVisible: false,
+        title: '',
+        text: '',
+        btnText: '',
+        onPress: () => {}
+    }
 }
 
 const addChatMessage = (state: ElberState, newMessage: ElberMessage): ElberState => {
@@ -62,6 +78,8 @@ export type ElberAction =
 | { type: 'SELECT_CHAT_MESSAGE', selectedMessage: SelectedMessage }
 | { type: 'PROCESS_STREAM', chunk: string }
 | { type: 'ELBER_IS_STREAMING', isStreaming: boolean }
+| { type: 'SHOW_ALERT', alert: AlertProps}
+| { type: 'HIDE_ALERT' }
 | { type: 'LOG_OUT' }
 
 export const elberReducer = (state: ElberState, action: ElberAction): ElberState => {
@@ -78,6 +96,10 @@ export const elberReducer = (state: ElberState, action: ElberAction): ElberState
             return processStream(state, action.chunk)
         case 'ELBER_IS_STREAMING':
             return {...state, isStreaming: action.isStreaming}
+        case 'SHOW_ALERT':
+            return {...state, alert: action.alert}
+        case 'HIDE_ALERT':
+            return {...state, alert: {...state.alert, isVisible: false}}
         default:
             return state;
     }

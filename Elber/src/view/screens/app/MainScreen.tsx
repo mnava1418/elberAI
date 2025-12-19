@@ -3,6 +3,7 @@ import { useState } from 'react';
 import TabBar from '../../components/tabBar/TabBar';
 import SettingsScreen from './SettingsScreen';
 import ChatScreen from './ChatScreen';
+import Alert from '../../components/ui/Alert';
 
 export type MainScreenTabProps = {
     Elber: undefined
@@ -27,6 +28,7 @@ const MainScreen = () => {
                 </Tab.Screen>
                 <Tab.Screen name='Ajustes' component={SettingsScreen} />
             </Tab.Navigator>
+            <Alert />
         </>
     )
 }

@@ -124,12 +124,11 @@ class SocketModel {
         }
     }
 
-    sendMessage(userMessages: ElberMessage[], dispatch: (value: any) => void) {
+    sendMessage(userMessage: ElberMessage, dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
-        const elberRequest = [...userMessages].reverse()
-
+        
         if(this.socket && this.socket.connected && currentUser) {
-            this.socket.emit('user:ask', currentUser?.displayName, elberRequest.slice(-12))
+            this.socket.emit('user:ask', currentUser.displayName, userMessage.content)
         } else {
             handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         }

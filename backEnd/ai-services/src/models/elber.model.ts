@@ -14,12 +14,8 @@ export type ElberUser = {
     name: string,
 }
 
-export interface ElberRequest {
-    role: 'user' | 'assistant',
-    content: string
-}
-
-export interface ElberMessage extends ElberRequest {
-    id: string,
-    createdAt: number,
+export type ElberRequest = {
+    userName: string,
+    text: string,
+    conversationId: string
 }

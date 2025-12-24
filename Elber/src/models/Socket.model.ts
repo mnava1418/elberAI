@@ -1,7 +1,7 @@
 import { io, Socket } from "socket.io-client"
 import { SOCKET_URL } from "@env"
 import { getAuth, getIdToken } from '@react-native-firebase/auth';
-import { ElberAction, ElberResponse } from "./elber.model";
+import { ElberAction, ElberRequest, ElberResponse } from "./elber.model";
 import { ElberMessage } from "../store/reducers/elber.reducer";
 import handleElberResponse from "../services/elber.service";
 
@@ -128,7 +128,12 @@ class SocketModel {
         const currentUser = getAuth().currentUser
         
         if(this.socket && this.socket.connected && currentUser) {
-            this.socket.emit('user:ask', currentUser.displayName, userMessage.content)
+            const elberRequest: ElberRequest = {
+                conversationId: 'conv_12345',
+                text: userMessage.content,
+                userName: currentUser.displayName || ''
+            }
+            this.socket.emit('user:ask', elberRequest )
         } else {
             handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
         }

@@ -1,22 +1,16 @@
 import React, { useContext, useEffect } from 'react'
 import MainView from '../../components/ui/MainView'
 import Chat from '../../components/chat/Chat'
-import { useNavigation, NavigationProp } from '@react-navigation/native'
-import { MainScreenTabProps } from './MainScreen'
+import { useNavigation, DrawerActions } from '@react-navigation/native'
 import SocketModel from '../../../models/Socket.model'
 import { GlobalContext } from '../../../store/GlobalProvider'
 
-type ChatScreenProps = {
-    setShowTabBar: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-const ChatScreen = ({setShowTabBar}: ChatScreenProps) => {
-    const navigation = useNavigation<NavigationProp<MainScreenTabProps>>()
+const ChatScreen = () => {
+    const navigation = useNavigation()
     const { dispatch } = useContext(GlobalContext);
 
-    const goBack = () => {
-        setShowTabBar(true)
-        navigation.navigate('Ajustes')
+    const showMenu = () => {
+        navigation.dispatch(DrawerActions.toggleDrawer)
     }
 
     useEffect(() => {
@@ -28,7 +22,7 @@ const ChatScreen = ({setShowTabBar}: ChatScreenProps) => {
     }, [])
     
     return (
-        <MainView navBarTitle='Elber' leftAction={goBack} applyPadding={false}>
+        <MainView navBarTitle='Elber' leftAction={showMenu} leftIcon='menu-outline' applyPadding={false}>
           <Chat />
         </MainView>
     )

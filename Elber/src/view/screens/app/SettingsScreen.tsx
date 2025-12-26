@@ -7,14 +7,20 @@ import { Image, View } from 'react-native'
 import CustomText from '../../components/ui/CustomText'
 import { selectUserProfile } from '../../../store/selectors/user.selector'
 import settingsStyle from '../../../styles/settings.style'
+import { DrawerActions, useNavigation } from '@react-navigation/native'
 
 const SettingsScreen = () => {
     const {state, dispatch} = useContext(GlobalContext)
     const {name, email} = selectUserProfile(state.user)
+    const navigation = useNavigation()
+
+    const showMenu = () => {
+        navigation.dispatch(DrawerActions.toggleDrawer)
+    }
 
     return (
-        <MainView navBarTitle='Ajustes'>
-            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+        <MainView navBarTitle='Ajustes' leftAction={showMenu} leftIcon='menu-outline'>
+            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
                 <View style={settingsStyle.logoContainer}>
                     <Image 
                         source={require('../../../assets/images/elber.png')}

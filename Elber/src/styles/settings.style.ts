@@ -7,7 +7,7 @@ const settingsStyle = StyleSheet.create({
         justifyContent: 'center', 
         backgroundColor: appColors.secondary, 
         borderRadius: 100, 
-        marginTop: 20, 
+        marginTop: 48, 
         marginBottom: 12,
     },
 

@@ -9,11 +9,12 @@ interface MainViewProps extends PropsWithChildren {
     navBarTitle?: string
     showNavBar?: boolean
     leftAction?: () => void | undefined
+    leftIcon?: string
     style?: StyleProp<ViewStyle>;
     applyPadding?: boolean
 }
 
-const MainView = ({ style, children, navBarTitle= '', leftAction = undefined, showNavBar= true, applyPadding = true }: MainViewProps) => {
+const MainView = ({ style, children, navBarTitle= '', leftAction = undefined, leftIcon = 'chevron-back', showNavBar= true, applyPadding = true }: MainViewProps) => {
     return (
         <ImageBackground source={backgroundImage} style={{flex: 1}} blurRadius={100}>
             <View style={{flex: 1, position: 'relative'}}>
@@ -24,7 +25,7 @@ const MainView = ({ style, children, navBarTitle= '', leftAction = undefined, sh
                     ]}
                     pointerEvents="none"
                 />
-                { showNavBar ? <NavBar title={navBarTitle} leftAction={leftAction} /> : <></>}
+                { showNavBar ? <NavBar title={navBarTitle} leftAction={leftAction} leftIcon={leftIcon} /> : <></>}
                 <View style={[{flex: 1, paddingHorizontal: applyPadding ? 20 : 0, zIndex: 2}, style]}>
                     {children}
                 </View>

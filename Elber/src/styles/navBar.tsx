@@ -4,19 +4,16 @@ const navBarStyles = StyleSheet.create({
     container: {
         flexDirection: 'row', 
         paddingHorizontal: 8, 
-        justifyContent: 'flex-start', 
-        alignItems: 'center', 
-        width: '100%', 
-        height: 32, 
+        justifyContent: 'center', 
+        alignItems: 'center',         
         zIndex: 2,
     },
 
     title: {
-        position: 'absolute', 
+        flex: 1,
         flexDirection: 'row', 
         justifyContent: 'center', 
-        alignItems: 'center', 
-        width: '100%'
+        alignItems: 'center',         
     }
 })
 

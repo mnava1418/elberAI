@@ -16,6 +16,12 @@ const setMiddlewares = () => {
         windowMs: 15 * 60 * 1000, // 15 minutos
         max: 100, // Limite por IP
     }));
+
+    app.use((req, res, next) => {
+        console.info('Call to ai service...')
+        next()
+    })
+    
     app.use(proxy_validate)
 }
 

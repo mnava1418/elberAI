@@ -19,3 +19,22 @@ export const saveChatMessage = async (uid: string, chatId: number, role: ElberRo
         throw new Error('Unable to save chat message')
     }
 }
+
+export const getUserChats = async (uid: string) => {
+    try {
+        const db = admin.database()
+        const ref = db.ref(`/chat/${uid}`)
+
+        const snapshot = await ref.once('value')
+        const data = snapshot.val()
+
+        if(data) {
+            return data    
+        }
+
+        return {}
+    } catch (error) {
+        console.error(error)
+        throw new Error('Unable to get user chats')
+    }
+}

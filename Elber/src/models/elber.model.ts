@@ -10,7 +10,7 @@ export type ElberResponse = {
 export type ElberRequest = {
     userName: string,
     text: string,
-    conversationId: string
+    chatId: number
 }
 
 export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error'

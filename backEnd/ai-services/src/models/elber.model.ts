@@ -17,5 +17,14 @@ export type ElberUser = {
 export type ElberRequest = {
     userName: string,
     text: string,
-    conversationId: string
+    chatId: number
+}
+
+export type ElberRole = 'user' | 'assistant'
+
+export type ElberMessage = {
+    id: string,
+    createdAt: number,
+    role: 'user' | 'assistant',
+    content: string
 }

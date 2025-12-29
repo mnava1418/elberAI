@@ -1,5 +1,5 @@
 import admin from 'firebase-admin'
-import { ElberMessage, ElberRole } from '../models/elber.model'
+import { ElberChat, ElberMessage, ElberRole } from '../models/elber.model'
 
 export const saveChatMessage = async (uid: string, chatId: number, role: ElberRole, content: string ) => {
     try {        
@@ -20,7 +20,7 @@ export const saveChatMessage = async (uid: string, chatId: number, role: ElberRo
     }
 }
 
-export const getUserChats = async (uid: string) => {
+export const getUserChats = async (uid: string): Promise<ElberChat[]> => {
     try {
         const db = admin.database()
         const ref = db.ref(`/chat/${uid}`)
@@ -29,10 +29,25 @@ export const getUserChats = async (uid: string) => {
         const data = snapshot.val()
 
         if(data) {
-            return data    
+            let elberChats: ElberChat[] = []
+
+            Object.keys(data).forEach(chatId => {
+                const chat = data[chatId]
+                const chatName = chat.name || 'Chat Nuevo'
+                const chatMessages: ElberMessage[] = Object.values(chat.messages)
+
+                elberChats.push({
+                    id: parseInt(chatId),
+                    messages: chatMessages,
+                    name: chatName
+                })
+            })
+
+            elberChats.sort((a, b) => b.id - a.id)
+            return elberChats
         }
 
-        return {}
+        return []
     } catch (error) {
         console.error(error)
         throw new Error('Unable to get user chats')

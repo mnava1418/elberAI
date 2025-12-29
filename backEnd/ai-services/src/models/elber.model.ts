@@ -28,3 +28,9 @@ export type ElberMessage = {
     role: 'user' | 'assistant',
     content: string
 }
+
+export type ElberChat = {
+    name?: string
+    id: number
+    messages: ElberMessage[]
+}

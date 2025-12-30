@@ -5,6 +5,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { ElberChat } from '../../../models/chat.model';
 import sideMenuStyles from '../../../styles/sideMenu.style';
 import { appColors } from '../../../styles/main.style';
+import { GlobalContext } from '../../../store/GlobalProvider';
+import { useContext } from 'react';
+import { selectChat } from '../../../store/actions/chat.actions';
 
 type SideMenuProps = {
     props: any,
@@ -12,8 +15,10 @@ type SideMenuProps = {
 }
 const SideMenuContent = ({props, elberChats}: SideMenuProps) => {
     const { navigation, state } = props;
+    const context = useContext(GlobalContext);
         
     const navigateToScreen = (screenName: string, params?: any) => {
+        context.dispatch(selectChat(params?.id || -1))
         navigation.navigate(screenName, params);
     };
 

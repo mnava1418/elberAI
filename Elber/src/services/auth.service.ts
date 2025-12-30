@@ -5,6 +5,7 @@ import { signInWithEmailAndPassword, getAuth, signOut } from '@react-native-fire
 import { logOutUser } from '../store/actions/user.actions';
 import SocketModel from '../models/Socket.model';
 import { logOutElber } from '../store/actions/elber.actions';
+import { logOutChat } from '../store/actions/chat.actions';
 
 export const requestAccess = async (email: string) => {
     try {
@@ -69,7 +70,8 @@ export const logOut = async (dispatch: React.Dispatch<any>) => {
             SocketModel.getInstance().disconnect()
             await signOut(auth);
             dispatch(logOutUser());
-            dispatch(logOutElber())
+            dispatch(logOutElber());
+            dispatch(logOutChat());
         }
     } catch (error) {
         console.error('Error al cerrar sesión:', error);

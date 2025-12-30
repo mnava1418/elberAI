@@ -15,6 +15,9 @@ const ChatGrid = ({setShowActions, flatListRef}: ChatGridProps) => {
     const { state } = useContext(GlobalContext);
     const chatInfo = selectChatInfo(state.chat)
     const isWaiting = selectIsWaitingForElber(state.elber)
+
+    const chatMessages = chatInfo.messages
+    chatMessages.sort((a,b) => b.createdAt - a.createdAt)
     
     return (
         <>
@@ -22,7 +25,7 @@ const ChatGrid = ({setShowActions, flatListRef}: ChatGridProps) => {
                 <FlatList 
                     inverted
                     ref={flatListRef}
-                    data={chatInfo.messages}
+                    data={chatMessages}
                     renderItem={({item, index}) => (
                         <ChatBubble key={index} align={item.role == 'assistant' ? 'left' : 'right'} message={item} setShowActions={setShowActions} />
                     )}                

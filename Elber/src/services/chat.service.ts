@@ -27,7 +27,6 @@ export const getChats = async(): Promise<Map<number, ElberChat>> => {
         const elberChatsMap = new Map<number, ElberChat>()
 
         elberChats.forEach(chat => {
-            chat.messages.sort((a,b) => b.createdAt - a.createdAt)
             elberChatsMap.set(chat.id, chat)
         })
         

@@ -33,7 +33,7 @@ export const getUserChats = async (uid: string): Promise<ElberChat[]> => {
 
             Object.keys(data).forEach(chatId => {
                 const chat = data[chatId]
-                const chatName = chat.name || 'Chat Nuevo'
+                const chatName = chat.name || `Chat ${chatId}`
                 const chatMessages: ElberMessage[] = Object.values(chat.messages)
 
                 elberChats.push({

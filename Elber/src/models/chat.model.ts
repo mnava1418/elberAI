@@ -1,15 +1,12 @@
-export interface ElberChats {
-    chats: { [key: string]: Chat }
+export type ElberMessage = {
+    id: string,
+    createdAt: number,
+    role: 'user' | 'assistant',
+    content: string
 }
 
-interface Chat {
-    name?: string
-    messages: { [key: string]: ChatMessage };
-}
-
-interface ChatMessage {
-    content:   string;
-    createdAt: number;
-    id:        string;
-    role:      string;
+export type ElberChat = {
+    name: string
+    id: number
+    messages: ElberMessage[]
 }

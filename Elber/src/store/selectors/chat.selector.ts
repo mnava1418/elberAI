@@ -1,5 +1,5 @@
 import { ElberChat } from "../../models/chat.model";
-import { ChatState } from "../reducers/chat.reducer";
+import { ChatState, SelectedMessage } from "../reducers/chat.reducer";
 
 export const selectChats = (state: ChatState): Map<number, ElberChat> => state.chats
 
@@ -14,3 +14,5 @@ export const selectChatInfo = (state: ChatState): ElberChat => {
         return state.chats.get(state.selectedChatId) as ElberChat
     }
 }
+
+export const selectMessage = (state: ChatState): SelectedMessage | null => state.selectedMessage

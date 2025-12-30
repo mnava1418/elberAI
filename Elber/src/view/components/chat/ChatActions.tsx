@@ -3,11 +3,11 @@ import { Dimensions, Modal, Pressable, StyleProp, View, ViewStyle } from 'react-
 import Clipboard from '@react-native-clipboard/clipboard'
 import Share from 'react-native-share';
 import { GlobalContext } from '../../../store/GlobalProvider';
-import { selectSelectedChatMessage } from '../../../store/selectors/elber.selector';
 import { mainStyles } from '../../../styles/main.style';
 import ChatActionItem from './ChatActionItem';
 import chatStyles from '../../../styles/chat.style';
 import ChatBubble from './ChatBubble';
+import { selectMessage } from '../../../store/selectors/chat.selector';
 
 type ChatActionsProps = {
     showActions: boolean,
@@ -19,7 +19,7 @@ const screenHeight = Dimensions.get('window').height
 
 const ChatActions = ({showActions, setShowActions, setInputText}: ChatActionsProps) => {
     const { state } = useContext(GlobalContext);
-    const selectedMessage = selectSelectedChatMessage(state.elber)
+    const selectedMessage = selectMessage(state.chat)
     const [actionsStyle, setActionsStyle] = useState<StyleProp<ViewStyle>>({})
     const [messageStyle, setMessageStyle] = useState<StyleProp<ViewStyle>>({})
 

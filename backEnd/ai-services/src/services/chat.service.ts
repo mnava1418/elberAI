@@ -43,7 +43,6 @@ export const getUserChats = async (uid: string): Promise<ElberChat[]> => {
                 })
             })
 
-            elberChats.sort((a, b) => b.id - a.id)
             return elberChats
         }
 

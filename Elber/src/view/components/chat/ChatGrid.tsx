@@ -1,9 +1,10 @@
 import React, { useContext } from 'react'
 import { FlatList, View } from 'react-native'
-import { selectChatMessages, selectIsWaitingForElber } from '../../../store/selectors/elber.selector'
+import { selectIsWaitingForElber } from '../../../store/selectors/elber.selector'
 import { GlobalContext } from '../../../store/GlobalProvider';
 import ChatBubble from './ChatBubble';
 import IsWaiting from './IsWaiting';
+import { selectChatInfo } from '../../../store/selectors/chat.selector';
 
 type ChatGridProps = {
     setShowActions: React.Dispatch<React.SetStateAction<boolean>>
@@ -12,17 +13,16 @@ type ChatGridProps = {
 
 const ChatGrid = ({setShowActions, flatListRef}: ChatGridProps) => {
     const { state } = useContext(GlobalContext);
-    const chatMessages = selectChatMessages(state.elber)
+    const chatInfo = selectChatInfo(state.chat)
     const isWaiting = selectIsWaitingForElber(state.elber)
     
-
     return (
         <>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-end', paddingHorizontal: 10}}>
                 <FlatList 
                     inverted
                     ref={flatListRef}
-                    data={chatMessages}
+                    data={chatInfo.messages}
                     renderItem={({item, index}) => (
                         <ChatBubble key={index} align={item.role == 'assistant' ? 'left' : 'right'} message={item} setShowActions={setShowActions} />
                     )}                

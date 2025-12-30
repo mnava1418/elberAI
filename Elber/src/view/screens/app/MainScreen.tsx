@@ -2,61 +2,51 @@ import {createDrawerNavigator} from '@react-navigation/drawer'
 import SettingsScreen from './SettingsScreen';
 import Alert from '../../components/ui/Alert';
 import ChatScreen from './ChatScreen';
-import { appColors } from '../../../styles/main.style';
-import { useState } from 'react';
+import { useContext, useEffect } from 'react';
+import { getChats } from '../../../services/chat.service';
+import { GlobalContext } from '../../../store/GlobalProvider';
+import { setChats } from '../../../store/actions/chat.actions';
+import { selectChats } from '../../../store/selectors/chat.selector';
+import SideMenuContent from '../../components/ui/SideMenu';
 
 const Drawer = createDrawerNavigator()
 
 const MainScreen = () => {
-    const [activeScreen, setActiveScreen] = useState<string>('')
+    const { dispatch, state} = useContext(GlobalContext);
+    const elberChats = selectChats(state.chat)
+
+    useEffect(() => {
+        getChats()
+        .then(chats => {
+            dispatch(setChats(chats))
+        })
+        .catch(error => {
+            console.error(error)
+        })
+    }, [])
+    
+    const chatEntries = Array.from(elberChats.values())
 
     return (
         <>
             <Drawer.Navigator 
+                drawerContent={(props) => <SideMenuContent props={props} elberChats={elberChats} />}
                 screenOptions={{
                     headerShown: false,
-                    drawerStyle: {
-                        backgroundColor: appColors.primary,                    
-                    },
-                    drawerActiveTintColor: appColors.text,
-                    drawerInactiveTintColor: appColors.subtitle,
-                    drawerActiveBackgroundColor: appColors.secondary,
-                    drawerLabelStyle: {
-                        fontSize: 18,
-                        fontWeight: '500',
-                    }
-                }}
-                screenListeners={{
-                    state: (e) => {
-                        const state = e.data.state;
-                        if (state && state.routes) {
-                            const activeRoute = state.routes[state.index];
-                            if(activeScreen === activeRoute.name) {
-                                return
-                            }
-
-                            console.log('Screen seleccionado:', activeRoute.name);
-                            console.log('Parámetros:', activeRoute.params);
-                            setActiveScreen(activeRoute.name);
-                        }
-                    }
-                }}
-            >
-                <Drawer.Screen 
-                    name='Chat A' 
-                    component={ChatScreen} 
-                    initialParams={{chatId: '1'}}
-                />
-                <Drawer.Screen 
-                    name='Chat B' 
-                    component={ChatScreen} 
-                    initialParams={{chatId: '2'}}
-                />
-                <Drawer.Screen 
-                    name='Chat C' 
-                    component={ChatScreen} 
-                    initialParams={{chatId: '3'}}
-                />                   
+                }}                
+            >   
+                <Drawer.Screen name='Chat Nuevo' component={ChatScreen} initialParams={{id: -1}}/>
+                {chatEntries.map(chat => {
+                    return (
+                        <Drawer.Screen 
+                            key={chat.id} 
+                            name={chat.name} 
+                            component={ChatScreen} 
+                            initialParams={{id: chat.id}}
+                        />
+                    )
+                })}
+    
                 <Drawer.Screen name='Ajustes' component={SettingsScreen} />
             </Drawer.Navigator>
             <Alert />

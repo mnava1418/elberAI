@@ -2,9 +2,9 @@ import React, { useContext, useRef } from 'react'
 import { Pressable, StyleProp, Text, View, ViewStyle } from 'react-native'
 import chatStyles, { markdownStyle } from '../../../styles/chat.style'
 import { GlobalContext } from '../../../store/GlobalProvider'
-import { selectChatMessage } from '../../../store/actions/elber.actions'
-import { ElberMessage } from '../../../store/reducers/elber.reducer'
 import Markdown from 'react-native-markdown-display'
+import { ElberMessage } from '../../../models/chat.model'
+import { selectMessage } from '../../../store/actions/chat.actions'
 
 type ChatBubbleProps = {
     message: ElberMessage
@@ -21,7 +21,7 @@ const ChatBubble = ({message, align, setShowActions, style = {}, isStatic = fals
     const handleLongPress = () => {
         if (messageRef.current && setShowActions) {
             messageRef.current.measure((fx, fy, width, height, px, py) => {
-                dispatch(selectChatMessage({
+                dispatch(selectMessage({
                     layout: {height, px, py, pv: align}, 
                     message
                 }))

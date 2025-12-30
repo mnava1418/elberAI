@@ -1,5 +1,5 @@
 import { ElberChat } from "../../models/chat.model";
-import { ChatAction } from "../reducers/chat.reducer";
+import { ChatAction, SelectedMessage } from "../reducers/chat.reducer";
 
 export const logOutChat = (): ChatAction => ({
     type: 'LOG_OUT'
@@ -13,4 +13,9 @@ export const setChats = (chats: Map<number, ElberChat>): ChatAction => ({
 export const selectChat = (selectedChatId: number): ChatAction => ({
     type: 'SELECT_CHAT',
     selectedChatId
+})
+
+export const selectMessage = (selectedMessage: SelectedMessage): ChatAction => ({
+    type: 'SELECT_MESSAGE',
+    selectedMessage
 })

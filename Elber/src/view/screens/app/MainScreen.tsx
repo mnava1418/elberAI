@@ -6,7 +6,7 @@ import { useContext, useEffect } from 'react';
 import { getChats } from '../../../services/chat.service';
 import { GlobalContext } from '../../../store/GlobalProvider';
 import { setChats } from '../../../store/actions/chat.actions';
-import { selectChats } from '../../../store/selectors/chat.selector';
+import { getSelectedChatId, selectChats } from '../../../store/selectors/chat.selector';
 import SideMenuContent from '../../components/ui/SideMenu';
 
 const Drawer = createDrawerNavigator()
@@ -14,6 +14,7 @@ const Drawer = createDrawerNavigator()
 const MainScreen = () => {
     const { dispatch, state} = useContext(GlobalContext);
     const elberChats = selectChats(state.chat)
+    const selectedChatId = getSelectedChatId(state.chat)
 
     useEffect(() => {
         getChats()
@@ -26,11 +27,12 @@ const MainScreen = () => {
     }, [])
     
     const chatEntries = Array.from(elberChats.values())
+    chatEntries.sort((a, b) => b.id - a.id)
 
     return (
         <>
             <Drawer.Navigator 
-                drawerContent={(props) => <SideMenuContent props={props} elberChats={elberChats} />}
+                drawerContent={(props) => <SideMenuContent props={props} chatEntries={chatEntries} selectedChatId={selectedChatId} />}
                 screenOptions={{
                     headerShown: false,
                 }}                

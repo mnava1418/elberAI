@@ -22,10 +22,40 @@ export const initialChatState: ChatState = {
     selectedMessage: null
 }
 
+const addChatMessage = (state: ChatState, chatId: number, newMessage: ElberMessage): ChatState => {
+    if(state.chats.has(chatId)) {
+        const newChats = new Map(state.chats)
+        const currChat = newChats.get(chatId) as ElberChat
+        
+        const updatedChat: ElberChat = {
+            ...currChat,
+            messages: [...currChat.messages, newMessage]
+        }
+        
+        newChats.set(chatId, updatedChat)
+        return {...state, chats: newChats}
+    } else {
+        return createChat(state, chatId, newMessage )
+    }
+}
+
+const createChat = (state: ChatState, chatId: number, newMessage: ElberMessage): ChatState => {
+    const newChats = new Map(state.chats)
+    const newChat: ElberChat = {
+        id: chatId,
+        name: `Chat ${chatId}`,
+        messages: [newMessage]
+    }
+
+    newChats.set(chatId, newChat)
+    return {...state, chats: newChats, selectedChatId: chatId}
+}
+
 export type ChatAction =
 | { type: 'SET_CHATS', chats: Map<number, ElberChat> }
 | { type: 'SELECT_CHAT', selectedChatId: number}
 | { type: 'SELECT_MESSAGE', selectedMessage: SelectedMessage}
+| { type: 'ADD_CHAT_MESSAGE', chatId: number, newMessage: ElberMessage}
 | { type: 'LOG_OUT' }
 
 export const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
@@ -38,6 +68,8 @@ export const chatReducer = (state: ChatState, action: ChatAction): ChatState => 
             return {...state, selectedChatId: action.selectedChatId}
         case 'SELECT_MESSAGE':
             return {...state, selectedMessage: action.selectedMessage}
+        case 'ADD_CHAT_MESSAGE':
+            return addChatMessage(state, action.chatId, action.newMessage)
         default:
             return state;
     }

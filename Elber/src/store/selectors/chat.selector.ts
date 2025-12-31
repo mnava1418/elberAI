@@ -16,3 +16,5 @@ export const selectChatInfo = (state: ChatState): ElberChat => {
 }
 
 export const selectMessage = (state: ChatState): SelectedMessage | null => state.selectedMessage
+
+export const getSelectedChatId = (state: ChatState): number => state.selectedChatId

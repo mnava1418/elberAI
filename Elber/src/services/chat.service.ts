@@ -21,16 +21,13 @@ export const getChats = async(): Promise<Map<number, ElberChat>> => {
         }
 
         const data = await apiGet<{chats: ElberChat[]}>(`${BACK_URL}/ai/chat`, config)
-        const elberChats = data.chats
-        elberChats.sort((a, b) => b.id - a.id)
+        const elberChats = new Map<number, ElberChat>()
 
-        const elberChatsMap = new Map<number, ElberChat>()
-
-        elberChats.forEach(chat => {
-            elberChatsMap.set(chat.id, chat)
+        data.chats.forEach(chat => {
+            elberChats.set(chat.id, chat)
         })
         
-        return elberChatsMap
+        return elberChats
     } catch (error) {
         console.error(error)
         throw new Error('Unable to get chats')

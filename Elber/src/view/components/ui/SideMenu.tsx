@@ -11,9 +11,10 @@ import { selectChat } from '../../../store/actions/chat.actions';
 
 type SideMenuProps = {
     props: any,
-    elberChats: Map<number, ElberChat>
+    chatEntries: ElberChat[],
+    selectedChatId: number,
 }
-const SideMenuContent = ({props, elberChats}: SideMenuProps) => {
+const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) => {
     const { navigation, state } = props;
     const context = useContext(GlobalContext);
         
@@ -22,12 +23,11 @@ const SideMenuContent = ({props, elberChats}: SideMenuProps) => {
         navigation.navigate(screenName, params);
     };
 
-    const isActive = (routeName: string) => {
+    const isActive = (routeName: string, chatId?: number) => {
         const activeRouteName = state.routes[state.index]?.name;
-        return activeRouteName === routeName;
-    };
 
-    const chatEntries = Array.from(elberChats.values())
+        return chatId ? chatId === selectedChatId : activeRouteName === routeName;
+    };
 
     return (
         <DrawerContentScrollView {...props} style={sideMenuStyles.container}>
@@ -68,11 +68,11 @@ const SideMenuContent = ({props, elberChats}: SideMenuProps) => {
                             <Icon 
                                 name="chatbubbles-outline" 
                                 size={size} 
-                                color={isActive(chat.name) ? appColors.text : appColors.subtitle} 
+                                color={isActive(chat.name, chat.id) ? appColors.text : appColors.subtitle} 
                             />
                         )}
-                        labelStyle={[sideMenuStyles.itemLabel, {color: isActive(chat.name) ? appColors.text : appColors.subtitle}]}
-                        style={[sideMenuStyles.item, {backgroundColor: isActive(chat.name) ? appColors.secondary : 'transparent'}]}
+                        labelStyle={[sideMenuStyles.itemLabel, {color: isActive(chat.name, chat.id) ? appColors.text : appColors.subtitle}]}
+                        style={[sideMenuStyles.item, {backgroundColor: isActive(chat.name, chat.id) ? appColors.secondary : 'transparent'}]}
                     />
                 )
             })}

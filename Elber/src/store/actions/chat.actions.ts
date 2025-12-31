@@ -1,4 +1,4 @@
-import { ElberChat } from "../../models/chat.model";
+import { ElberChat, ElberMessage } from "../../models/chat.model";
 import { ChatAction, SelectedMessage } from "../reducers/chat.reducer";
 
 export const logOutChat = (): ChatAction => ({
@@ -18,4 +18,10 @@ export const selectChat = (selectedChatId: number): ChatAction => ({
 export const selectMessage = (selectedMessage: SelectedMessage): ChatAction => ({
     type: 'SELECT_MESSAGE',
     selectedMessage
+})
+
+export const addChatMessage = (chatId: number, newMessage: ElberMessage): ChatAction => ({
+    type: 'ADD_CHAT_MESSAGE',
+    chatId,
+    newMessage
 })

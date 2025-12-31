@@ -42,7 +42,7 @@ const MainScreen = () => {
                     return (
                         <Drawer.Screen 
                             key={chat.id} 
-                            name={chat.name} 
+                            name={chat.name ? chat.name : chat.id.toString()} 
                             component={ChatScreen} 
                             initialParams={{id: chat.id}}
                         />

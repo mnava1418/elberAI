@@ -29,7 +29,7 @@ const addChatMessage = (state: ChatState, chatId: number, newMessage: ElberMessa
         
         const updatedChat: ElberChat = {
             ...currChat,
-            messages: [...currChat.messages, newMessage]
+            messages: [newMessage, ...currChat.messages]
         }
         
         newChats.set(chatId, updatedChat)

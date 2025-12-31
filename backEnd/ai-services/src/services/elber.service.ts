@@ -1,15 +1,10 @@
-import { ElberAction, ElberEvent, ElberResponse, ElberUser } from "../models/elber.model";
+import { ElberEvent, ElberUser } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents'
 import agents from "../agents";
 import { shortTermMemory } from "../models/shortTermMemory.model";
 import { saveChatMessage } from "./chat.service";
 
-const response: ElberResponse = {
-    action: ElberAction.CHAT_TEXT,
-    payload: {message: 'Error al hacer streaming'}
-}
-
-export const chat = async(user: ElberUser, text: string, chatId: number, emitMessage: (event: ElberEvent, response: ElberResponse | string) => void) => {
+export const chat = async(user: ElberUser, text: string, chatId: number, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     await withTrace('Elber workflow', async() => {
 
         const conversationId = `${user.uid}_${chatId.toString()}`
@@ -29,12 +24,12 @@ export const chat = async(user: ElberUser, text: string, chatId: number, emitMes
                 if(event.type == 'raw_model_stream_event' && event.data.event) {
                     if(event.data.event.type == 'response.output_text.delta') {
                         agentResponse = `${agentResponse}${event.data.event?.delta}`
-                        emitMessage('elber:stream', event.data.event?.delta )
+                        emitMessage('elber:stream', chatId, event.data.event?.delta )
                     }
 
                     if(event.data.event.type == 'response.completed' && !responseCompleted) {
                         responseCompleted = true
-                        emitMessage('elber:response', '' );                        
+                        emitMessage('elber:response', chatId, '' );                        
                         saveChatMessage(user.uid, chatId, 'assistant', agentResponse)
                         .catch(error => {
                             console.error(error)
@@ -42,13 +37,13 @@ export const chat = async(user: ElberUser, text: string, chatId: number, emitMes
                     }    
 
                     if(event.data.event.type == 'response.error') {
-                        emitMessage('elber:error', response);
+                        emitMessage('elber:error', chatId, 'Error en la respuesta de Elber agent');
                     }                    
                 }
             }
         } catch (error) {
             console.error(error)
-            emitMessage('elber:error', response);
+            emitMessage('elber:error', chatId, 'Error en la respuesta de Elber agent');
         }    
     })
 }

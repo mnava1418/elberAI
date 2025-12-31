@@ -1,32 +1,16 @@
 import { io, Socket } from "socket.io-client"
 import { SOCKET_URL } from "@env"
 import { getAuth, getIdToken } from '@react-native-firebase/auth';
-import { ElberAction, ElberRequest, ElberResponse } from "./elber.model";
-import { ElberMessage } from "../store/reducers/elber.reducer";
-import handleElberResponse from "../services/elber.service";
-
-let ERROR_CONNECTION: ElberResponse = {
-    action: ElberAction.CHAT_TEXT,
-    payload: {
-        message: '¡Pinche conexión se hizo la desaparecida y nos dejó tirados! Intenta de nuevo.'
-    }
-} 
-
-let ERROR_ELBER: ElberResponse = {
-    action: ElberAction.CHAT_TEXT,
-    payload: {
-        message: "No manches, se me hizo bolas el engrudo! Dame un minuto pa' recomponerme."
-    }
-} 
+import { ElberRequest } from "./elber.model";
+import handleChatResponse from "../services/elber.service";
+import { ElberMessage } from "./chat.model";
 
 class SocketModel {
     private socket: Socket | null
     private static instance: SocketModel
-    private reportDisconnect: boolean
-
+    
     constructor() {
-        this.socket = null
-        this.reportDisconnect = false
+        this.socket = null    
     }
 
     static getInstance(): SocketModel {
@@ -78,8 +62,7 @@ class SocketModel {
 
         this.socket.on("connect", () => {
             console.info('Connected to socket:', this.socket!.id)    
-            this.setListeners(dispatch)       
-            this.reportDisconnect = false                 
+            this.setListeners(dispatch)                   
         });
 
         this.socket.on("disconnect", () => {                
@@ -87,13 +70,7 @@ class SocketModel {
         });
 
         this.socket.on("connect_error", (err) => {                
-            console.error('Error connecting to socket:', err.message);
-
-            if(!this.reportDisconnect) {
-                handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
-            }
-
-            this.reportDisconnect = true
+            console.error('Error connecting to socket:', err.message);            
         });
     }
 
@@ -109,33 +86,33 @@ class SocketModel {
             this.socket.off('elber:response');
             this.socket.off('elber:error');
 
-            this.socket.on('elber:stream', (response: string) => {
-                handleElberResponse('elber:stream', dispatch, response)              
+            this.socket.on('elber:stream', (chatId: number, text: string) => {
+                handleChatResponse(dispatch, 'elber:stream', {chatId, text})              
             })
 
-            this.socket.on('elber:response', () => {
-                handleElberResponse('elber:response', dispatch)
+            this.socket.on('elber:response', (chatId: number, text: string) => {
+                handleChatResponse(dispatch, 'elber:response', {chatId, text} )
             })
 
-            this.socket.on('elber:error', (response: ElberResponse) => {
-                console.error(response)
-                handleElberResponse('elber:error', dispatch, ERROR_ELBER)
+            this.socket.on('elber:error', (chatId: number, text: string) => {
+                console.error(text)
+                handleChatResponse(dispatch, 'elber:error',  {chatId, text: "No manches, se me hizo bolas el engrudo! Dame un minuto pa' recomponerme." })
             })
         }
     }
 
-    sendMessage(userMessage: ElberMessage, dispatch: (value: any) => void) {
+    sendMessage(chatId: number, userMessage: ElberMessage, dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
         
         if(this.socket && this.socket.connected && currentUser) {
             const elberRequest: ElberRequest = {
-                conversationId: 'conv_12345',
+                chatId,
                 text: userMessage.content,
                 userName: currentUser.displayName || ''
             }
             this.socket.emit('user:ask', elberRequest )
         } else {
-            handleElberResponse('elber:error', dispatch, ERROR_CONNECTION)
+            handleChatResponse(dispatch, 'elber:error',  {chatId, text: "¡Pinche conexión se hizo la desaparecida y nos dejó tirados! Intenta de nuevo." })
         }
     }
 }

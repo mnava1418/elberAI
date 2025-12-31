@@ -5,10 +5,7 @@ const elberAgent = (name: string) => {
     const agent = Agent.create({
         name: 'Elber',
         model: 'gpt-4.1-mini',
-        instructions: prompts.elberPrompt(name),
-        modelSettings: {
-            maxTokens: 384
-        }
+        instructions: prompts.elberPrompt(name),        
     })
 
     return agent

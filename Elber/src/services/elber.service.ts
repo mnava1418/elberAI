@@ -1,17 +1,18 @@
-import { ElberEvent, ElberResponse } from "../models/elber.model";
-import { addChatMessage, elberIsStreaming, isWaitingForElber, processChatStream } from "../store/actions/elber.actions";
-import { ElberMessage } from "../store/reducers/elber.reducer";
+import { ElberMessage } from "../models/chat.model";
+import { ElberChatResponse, ElberEvent } from "../models/elber.model";
+import { addChatMessage, processStream } from "../store/actions/chat.actions";
+import { elberIsStreaming, isWaitingForElber } from "../store/actions/elber.actions";
 
-const handleElberResponse = (event: ElberEvent, dispatch: (value: any) => void, response: ElberResponse | string | undefined = undefined) => {
+const handleChatResponse = (dispatch: (value: any) => void, event: ElberEvent, chatResponse: ElberChatResponse) => {
     switch (event) {
         case 'elber:response':
             handleResponseEvent(dispatch)
             break;
         case 'elber:stream':
-            handleStreamEvent(dispatch, response as string)
+            handleStreamEvent(dispatch, chatResponse)
             break;
         case 'elber:error':
-            handleErrorEvent(dispatch, response as ElberResponse)
+            handleErrorEvent(dispatch, chatResponse)
             break;
         default:
             break;
@@ -22,25 +23,25 @@ const handleResponseEvent = (dispatch: (value: any) => void) => {
     dispatch(elberIsStreaming(false))
 }
 
-const handleStreamEvent = (dispatch: (value: any) => void, response: string) => {
+const handleStreamEvent = (dispatch: (value: any) => void, chatResponse: ElberChatResponse) => {
     dispatch(elberIsStreaming(true))
     dispatch(isWaitingForElber(false))
-    dispatch(processChatStream(response))  
+    dispatch(processStream(chatResponse.text))  
 }
 
-const handleErrorEvent = (dispatch: (value: any) => void, response: ElberResponse) => {
+const handleErrorEvent = (dispatch: (value: any) => void, chatResponse: ElberChatResponse) => {
     dispatch(elberIsStreaming(false))
     dispatch(isWaitingForElber(false))
     
-    const timeStamp = new Date().getTime()
+    const timeStamp = Date.now()
     const chatMessage: ElberMessage = {
         id: `assistant:${timeStamp}`,
         createdAt: timeStamp,
         role: 'assistant',
-        content: response.payload.message
+        content: chatResponse.text
     }
 
-    dispatch(addChatMessage(chatMessage))
+    dispatch(addChatMessage(chatResponse.chatId, chatMessage))
 }
 
-export default handleElberResponse
+export default handleChatResponse

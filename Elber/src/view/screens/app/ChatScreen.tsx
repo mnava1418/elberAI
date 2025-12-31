@@ -24,7 +24,7 @@ const ChatScreen = () => {
     }, [])
     
     return (
-        <MainView navBarTitle={chatInfo.name} leftAction={showMenu} leftIcon='menu-outline' applyPadding={false}>
+        <MainView navBarTitle={chatInfo.name ? chatInfo.name : 'Chat Nuevo'} leftAction={showMenu} leftIcon='menu-outline' applyPadding={false}>
           <Chat />
         </MainView>
     )

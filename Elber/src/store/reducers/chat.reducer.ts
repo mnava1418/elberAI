@@ -43,7 +43,6 @@ const createChat = (state: ChatState, chatId: number, newMessage: ElberMessage):
     const newChats = new Map(state.chats)
     const newChat: ElberChat = {
         id: chatId,
-        name: `Chat ${chatId}`,
         messages: [newMessage]
     }
 

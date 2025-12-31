@@ -62,17 +62,17 @@ const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) =>
                 return(
                     <DrawerItem
                         key={chat.id}
-                        label={chat.name}
-                        onPress={() => navigateToScreen(chat.name, {id: chat.id})}
+                        label={chat.name ? chat.name : 'Chat Nuevo'}
+                        onPress={() => navigateToScreen(chat.name ? chat.name : chat.id.toString(), {id: chat.id})}
                         icon={({ focused, size }) => (
                             <Icon 
                                 name="chatbubbles-outline" 
                                 size={size} 
-                                color={isActive(chat.name, chat.id) ? appColors.text : appColors.subtitle} 
+                                color={isActive(chat.name ? chat.name : chat.id.toString(), chat.id) ? appColors.text : appColors.subtitle} 
                             />
                         )}
-                        labelStyle={[sideMenuStyles.itemLabel, {color: isActive(chat.name, chat.id) ? appColors.text : appColors.subtitle}]}
-                        style={[sideMenuStyles.item, {backgroundColor: isActive(chat.name, chat.id) ? appColors.secondary : 'transparent'}]}
+                        labelStyle={[sideMenuStyles.itemLabel, {color: isActive(chat.name ? chat.name : chat.id.toString(), chat.id) ? appColors.text : appColors.subtitle}]}
+                        style={[sideMenuStyles.item, {backgroundColor: isActive(chat.name ? chat.name : chat.id.toString(), chat.id) ? appColors.secondary : 'transparent'}]}
                     />
                 )
             })}

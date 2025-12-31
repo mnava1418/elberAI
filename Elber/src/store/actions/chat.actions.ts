@@ -25,3 +25,8 @@ export const addChatMessage = (chatId: number, newMessage: ElberMessage): ChatAc
     chatId,
     newMessage
 })
+
+export const processStream = (chunk: string): ChatAction => ({
+    type: 'PROCESS_STREAM',
+    chunk
+})

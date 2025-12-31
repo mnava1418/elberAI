@@ -50,11 +50,37 @@ const createChat = (state: ChatState, chatId: number, newMessage: ElberMessage):
     return {...state, chats: newChats, selectedChatId: chatId}
 }
 
+const processChatStream = (state: ChatState, chunk: string): ChatState => {
+    const newChats = new Map(state.chats)
+    const currChat = newChats.get(state.selectedChatId) as ElberChat
+    const chatMessages = [...currChat.messages]
+    const message = chatMessages[0]
+
+    if(message.role == "user") {
+        const timeStamp = Date.now()
+        const newMessage: ElberMessage = {
+            id: `assistant: ${timeStamp}`,
+            createdAt: timeStamp,
+            role: 'assistant',
+            content: chunk
+        }
+
+        return addChatMessage(state, state.selectedChatId, newMessage)
+    } else {
+        message.content = `${message.content}${chunk}`
+        chatMessages[0] = message
+        currChat.messages = [...chatMessages]
+        newChats.set(state.selectedChatId, currChat)
+        return {...state, chats: newChats}
+    }
+}
+
 export type ChatAction =
 | { type: 'SET_CHATS', chats: Map<number, ElberChat> }
-| { type: 'SELECT_CHAT', selectedChatId: number}
-| { type: 'SELECT_MESSAGE', selectedMessage: SelectedMessage}
-| { type: 'ADD_CHAT_MESSAGE', chatId: number, newMessage: ElberMessage}
+| { type: 'SELECT_CHAT', selectedChatId: number }
+| { type: 'SELECT_MESSAGE', selectedMessage: SelectedMessage }
+| { type: 'ADD_CHAT_MESSAGE', chatId: number, newMessage: ElberMessage }
+| { type: 'PROCESS_STREAM', chunk: string }
 | { type: 'LOG_OUT' }
 
 export const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
@@ -69,6 +95,8 @@ export const chatReducer = (state: ChatState, action: ChatAction): ChatState => 
             return {...state, selectedMessage: action.selectedMessage}
         case 'ADD_CHAT_MESSAGE':
             return addChatMessage(state, action.chatId, action.newMessage)
+        case 'PROCESS_STREAM':
+            return processChatStream(state, action.chunk)
         default:
             return state;
     }

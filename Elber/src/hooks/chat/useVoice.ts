@@ -3,20 +3,18 @@ import { checkVoicePermissions } from "../../services/entitlements.service"
 import { Platform } from "react-native"
 import Voice from '@react-native-voice/voice'
 import { openSettings } from 'react-native-permissions'
-import { ElberAction, ElberResponse } from "../../models/elber.model"
-import handleElberResponse from "../../services/elber.service"
+import { ElberChatResponse } from "../../models/elber.model"
+import handleChatResponse from "../../services/elber.service"
 import { hideAlert, showAlert } from "../../store/actions/elber.actions"
 
-const ERROR_VOICE: ElberResponse = {
-    action: ElberAction.CHAT_TEXT,
-    payload: {
-        message: "Perdón, me distraje viendo unos memes... ¿puedes repetir lo que dijiste?"
-    }
-} 
-
-const useVoice = (dispatch: (value: any) => void, onEnd: React.Dispatch<React.SetStateAction<string>>) => {
+const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.Dispatch<React.SetStateAction<string>>) => {
     const [isListening, setIsListening] = useState(false)
     const message = useRef('')
+
+    const ERROR_VOICE: ElberChatResponse = {
+        chatId,
+        text: "Perdón, me distraje viendo unos memes... ¿puedes repetir lo que dijiste?"
+    } 
 
     const startListening = async () => {
         const hasVoicePermissions = await checkVoicePermissions(Platform.OS === 'ios' ? 'ios' : 'android')
@@ -26,7 +24,7 @@ const useVoice = (dispatch: (value: any) => void, onEnd: React.Dispatch<React.Se
             try {
                 await Voice.start('es-MX')
             } catch (error) { 
-                handleElberResponse('elber:error', dispatch, ERROR_VOICE)
+                handleChatResponse(dispatch, 'elber:error', ERROR_VOICE)
             }
         } else {
             dispatch(showAlert({
@@ -47,7 +45,7 @@ const useVoice = (dispatch: (value: any) => void, onEnd: React.Dispatch<React.Se
             setIsListening(false)
             await Voice.stop()            
         } catch (error) {
-            handleElberResponse('elber:error', dispatch, ERROR_VOICE)
+            handleChatResponse(dispatch, 'elber:error', ERROR_VOICE)
         }
     }
 
@@ -70,7 +68,7 @@ const useVoice = (dispatch: (value: any) => void, onEnd: React.Dispatch<React.Se
 
         Voice.onSpeechError = (error) => {            
             setIsListening(false)
-            handleElberResponse('elber:error', dispatch, ERROR_VOICE)
+            handleChatResponse(dispatch, 'elber:error', ERROR_VOICE)
         };
     }
 

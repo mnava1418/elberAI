@@ -6,11 +6,12 @@ import ChatBtn from './ChatBtn';
 import chatStyles from '../../../styles/chat.style';
 import { GlobalContext } from '../../../store/GlobalProvider';
 import SocketModel from '../../../models/Socket.model';
-import { selectChatMessages } from '../../../store/selectors/elber.selector';
-import { addChatMessage, isWaitingForElber } from '../../../store/actions/elber.actions';
-import { ElberMessage } from '../../../store/reducers/elber.reducer';
+import { isWaitingForElber } from '../../../store/actions/elber.actions';
 import useElberStatus from '../../../hooks/chat/useElberStatus';
 import useVoice from '../../../hooks/chat/useVoice';
+import { selectChatInfo } from '../../../store/selectors/chat.selector';
+import { ElberMessage } from '../../../models/chat.model';
+import { addChatMessage } from '../../../store/actions/chat.actions';
 
 type InputToolBarProps = {
     inputText: string
@@ -21,7 +22,8 @@ type InputToolBarProps = {
 
 const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: InputToolBarProps) => {
     const { state, dispatch } = useContext(GlobalContext);
-    const chatMessages = selectChatMessages(state.elber)
+    const chatInfo = selectChatInfo(state.chat)
+    
     const { isStreaming, isWaiting } = useElberStatus(state.elber)
     const { 
         isListening, 
@@ -29,7 +31,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
         prepareSpeech, 
         removeSpeechListener, 
         stopListening 
-    } = useVoice(dispatch, setInputText)
+    } = useVoice(dispatch, chatInfo.id, setInputText)
 
     const handleVoice = () => {
         if(isWaiting || isStreaming) {
@@ -45,7 +47,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     }
     
     const handleSend = () => {
-        if(chatMessages.length >0) {
+        if(chatInfo.messages.length >0) {
             flatListRef.current?.scrollToIndex({index: 0, animated: true})
         }
         
@@ -54,7 +56,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
         }
 
         const messageText = inputText.trim();        
-        const timeStamp = new Date().getTime()
+        const timeStamp = Date.now()
         const newMessage: ElberMessage = {
             id: `user:${timeStamp}`,
             createdAt: timeStamp,
@@ -62,10 +64,11 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
             content: messageText
         }
 
+        const chatId = chatInfo.id !== -1 ? chatInfo.id : Date.now()
         dispatch(isWaitingForElber(true))
-        dispatch(addChatMessage(newMessage))        
-
-        SocketModel.getInstance().sendMessage(newMessage, dispatch)  
+        dispatch(addChatMessage(chatId, newMessage))
+        
+        SocketModel.getInstance().sendMessage(chatId, newMessage, dispatch)  
         setInputText('')
     }
 

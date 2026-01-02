@@ -35,3 +35,8 @@ export const updateChatTitle = (title: string): ChatAction => ({
     type: 'UPDATE_CHAT_TITLE',
     title
 })
+
+export const deleteChatAction = (chatId: number): ChatAction => ({
+    type: 'DELETE_CHAT',
+    chatId
+})

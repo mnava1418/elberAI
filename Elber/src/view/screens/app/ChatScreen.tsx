@@ -5,6 +5,8 @@ import { useNavigation, DrawerActions } from '@react-navigation/native'
 import SocketModel from '../../../models/Socket.model'
 import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectChatInfo } from '../../../store/selectors/chat.selector'
+import * as chatServices from '../../../services/chat.service'
+import { deleteChatAction } from '../../../store/actions/chat.actions'
 
 const ChatScreen = () => {
     const navigation = useNavigation()
@@ -13,6 +15,16 @@ const ChatScreen = () => {
     
     const showMenu = () => {
         navigation.dispatch(DrawerActions.toggleDrawer)
+    }
+
+    const deleteChat = () => {
+      chatServices.deleteChat(chatInfo.id)
+        .then(() => {
+          dispatch(deleteChatAction(chatInfo.id))
+        })
+        .catch(error => {
+          console.error(error)
+        })
     }
 
     useEffect(() => {
@@ -24,7 +36,14 @@ const ChatScreen = () => {
     }, [])
     
     return (
-        <MainView navBarTitle={chatInfo.name ? chatInfo.name : 'Chat Nuevo'} leftAction={showMenu} leftIcon='menu-outline' applyPadding={false}>
+        <MainView 
+          navBarTitle={chatInfo.name ? chatInfo.name : 'Chat Nuevo'} 
+          leftAction={showMenu} 
+          leftIcon='menu-outline' 
+          applyPadding={false}
+          rightAction={ chatInfo.id !== -1 ? deleteChat : undefined}          
+          rightIcon='trash-outline'
+        >
           <Chat />
         </MainView>
     )

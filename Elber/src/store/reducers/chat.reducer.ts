@@ -22,6 +22,16 @@ export const initialChatState: ChatState = {
     selectedMessage: null
 }
 
+export const deleteChat = (state: ChatState, chatId: number): ChatState => {
+    if(!state.chats.has(chatId)) {
+        return state
+    }
+
+    const newChats = new Map(state.chats)
+    newChats.delete(chatId)
+    return {...state, chats: newChats, selectedChatId: -1}
+}
+
 const addChatMessage = (state: ChatState, chatId: number, newMessage: ElberMessage): ChatState => {
     if(state.chats.has(chatId)) {
         const newChats = new Map(state.chats)
@@ -90,6 +100,7 @@ export type ChatAction =
 | { type: 'ADD_CHAT_MESSAGE', chatId: number, newMessage: ElberMessage }
 | { type: 'PROCESS_STREAM', chunk: string }
 | { type: 'UPDATE_CHAT_TITLE', title: string }
+| { type: 'DELETE_CHAT', chatId: number }
 | { type: 'LOG_OUT' }
 
 export const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
@@ -108,6 +119,8 @@ export const chatReducer = (state: ChatState, action: ChatAction): ChatState => 
             return processChatStream(state, action.chunk)
         case 'UPDATE_CHAT_TITLE':
             return updateChatTitle(state, action.title)
+        case 'DELETE_CHAT':
+            return deleteChat(state, action.chatId)
         default:
             return state;
     }

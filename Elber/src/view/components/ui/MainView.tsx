@@ -8,13 +8,25 @@ const backgroundImage = require('../../../assets/images/mainBackground.png');
 interface MainViewProps extends PropsWithChildren {
     navBarTitle?: string
     showNavBar?: boolean
-    leftAction?: () => void | undefined
+    leftAction?: () => void
     leftIcon?: string
+    rightAction?: () => void
+    rightIcon?: string
     style?: StyleProp<ViewStyle>;
     applyPadding?: boolean
 }
 
-const MainView = ({ style, children, navBarTitle= '', leftAction = undefined, leftIcon = 'chevron-back', showNavBar= true, applyPadding = true }: MainViewProps) => {
+const MainView = ({ 
+    style, 
+    children, 
+    navBarTitle= '', 
+    leftAction = undefined, 
+    leftIcon = 'chevron-back', 
+    showNavBar= true, 
+    applyPadding = true,
+    rightAction = undefined,
+    rightIcon = ''
+}: MainViewProps) => {
     return (
         <ImageBackground source={backgroundImage} style={{flex: 1}} blurRadius={100}>
             <View style={{flex: 1, position: 'relative'}}>
@@ -25,7 +37,7 @@ const MainView = ({ style, children, navBarTitle= '', leftAction = undefined, le
                     ]}
                     pointerEvents="none"
                 />
-                { showNavBar ? <NavBar title={navBarTitle} leftAction={leftAction} leftIcon={leftIcon} /> : <></>}
+                { showNavBar ? <NavBar title={navBarTitle} leftAction={leftAction} leftIcon={leftIcon} rightAction={rightAction} rightIcon={rightIcon} /> : <></>}
                 <View style={[{flex: 1, paddingHorizontal: applyPadding ? 20 : 0, zIndex: 2}, style]}>
                     {children}
                 </View>

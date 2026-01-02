@@ -2,7 +2,7 @@ import { ElberEvent, ElberUser } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents'
 import agents from "../agents";
 import { shortTermMemory } from "../models/shortTermMemory.model";
-import { saveChatMessage } from "./chat.service";
+import { saveChatMessage, updateTitle } from "./chat.service";
 
 export const chat = async(user: ElberUser, text: string, chatId: number, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     await withTrace('Elber workflow', async() => {
@@ -48,12 +48,13 @@ export const chat = async(user: ElberUser, text: string, chatId: number, emitMes
     })
 }
 
-export const generateChatTitle = async (text: string, chatId: number, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+export const generateChatTitle = async (uid: string, text: string, chatId: number, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     await withTrace('Title Generator', async () => {
         try {
             const result = await run(agents.chatTitle(), text)
 
             if(result.finalOutput) {
+                updateTitle(uid, chatId, result.finalOutput)
                 emitMessage('elber:title', chatId, result.finalOutput)
             }            
         } catch (error) {

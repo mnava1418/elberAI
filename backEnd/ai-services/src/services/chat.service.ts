@@ -52,3 +52,14 @@ export const getUserChats = async (uid: string): Promise<ElberChat[]> => {
         throw new Error('Unable to get user chats')
     }
 }
+
+export const updateTitle = async (uid: string, chatId: number, name: string) => {
+    try {
+        const db = admin.database()
+        const ref = db.ref(`/chat/${uid}/${chatId}`)
+        await ref.update({name})
+    } catch (error) {
+        console.log(error)
+        throw new Error('Unable to update chat name')
+    }
+}

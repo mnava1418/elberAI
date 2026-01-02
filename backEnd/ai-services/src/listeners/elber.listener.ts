@@ -18,7 +18,7 @@ const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEve
             console.info(`Processing ask from ${uid}`)                        
             
             if(isNewChat) {
-                generateChatTitle(text, chatId, emitChatResponse)
+                generateChatTitle(uid, text, chatId, emitChatResponse)
             }
 
             saveChatMessage(uid, chatId, "user", text)

@@ -47,3 +47,17 @@ export const chat = async(user: ElberUser, text: string, chatId: number, emitMes
         }    
     })
 }
+
+export const generateChatTitle = async (text: string, chatId: number, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+    await withTrace('Title Generator', async () => {
+        try {
+            const result = await run(agents.chatTitle(), text)
+
+            if(result.finalOutput) {
+                emitMessage('elber:title', chatId, result.finalOutput)
+            }            
+        } catch (error) {
+            console.error(error)            
+        }
+    })
+}

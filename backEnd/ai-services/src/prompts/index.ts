@@ -1,7 +1,9 @@
-import elberPrompt from "./elber.propmt";
+import elberPrompt from "./elber.prompt";
+import chatTitlePrompt from "./chatTitle.prompt";
 
 const prompts = {
-    elberPrompt
+    elberPrompt,
+    chatTitlePrompt
 }
 
 export default prompts

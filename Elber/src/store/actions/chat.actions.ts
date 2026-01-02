@@ -30,3 +30,8 @@ export const processStream = (chunk: string): ChatAction => ({
     type: 'PROCESS_STREAM',
     chunk
 })
+
+export const updateChatTitle = (title: string): ChatAction => ({
+    type: 'UPDATE_CHAT_TITLE',
+    title
+})

@@ -1,6 +1,6 @@
 import { ElberMessage } from "../models/chat.model";
 import { ElberChatResponse, ElberEvent } from "../models/elber.model";
-import { addChatMessage, processStream } from "../store/actions/chat.actions";
+import { addChatMessage, processStream, updateChatTitle } from "../store/actions/chat.actions";
 import { elberIsStreaming, isWaitingForElber } from "../store/actions/elber.actions";
 
 const handleChatResponse = (dispatch: (value: any) => void, event: ElberEvent, chatResponse: ElberChatResponse) => {
@@ -14,6 +14,8 @@ const handleChatResponse = (dispatch: (value: any) => void, event: ElberEvent, c
         case 'elber:error':
             handleErrorEvent(dispatch, chatResponse)
             break;
+        case 'elber:title':
+            handleTitleEvent(dispatch, chatResponse)
         default:
             break;
     }
@@ -42,6 +44,10 @@ const handleErrorEvent = (dispatch: (value: any) => void, chatResponse: ElberCha
     }
 
     dispatch(addChatMessage(chatResponse.chatId, chatMessage))
+}
+
+const handleTitleEvent = (dispatch: (value: any) => void, chatResponse: ElberChatResponse) => {
+    dispatch(updateChatTitle(chatResponse.text))
 }
 
 export default handleChatResponse

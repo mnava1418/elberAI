@@ -1,4 +1,4 @@
-export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error'
+export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title'
 
 export enum ElberAction {
     CHAT_TEXT = 'chat_text'
@@ -17,7 +17,8 @@ export type ElberUser = {
 export type ElberRequest = {
     userName: string,
     text: string,
-    chatId: number
+    chatId: number,
+    isNewChat: boolean
 }
 
 export type ElberRole = 'user' | 'assistant'

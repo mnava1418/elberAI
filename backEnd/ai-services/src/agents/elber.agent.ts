@@ -1,7 +1,7 @@
 import { Agent } from "@openai/agents";
 import prompts from '../prompts'
 
-const elberAgent = (name: string) => {
+export const elberAgent = (name: string) => {
     const agent = Agent.create({
         name: 'Elber',
         model: 'gpt-4.1-mini',
@@ -11,4 +11,12 @@ const elberAgent = (name: string) => {
     return agent
 } 
 
-export default elberAgent
+export const chatTitleAgent = () => {
+    const agent = Agent.create({
+        name: 'Title Generator',
+        model: 'gpt-4.1-mini',
+        instructions: prompts.chatTitlePrompt
+    })
+
+    return agent
+}

@@ -55,6 +55,9 @@ export const generateChatTitle = async (uid: string, text: string, chatId: numbe
 
             if(result.finalOutput) {
                 updateTitle(uid, chatId, result.finalOutput)
+                .catch(error => {
+                    console.log(error)
+                })
                 emitMessage('elber:title', chatId, result.finalOutput)
             }            
         } catch (error) {

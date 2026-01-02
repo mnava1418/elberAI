@@ -56,7 +56,7 @@ const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) =>
                 style={sideMenuStyles.item}
             />             
 
-            <View style={sideMenuStyles.separator} />                     
+            {chatEntries.length > 0 ? <View style={sideMenuStyles.separator} /> : <></>}
 
             {chatEntries.map(chat=> {
                 return(

@@ -15,7 +15,6 @@ export const validateFBToken = (req: AuthenticationRequest, res: Response, next:
         admin.auth().verifyIdToken(token as string)
         .then(user => {
             req.user = user
-            req.body = {...req.body, uid: user.uid}
             next()
         })
         .catch(() => {

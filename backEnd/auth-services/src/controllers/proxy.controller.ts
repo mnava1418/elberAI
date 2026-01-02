@@ -1,10 +1,15 @@
 import { ClientRequest } from "http";
 import { Request, Response, NextFunction } from "express";
 import { gateway } from "../config/index.config"
+import { AuthenticationRequest } from "../interfaces/http.interface"
 
-export const proxy_request = (proxyReq: ClientRequest, req: Request, res: Response) => {
+export const proxy_request = (proxyReq: ClientRequest, req: AuthenticationRequest, res: Response) => {
     if(gateway.secret) {
         proxyReq.setHeader('x-api-gateway-secret', gateway.secret)
+    }
+
+    if(req.user && req.user.uid) {
+        proxyReq.setHeader('x-user-uid', req.user.uid)
     }
 
     if (req.body && Object.keys(req.body).length) {

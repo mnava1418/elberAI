@@ -1,5 +1,5 @@
 import { BACK_URL } from "@env"
-import { apiDelete, apiGet, apiPost } from "./network.service"
+import { apiDelete, apiGet } from "./network.service"
 import { AxiosRequestConfig } from "axios"
 import { getAuth, getIdToken } from "@react-native-firebase/auth"
 import { ElberChat } from "../models/chat.model"

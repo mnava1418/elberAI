@@ -75,12 +75,21 @@ const processChatStream = (state: ChatState, chunk: string): ChatState => {
     }
 }
 
+const updateChatTitle = (state: ChatState, title: string): ChatState => {
+    const newChats = new Map(state.chats)
+    const currChat = newChats.get(state.selectedChatId) as ElberChat
+    currChat.name = title
+    newChats.set(state.selectedChatId, currChat)
+    return {...state, chats: newChats}
+}
+
 export type ChatAction =
 | { type: 'SET_CHATS', chats: Map<number, ElberChat> }
 | { type: 'SELECT_CHAT', selectedChatId: number }
 | { type: 'SELECT_MESSAGE', selectedMessage: SelectedMessage }
 | { type: 'ADD_CHAT_MESSAGE', chatId: number, newMessage: ElberMessage }
 | { type: 'PROCESS_STREAM', chunk: string }
+| { type: 'UPDATE_CHAT_TITLE', title: string }
 | { type: 'LOG_OUT' }
 
 export const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
@@ -97,6 +106,8 @@ export const chatReducer = (state: ChatState, action: ChatAction): ChatState => 
             return addChatMessage(state, action.chatId, action.newMessage)
         case 'PROCESS_STREAM':
             return processChatStream(state, action.chunk)
+        case 'UPDATE_CHAT_TITLE':
+            return updateChatTitle(state, action.title)
         default:
             return state;
     }

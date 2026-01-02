@@ -1,7 +1,8 @@
-import elberAgent from "./elber.agent";
+import {elberAgent, chatTitleAgent} from "./elber.agent";
 
 const agents = {
-    elber: elberAgent
+    elber: elberAgent,
+    chatTitle: chatTitleAgent
 }
 
 export default agents

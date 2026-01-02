@@ -82,9 +82,7 @@ class SocketModel {
         if(this.socket && this.socket.connected ) {
             console.info('Setting Elber listeners...')
 
-            this.socket.off('elber:stream');
-            this.socket.off('elber:response');
-            this.socket.off('elber:error');
+            this.socket.removeAllListeners();           
 
             this.socket.on('elber:stream', (chatId: number, text: string) => {
                 handleChatResponse(dispatch, 'elber:stream', {chatId, text})              
@@ -94,6 +92,10 @@ class SocketModel {
                 handleChatResponse(dispatch, 'elber:response', {chatId, text} )
             })
 
+            this.socket.on('elber:title', (chatId: number, text: string) => {
+                handleChatResponse(dispatch, 'elber:title', {chatId, text})
+            })
+
             this.socket.on('elber:error', (chatId: number, text: string) => {
                 console.error(text)
                 handleChatResponse(dispatch, 'elber:error',  {chatId, text: "No manches, se me hizo bolas el engrudo! Dame un minuto pa' recomponerme." })
@@ -101,14 +103,15 @@ class SocketModel {
         }
     }
 
-    sendMessage(chatId: number, userMessage: ElberMessage, dispatch: (value: any) => void) {
+    sendMessage(chatId: number, userMessage: ElberMessage, isNewChat: boolean, dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
         
         if(this.socket && this.socket.connected && currentUser) {
             const elberRequest: ElberRequest = {
                 chatId,
                 text: userMessage.content,
-                userName: currentUser.displayName || ''
+                userName: currentUser.displayName || '',
+                isNewChat
             }
             this.socket.emit('user:ask', elberRequest )
         } else {

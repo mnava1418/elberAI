@@ -64,11 +64,18 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
             content: messageText
         }
 
-        const chatId = chatInfo.id !== -1 ? chatInfo.id : Date.now()
+        let chatId = chatInfo.id
+        let isNewChat = false
+
+        if(chatInfo.id === -1) {
+            chatId = Date.now()
+            isNewChat = true
+        }
+        
         dispatch(isWaitingForElber(true))
         dispatch(addChatMessage(chatId, newMessage))
         
-        SocketModel.getInstance().sendMessage(chatId, newMessage, dispatch)  
+        SocketModel.getInstance().sendMessage(chatId, newMessage, isNewChat, dispatch)  
         setInputText('')
     }
 

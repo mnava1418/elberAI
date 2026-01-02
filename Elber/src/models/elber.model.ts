@@ -10,7 +10,8 @@ export type ElberChatResponse = {
 export type ElberRequest = {
     userName: string,
     text: string,
-    chatId: number
+    chatId: number,
+    isNewChat: boolean
 }
 
-export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error'
+export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title'

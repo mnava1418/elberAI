@@ -44,6 +44,16 @@ class ShortTermMemory {
             this.sessions.delete(conversationId)
         }
     }
+
+    deleteOldSessions() {
+        const now = Date.now()
+
+        this.sessions.forEach((entry, conversationId) => {
+            if(entry.expiresAt <= now) {
+                this.sessions.delete(conversationId)
+            }
+        })
+    }
 }
 
 export default ShortTermMemory

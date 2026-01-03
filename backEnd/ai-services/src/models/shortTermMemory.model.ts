@@ -9,6 +9,15 @@ const SESSION_TTL_MS = 24 * 60 * 60 * 1000; //24 hours
 
 class ShortTermMemory {
     private sessions = new Map<string, SessionEntry>()
+    private static instance: ShortTermMemory
+
+    static getInstance(): ShortTermMemory {
+        if(!ShortTermMemory.instance) {
+            ShortTermMemory.instance = new ShortTermMemory()
+        }
+
+        return ShortTermMemory.instance
+    }
     
     getSession(conversationId: string): OpenAIConversationsSession {
         const now = Date.now()
@@ -29,6 +38,12 @@ class ShortTermMemory {
 
         return newSession
     }
+
+    deleteSession(conversationId: string) {
+        if(this.sessions.has(conversationId)) {
+            this.sessions.delete(conversationId)
+        }
+    }
 }
 
-export const shortTermMemory = new ShortTermMemory()
+export default ShortTermMemory

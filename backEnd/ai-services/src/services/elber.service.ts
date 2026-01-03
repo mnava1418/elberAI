@@ -1,14 +1,14 @@
 import { ElberEvent, ElberUser } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents'
 import agents from "../agents";
-import { shortTermMemory } from "../models/shortTermMemory.model";
 import { saveChatMessage, updateTitle } from "./chat.service";
+import ShortTermMemory from "../models/shortTermMemory.model";
 
 export const chat = async(user: ElberUser, text: string, chatId: number, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     await withTrace('Elber workflow', async() => {
 
         const conversationId = `${user.uid}_${chatId.toString()}`
-        const session = shortTermMemory.getSession(conversationId)
+        const session = ShortTermMemory.getInstance().getSession(conversationId)
         
         try {
             const result = await run(agents.elber(user.name), text, {

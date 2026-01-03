@@ -1,5 +1,6 @@
 import admin from 'firebase-admin'
 import { ElberChat, ElberMessage, ElberRole } from '../models/elber.model'
+import ShortTermMemory from '../models/shortTermMemory.model'
 
 export const saveChatMessage = async (uid: string, chatId: number, role: ElberRole, content: string ) => {
     try {        
@@ -66,9 +67,12 @@ export const updateTitle = async (uid: string, chatId: number, name: string) => 
 
 export const deleteChat = async (uid: string, chatId: number) => {
     try {
+        const conversationId = `${uid}_${chatId.toString()}`
+        ShortTermMemory.getInstance().deleteSession(conversationId)
+        
         const db = admin.database()
         const ref = db.ref(`/chat/${uid}/${chatId}`)
-        await ref.remove()
+        await ref.remove()        
     } catch (error) {
         console.log(error)
         throw new Error('Unable to delete chat')

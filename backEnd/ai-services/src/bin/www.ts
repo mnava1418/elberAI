@@ -3,6 +3,7 @@ import http from 'http'
 import {server} from '../config/index.config'
 import socketLoader from '../loaders/socket.loader';
 import initFirebase from '../loaders/firebase.loader';
+import cleanOldSessions from '../loaders/sessionHandler.loader';
 
 const PORT = server.port || 4042;
 
@@ -28,6 +29,7 @@ process.on('unhandledRejection', (reason, promise) => {
 const initApps = (server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>) => {
     socketLoader(server)    
     initFirebase()
+    cleanOldSessions
 }
 
 const startServer = () => {

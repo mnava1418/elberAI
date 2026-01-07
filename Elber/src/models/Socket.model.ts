@@ -48,7 +48,7 @@ class SocketModel {
         this.socket = io(SOCKET_URL, {
             path: '/socket.io',
             transports: ["websocket"],
-            forceNew: true,
+            forceNew: false,
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelayMax: 500,
@@ -103,7 +103,7 @@ class SocketModel {
         }
     }
 
-    sendMessage(chatId: number, userMessage: ElberMessage, isNewChat: boolean, dispatch: (value: any) => void) {
+    sendMessage(chatId: number, title: string, userMessage: ElberMessage, dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
         
         if(this.socket && this.socket.connected && currentUser) {
@@ -111,7 +111,7 @@ class SocketModel {
                 chatId,
                 text: userMessage.content,
                 userName: currentUser.displayName || '',
-                isNewChat
+                title
             }
             this.socket.emit('user:ask', elberRequest )
         } else {

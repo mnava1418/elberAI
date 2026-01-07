@@ -22,7 +22,7 @@ const NavBar = ({title, leftAction = undefined, leftIcon = 'chevron-back', right
                 {leftAction ? <NavBtn icon={leftIcon} onPress={leftAction} /> : <></>}
             </View>
             <View style={navBarStyles.title}>
-                <CustomText style={{fontWeight: '600', fontSize: 20, marginHorizontal: 16}} type='text' text={title.length >= 30 ? `${title.substring(0, 30)}...` : title} />
+                <CustomText style={{fontWeight: '600', fontSize: 20, marginHorizontal: 16}} type='text' text={title.length >= 25 ? `${title.substring(0, 25)}...` : title} />
             </View>
             <View style={{width: 32, height: 32}}>
                 {rightAction ? <NavBtn icon={rightIcon} onPress={rightAction} /> : <></>}

@@ -11,9 +11,10 @@ const chatTitlePrompt = (title: string, lastMessage: string, conversationContext
     - ¿El último mensaje introduce un tema completamente diferente al título actual?
     - ¿El usuario está pidiendo ayuda con algo nuevo que no tiene relación?
     - ¿La conversación evolucionó hacia un área totalmente distinta?
+    - ¿El título actual es "Chat Nuevo"?
 
     2. **CUÁNDO SÍ CAMBIAR** (setea changeTitle: true):
-    - El título es "Chat Nuevo" y ya hay contexto claro del tema
+    - El título es "Chat Nuevo". Simpre cambia en este caso
     - Usuario cambió de tema completamente (ej: de "Recetas de cocina" a "Código JavaScript")
     - La conversación evolucionó naturalmente a un tema más específico
     - El título actual es muy genérico pero ahora hay un enfoque claro
@@ -28,6 +29,7 @@ const chatTitlePrompt = (title: string, lastMessage: string, conversationContext
     - "Chat Nuevo" → "Ayuda con React" (cuando pregunta sobre React)
     - "Problemas de código" → "Recetas vegetarianas" (cambio total de tema)
     - "Ayuda general" → "Configurar Docker" (se volvió específico)
+    - El título actual es "Chat Nuevo"
 
     5. **EJEMPLOS DE NO CAMBIOS**:
     - "JavaScript" → sigue preguntando sobre JavaScript

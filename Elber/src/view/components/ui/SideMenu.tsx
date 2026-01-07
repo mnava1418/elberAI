@@ -63,7 +63,7 @@ const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) =>
                     <DrawerItem
                         key={chat.id}
                         label={chat.name ? chat.name : 'Chat Nuevo'}
-                        onPress={() => navigateToScreen(chat.name ? chat.name : chat.id.toString(), {id: chat.id})}
+                        onPress={() => navigateToScreen(chat.id.toString(), {id: chat.id})}
                         icon={({ focused, size }) => (
                             <Icon 
                                 name="chatbubbles-outline" 

@@ -6,6 +6,8 @@ const cleanOldSessions = () => {
         console.info('Cleaning old sessions from ShortTermMemory')
         ShortTermMemory.getInstance().deleteOldSessions()
     }, CLEAN_INTERVAL);
+
+    console.info("Ready to clean short term memory...")
 }
 
 export default cleanOldSessions

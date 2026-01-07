@@ -29,7 +29,7 @@ process.on('unhandledRejection', (reason, promise) => {
 const initApps = (server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>) => {
     socketLoader(server)    
     initFirebase()
-    cleanOldSessions
+    cleanOldSessions()
 }
 
 const startServer = () => {

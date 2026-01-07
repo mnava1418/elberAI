@@ -71,7 +71,7 @@ export const generateChatTitle = async (uid: string, request: ElberRequest, emit
             
             updateTitle(uid, chatId, result.finalOutput.chatTitle)
             .catch(error => {
-                console.log(error)
+                console.error(error)
             })
             emitMessage('elber:title', chatId, result.finalOutput.chatTitle)
         } else {

@@ -60,7 +60,7 @@ export const updateTitle = async (uid: string, chatId: number, name: string) => 
         const ref = db.ref(`/chat/${uid}/${chatId}`)
         await ref.update({name})
     } catch (error) {
-        console.log(error)
+        console.error(error)
         throw new Error('Unable to update chat name')
     }
 }
@@ -74,7 +74,7 @@ export const deleteChat = async (uid: string, chatId: number) => {
         const ref = db.ref(`/chat/${uid}/${chatId}`)
         await ref.remove()        
     } catch (error) {
-        console.log(error)
+        console.error(error)
         throw new Error('Unable to delete chat')
     }
 }

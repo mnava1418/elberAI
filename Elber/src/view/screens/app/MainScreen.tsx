@@ -8,6 +8,7 @@ import { GlobalContext } from '../../../store/GlobalProvider';
 import { setChats } from '../../../store/actions/chat.actions';
 import { getSelectedChatId, selectChats } from '../../../store/selectors/chat.selector';
 import SideMenuContent from '../../components/ui/SideMenu';
+import SocketModel from '../../../models/Socket.model';
 
 const Drawer = createDrawerNavigator()
 
@@ -17,6 +18,8 @@ const MainScreen = () => {
     const selectedChatId = getSelectedChatId(state.chat)
 
     useEffect(() => {
+        SocketModel.getInstance().connect(dispatch)
+
         getChats()
         .then(chats => {
             dispatch(setChats(chats))
@@ -24,6 +27,10 @@ const MainScreen = () => {
         .catch(error => {
             console.error(error)
         })
+
+        return () => {
+            SocketModel.getInstance().disconnect()
+        }
     }, [])
     
     const chatEntries = Array.from(elberChats.values())
@@ -42,7 +49,7 @@ const MainScreen = () => {
                     return (
                         <Drawer.Screen 
                             key={chat.id} 
-                            name={chat.name ? chat.name : chat.id.toString()} 
+                            name={chat.id.toString()} 
                             component={ChatScreen} 
                             initialParams={{id: chat.id}}
                         />

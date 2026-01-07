@@ -6,7 +6,7 @@ export type ElberMessage = {
 }
 
 export type ElberChat = {
-    name?: string
+    name: string
     id: number
     messages: ElberMessage[]
 }

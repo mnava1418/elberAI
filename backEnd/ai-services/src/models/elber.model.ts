@@ -18,7 +18,7 @@ export type ElberRequest = {
     userName: string,
     text: string,
     chatId: number,
-    isNewChat: boolean
+    title: string 
 }
 
 export type ElberRole = 'user' | 'assistant'

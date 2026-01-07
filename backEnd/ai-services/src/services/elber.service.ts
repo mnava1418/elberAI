@@ -1,21 +1,21 @@
-import { ElberEvent, ElberUser } from "../models/elber.model";
-import { run, withTrace } from '@openai/agents'
+import { ElberEvent, ElberRequest, ElberUser } from "../models/elber.model";
+import { run, withTrace } from '@openai/agents';
 import agents from "../agents";
 import { saveChatMessage, updateTitle } from "./chat.service";
 import ShortTermMemory from "../models/shortTermMemory.model";
 
-export const chat = async(user: ElberUser, text: string, chatId: number, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     await withTrace('Elber workflow', async() => {
+        const {chatId, text} = request
+        try {            
+            const conversationId = `${user.uid}_${chatId.toString()}`
+            const session = ShortTermMemory.getInstance().getSession(conversationId)
 
-        const conversationId = `${user.uid}_${chatId.toString()}`
-        const session = ShortTermMemory.getInstance().getSession(conversationId)
-        
-        try {
             const result = await run(agents.elber(user.name), text, {
                 session,
-                maxTurns: 8,
+                maxTurns: 3,
                 stream: true
-            })
+            })            
 
             let agentResponse = ''
             let responseCompleted = false
@@ -30,10 +30,17 @@ export const chat = async(user: ElberUser, text: string, chatId: number, emitMes
                     if(event.data.event.type == 'response.completed' && !responseCompleted) {
                         responseCompleted = true
                         emitMessage('elber:response', chatId, '' );                        
+                        
                         saveChatMessage(user.uid, chatId, 'assistant', agentResponse)
                         .catch(error => {
                             console.error(error)
+                        })                        
+                        
+                        generateChatTitle(user.uid, request, emitMessage)
+                        .catch(error => {
+                            console.error('Error actualizando título:', error)
                         })
+                        
                     }    
 
                     if(event.data.event.type == 'response.error') {
@@ -48,20 +55,29 @@ export const chat = async(user: ElberUser, text: string, chatId: number, emitMes
     })
 }
 
-export const generateChatTitle = async (uid: string, text: string, chatId: number, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
-    await withTrace('Title Generator', async () => {
-        try {
-            const result = await run(agents.chatTitle(), text)
+export const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+    try {
+        const {chatId, text, title} = request
+        const conversationId = `${uid}_${chatId.toString()}`
+        const session = ShortTermMemory.getInstance().getSession(conversationId)
 
-            if(result.finalOutput) {
-                updateTitle(uid, chatId, result.finalOutput)
-                .catch(error => {
-                    console.log(error)
-                })
-                emitMessage('elber:title', chatId, result.finalOutput)
-            }            
-        } catch (error) {
-            console.error(error)            
-        }
-    })
+        const result = await run(agents.chatTitle(title, text), text, {
+            session,
+            maxTurns: 3
+        })           
+        
+        if(result.finalOutput && result.finalOutput.changeTitle) {
+            console.info(`Cambiando título: "${title}" → "${result.finalOutput.chatTitle}" | Razón: ${result.finalOutput.reasoning || 'No especificada'}`)
+            
+            updateTitle(uid, chatId, result.finalOutput.chatTitle)
+            .catch(error => {
+                console.log(error)
+            })
+            emitMessage('elber:title', chatId, result.finalOutput.chatTitle)
+        } else {
+            console.info(`Manteniendo título: "${title}" | Razón: ${result.finalOutput?.reasoning || 'No hay cambio necesario'}`)
+        }            
+    } catch (error) {
+        console.error('Error en generateChatTitle:', error)            
+    }
 }

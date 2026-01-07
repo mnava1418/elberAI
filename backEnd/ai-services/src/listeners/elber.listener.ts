@@ -1,6 +1,6 @@
 import { DefaultEventsMap, Socket, Server } from "socket.io";
 import { ElberEvent, ElberRequest, ElberUser } from "../models/elber.model";
-import { chat, generateChatTitle } from "../services/elber.service";
+import { chat } from "../services/elber.service";
 import { saveChatMessage } from "../services/chat.service";
 
 const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, ongoingConvo: Map<string, {abort?: (() => void) | undefined;}>) => {
@@ -12,21 +12,17 @@ const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEve
     };
     
     socket.on('user:ask', (payload: ElberRequest) => {
-        const {userName, text, chatId, isNewChat} = payload
+        const {userName, text, chatId} = payload
         const user: ElberUser = {uid, name: userName}
         if(uid) {
             console.info(`Processing ask from ${uid}`)                        
-            
-            if(isNewChat) {
-                generateChatTitle(uid, text, chatId, emitChatResponse)
-            }
 
             saveChatMessage(uid, chatId, "user", text)
             .catch(error => {
                 console.error(error)
             })
-
-            chat(user, text, chatId, emitChatResponse )
+            
+            chat(user, payload, emitChatResponse)
         }
     })
 }

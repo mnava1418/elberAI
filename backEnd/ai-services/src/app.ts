@@ -1,9 +1,9 @@
 import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { proxy_validate } from 'auth-services'
 
 import indexRoutes from './routes/index.routes';
+import { proxy_validate } from './middlewares/auth.middleware';
 
 const app = express();
 

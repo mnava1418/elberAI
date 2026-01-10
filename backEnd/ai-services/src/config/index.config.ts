@@ -17,3 +17,7 @@ export const firebase = {
 export const openaiCfg = {
     cred: process.env.OPENAI_API_KEY
 }
+
+export const gateway = {
+    secret: process.env.GATEWAY_SECRET
+}

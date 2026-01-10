@@ -20,13 +20,11 @@
   },
   "dependencies": {
     "@openai/agents": "^0.3.7",
-    "auth-services": "file:../auth-services",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "firebase-admin": "^13.5.0",
     "helmet": "^8.1.0",
-    "notification-services": "file:../notification-services",
     "openai": "^6.8.1",
     "socket.io": "^4.8.1",
     "zod": "^4.3.5"

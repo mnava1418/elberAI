@@ -22,5 +22,12 @@
             "command": "npm run dev",
             "cwd": "${workspaceFolder}/backEnd/ai-services"
         },       
+        {
+            "type": "node-terminal",
+            "name": "Run Notification Services",
+            "request": "launch",
+            "command": "npm run dev",
+            "cwd": "${workspaceFolder}/backEnd/notification-services"
+        },       
     ]
 }

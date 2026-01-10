@@ -4,20 +4,26 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "dev": "nodemon src/bin/www.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/bin/www.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^24.3.0",
     "@types/nodemailer": "^7.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   },
   "dependencies": {
     "dotenv": "^17.2.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
     "nodemailer": "^7.0.5"
   }
 }

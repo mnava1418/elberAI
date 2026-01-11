@@ -18,12 +18,14 @@ export const firebase = {
 
 export const auth = {
     token: process.env.JWT_TOKEN,
+    internal: process.env.INTERNAL_TOKEN
 }
 
 export const notification = {
     email: {
         from: 'martin@namart.tech'
-    }
+    },
+    url: process.env.NOTIFICATION_SERVICE
 }
 
 export const gateway = {

@@ -1,18 +1,21 @@
 import { Request, Response, NextFunction } from "express";
-import { gateway } from "../config/index.config";
+import jwt from 'jsonwebtoken';
+import { auth } from "../config/index.config";
 
-export const proxy_validate = (req: Request, res: Response, next: NextFunction) => {
+export const validateToken = (req: Request, res: Response, next: NextFunction) => {
     try {
-        console.info('Validating rest call...')
-        const headers = req.headers
+        const authToken = req.headers.authorization
 
-        if(headers['x-api-gateway-secret'] === gateway.secret) {
-            next()
-        } else {
+        if(!authToken) {
             res.status(403).json({error: 'Invalid Call.'})
-        }        
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({error: 'Internal Error Server.'})
-    }
+            return
+        }
+
+        const token = authToken.split(' ')[1]
+        jwt.verify(token, auth.token as string);
+        next();
+    } catch (err) {
+        res.status(403).json({error: 'Invalid Call.'})
+   }
 }
+

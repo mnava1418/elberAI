@@ -10,10 +10,10 @@ export const email = {
     from: 'martin@namart.tech'
 }
 
-export const gateway = {
-    secret: process.env.GATEWAY_SECRET
-}
-
 export const server = {
     port: process.env.NOTIFICATION_PORT,
+}
+
+export const auth = {
+    token: process.env.INTERNAL_TOKEN
 }

@@ -1,8 +1,8 @@
 import admin from 'firebase-admin'
 import { RequestAccessModel, RequestResponseModel, RequestStatus, RequestStatusModel } from '../models/auth.model';
-import { server, notification, auth } from '../config/index.config';
+import { server, auth } from '../config/index.config';
 import jwt from 'jsonwebtoken';
-import { SendEmailInput, EmailMessageType, sendEmail } from 'notification-services'
+import sendEmail from './notification.service';
 
 export const generateToken = (payload: object) => {
     return jwt.sign(payload, auth.token as string);
@@ -73,26 +73,12 @@ export const validateAccessCode = async (email: string, accessCode: number) => {
 const sendRequestEmails = (email: string) => {
     const approveToken = generateToken({ email, isApproved: true })
     const rejectToken = generateToken({ email, isApproved: false })
+
+    const approveURL = `${server.gateway}/auth/access/review?token=${approveToken}`
+    const rejectURL = `${server.gateway}/auth/access/review?token=${rejectToken}`
     
-    const userRequestInput: SendEmailInput = {
-        to: email,
-        subject: '¡Recibimos tu solicitud de acceso!',
-        messageType: EmailMessageType.UserRequestAccess
-    }
-
-    const adminRequestInput: SendEmailInput = {
-        to: notification.email.from,
-        subject: '¡Alerta de nuevo solicitante!',
-        messageType: EmailMessageType.AdminRequestAccess,
-        payload: {
-            userEmail: email,
-            approveURL: `${server.gateway}/auth/access/review?token=${approveToken}`,
-            rejectURL: `${server.gateway}/auth/access/review?token=${rejectToken}`
-        }
-    }
-
-    sendEmail(userRequestInput)
-    sendEmail(adminRequestInput)
+    const body = { userEmail: email, approveURL, rejectURL}
+    sendEmail('/email/requestAccess', body)
 }
 
 export const getRequestStatus = async (email: string): Promise<RequestStatusModel> => {
@@ -116,14 +102,8 @@ export const getRequestStatus = async (email: string): Promise<RequestStatusMode
 };
 
 const sendAccessResponseEmail = (email: string, isApproved: boolean, accessCode: number | null) => {
-    const adminResponseInput: SendEmailInput = {
-        to: email,
-        subject: isApproved ? '¡Felicidades, tu acceso fue aprobado!' : '¡Chale, tu acceso fue rechazado!',
-        messageType: isApproved ? EmailMessageType.UserAccessGranted : EmailMessageType.UserAccessDenied,
-        payload: isApproved && accessCode !== null ? { code: accessCode } : undefined
-    };
-
-    sendEmail(adminResponseInput);
+    const body = {email, isApproved, accessCode}
+    sendEmail('/email/accessResponse', body)
 };
 
 const generateAccessCode = () => {

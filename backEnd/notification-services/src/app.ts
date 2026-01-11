@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
 import indexRoutes from './routes/index.routes';
-import { proxy_validate } from './middlewares/aut.middleware';
+import { validateToken } from './middlewares/aut.middleware';
 
 const app = express();
 
@@ -22,7 +22,7 @@ const setMiddlewares = () => {
         next()
     })
     
-    app.use(proxy_validate)
+    app.use(validateToken)
 }
 
 const setRoutes = () => {

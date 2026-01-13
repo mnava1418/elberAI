@@ -69,3 +69,23 @@ export const verifyAccount = (req: Request, res: Response) => {
 
     res.json({result: true}).status(200)
 }
+
+export const resetPassword = (req: Request, res: Response) => {
+    try {
+        const { email, recoverLink } = req.body
+        
+        const recoverPasswordInput: SendEmailInput = {
+            to: email,
+            subject: 'Recupera tu password',
+            messageType: EmailMessageType.RecoverPassword,
+            payload: {recoverLink}
+        }
+
+        sendEmail(recoverPasswordInput)
+
+    } catch (error) {
+        console.error('Error sending access response email', error)
+    }
+
+    res.json({result: true}).status(200)
+}

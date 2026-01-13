@@ -1,6 +1,6 @@
 import { getRequestStatus } from "./auth.service";
 import admin from 'firebase-admin'
-import { sendEmail, SendEmailInput, EmailMessageType } from 'notification-services'
+import sendEmail from "./notification.service";
 
 export const signUp = async (email: string, password: string, displayName: string): Promise<{ registered: boolean, message: string }> => {
     try {
@@ -36,14 +36,9 @@ export const signUp = async (email: string, password: string, displayName: strin
 
 const sendVerifyEmail = async (email: string, name: string) => {
     const link = await admin.auth().generateEmailVerificationLink(email)
-    const verifyEmailInput: SendEmailInput = {
-        to: email,
-        subject: '¡Ya casi! Verifica tu correo para terminar',
-        messageType: EmailMessageType.VerifyEmail,
-        payload: {name, link}
-    }
+    const body = { email, name, link }
 
-    sendEmail(verifyEmailInput)
+    sendEmail('/email/verifyAccount', body)
 }
 
 export const resetPassword = async (email: string): Promise<string> => {
@@ -54,14 +49,9 @@ export const resetPassword = async (email: string): Promise<string> => {
         }
 
         const recoverLink = await admin.auth().generatePasswordResetLink(email)
-        const recoverPasswordInput: SendEmailInput = {
-            to: email,
-            subject: 'Recupera tu password',
-            messageType: EmailMessageType.RecoverPassword,
-            payload: {recoverLink}
-        }
+        const body = { email, recoverLink }
     
-        sendEmail(recoverPasswordInput)
+        sendEmail('/email/resetPassword', body)
     } catch (error) {
         console.error(error);
     } finally {

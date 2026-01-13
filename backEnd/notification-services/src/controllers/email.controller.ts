@@ -49,3 +49,23 @@ export const accessRespose = (req: Request, res: Response) => {
 
     res.json({result: true}).status(200)
 }
+
+export const verifyAccount = (req: Request, res: Response) => {
+    try {
+        const { email, name, link } = req.body
+        
+        const verifyEmailInput: SendEmailInput = {
+            to: email,
+            subject: '¡Ya casi! Verifica tu correo para terminar',
+            messageType: EmailMessageType.VerifyEmail,
+            payload: {name, link}
+        }
+
+        sendEmail(verifyEmailInput)
+
+    } catch (error) {
+        console.error('Error sending access response email', error)
+    }
+
+    res.json({result: true}).status(200)
+}

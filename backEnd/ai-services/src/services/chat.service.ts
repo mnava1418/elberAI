@@ -13,7 +13,7 @@ export const saveChatMessage = async (uid: string, chatId: number, role: ElberRo
         }      
 
         const db = admin.database()
-        const ref = db.ref(`/chat/${uid}/${chatId}/messages/${message.createdAt}`)
+        const ref = db.ref(`/${uid}/chats/${chatId}/messages/${message.createdAt}`)
         await ref.update(message)        
     } catch (error) {
         console.error(error)
@@ -24,7 +24,7 @@ export const saveChatMessage = async (uid: string, chatId: number, role: ElberRo
 export const getUserChats = async (uid: string): Promise<ElberChat[]> => {
     try {
         const db = admin.database()
-        const ref = db.ref(`/chat/${uid}`)
+        const ref = db.ref(`/${uid}/chats`)
 
         const snapshot = await ref.once('value')
         const data = snapshot.val()
@@ -57,7 +57,7 @@ export const getUserChats = async (uid: string): Promise<ElberChat[]> => {
 export const updateTitle = async (uid: string, chatId: number, name: string) => {
     try {
         const db = admin.database()
-        const ref = db.ref(`/chat/${uid}/${chatId}`)
+        const ref = db.ref(`/${uid}/chats/${chatId}`)
         await ref.update({name})
     } catch (error) {
         console.error(error)
@@ -71,7 +71,7 @@ export const deleteChat = async (uid: string, chatId: number) => {
         ShortTermMemory.getInstance().deleteSession(conversationId)
         
         const db = admin.database()
-        const ref = db.ref(`/chat/${uid}/${chatId}`)
+        const ref = db.ref(`/${uid}/chats/${chatId}`)
         await ref.remove()        
     } catch (error) {
         console.error(error)

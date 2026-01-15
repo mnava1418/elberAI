@@ -78,3 +78,22 @@ export const deleteChat = async (uid: string, chatId: number) => {
         throw new Error('Unable to delete chat')
     }
 }
+
+export const getChatSummary = async (uid: string, chatId: number) => {
+    try {
+        const db = admin.database()
+        const ref = db.ref(`/${uid}/chats/${chatId}`)
+        const snapshot = await ref.once('value')
+        const data = snapshot.val()
+
+        if(data && data.summary) {
+            return data.summary
+        }
+        
+        return ''
+        
+    } catch (error) {
+        console.error(error)
+        throw new Error('Unable to delete chat')
+    }
+}

@@ -1,10 +1,5 @@
 import { getChatSummary } from "../services/chat.service";
-
-type MemoryEntry = {
-    summary: string
-    turnsCount: number
-    expiresAt: number
-}
+import { MemoryEntry } from "./elber.model";
 
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; //24 hours
 
@@ -58,6 +53,13 @@ class MidTermMemory {
 
         this.memories.set(conversationId, memory)
         return memory
+    }
+
+    increaseTurnsCount(conversationId: string) {
+        if(this.memories.has(conversationId)) {
+            const memory = this.memories.get(conversationId)!
+            memory.turnsCount += 1
+        }
     }
 }
 

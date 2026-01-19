@@ -1,8 +1,31 @@
-import { ElberEvent, ElberRequest, ElberUser } from "../models/elber.model";
+import { ElberEvent, ElberRequest, ElberResponse, ElberUser } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents';
 import agents from "../agents";
 import { saveChatMessage, updateTitle } from "./chat.service";
 import ShortTermMemory from "../models/shortTermMemory.model";
+import MidTermMemory from "../models/midTermMemory.model";
+
+const MEMORY_TURNS_LIMIT = 8
+
+const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+    const { user, originalRequest, agentResponse, memory, conversationId } = elberResponse
+    
+    generateChatTitle(user.uid, originalRequest, emitMessage)
+    .catch(error => {
+        console.error('Error actualizando título:', error)
+    })
+    
+    saveChatMessage(user.uid, originalRequest.chatId, 'assistant', agentResponse)
+    .catch(error => {
+        console.error('Error guardando respuesta', error)
+    })    
+
+    if(memory.turnsCount >= MEMORY_TURNS_LIMIT ) {
+        console.log('Generate memory')
+    } else {
+        MidTermMemory.getInstance().increaseTurnsCount(conversationId)
+    }
+}
 
 export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     await withTrace('Elber workflow', async() => {
@@ -10,8 +33,9 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
         try {            
             const conversationId = `${user.uid}_${chatId.toString()}`
             const session = ShortTermMemory.getInstance().getSession(conversationId)
+            const midMemory = await MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId)
 
-            const result = await run(agents.elber(user.name), text, {
+            const result = await run(agents.elber(user.name, midMemory.summary), text, {
                 session,
                 maxTurns: 3,
                 stream: true
@@ -29,18 +53,17 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
 
                     if(event.data.event.type == 'response.completed' && !responseCompleted) {
                         responseCompleted = true
-                        emitMessage('elber:response', chatId, '' );                        
+                        emitMessage('elber:response', chatId, '' );
                         
-                        saveChatMessage(user.uid, chatId, 'assistant', agentResponse)
-                        .catch(error => {
-                            console.error(error)
-                        })                        
+                        const elberResponse: ElberResponse = {
+                            user,
+                            agentResponse,
+                            conversationId,
+                            originalRequest: request,
+                            memory: midMemory
+                        }
                         
-                        generateChatTitle(user.uid, request, emitMessage)
-                        .catch(error => {
-                            console.error('Error actualizando título:', error)
-                        })
-                        
+                        handleResponse(elberResponse, emitMessage)
                     }    
 
                     if(event.data.event.type == 'response.error') {

@@ -4,11 +4,6 @@ export enum ElberAction {
     CHAT_TEXT = 'chat_text'
 }
 
-export type ElberResponse = {
-    action: ElberAction,
-    payload: Record<string, any>
-}
-
 export type ElberUser = {
     uid: string,
     name: string,
@@ -19,6 +14,14 @@ export type ElberRequest = {
     text: string,
     chatId: number,
     title: string 
+}
+
+export type ElberResponse = {
+    user: ElberUser,
+    originalRequest: ElberRequest,
+    agentResponse: string,
+    memory: MemoryEntry,
+    conversationId: string
 }
 
 export type ElberRole = 'user' | 'assistant'
@@ -34,4 +37,10 @@ export type ElberChat = {
     name?: string
     id: number
     messages: ElberMessage[]
+}
+
+export type MemoryEntry = {
+    summary: string
+    turnsCount: number
+    expiresAt: number
 }

@@ -1,7 +1,7 @@
 import { ElberEvent, ElberRequest, ElberResponse, ElberUser } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents';
 import agents from "../agents";
-import { saveChatMessage, updateTitle } from "./chat.service";
+import { saveChatMessage, updateTitle, updateChatSummary } from "./chat.service";
 import ShortTermMemory from "../models/shortTermMemory.model";
 import MidTermMemory from "../models/midTermMemory.model";
 
@@ -20,11 +20,14 @@ const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: Elber
         console.error('Error guardando respuesta', error)
     })    
 
+    MidTermMemory.getInstance().increaseTurnsCount(conversationId)
+
     if(memory.turnsCount >= MEMORY_TURNS_LIMIT ) {
-        console.log('Generate memory')
-    } else {
-        MidTermMemory.getInstance().increaseTurnsCount(conversationId)
-    }
+        generateSummary(memory.summary, conversationId, user.uid, originalRequest.chatId)
+        .catch(error => {
+            console.error('Error generando resumen de la conversacion', error)
+        })
+    } 
 }
 
 export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
@@ -78,7 +81,7 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
     })
 }
 
-export const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     try {
         const {chatId, text, title} = request
         const conversationId = `${uid}_${chatId.toString()}`
@@ -102,5 +105,22 @@ export const generateChatTitle = async (uid: string, request: ElberRequest, emit
         }            
     } catch (error) {
         console.error('Error en generateChatTitle:', error)            
+    }
+}
+
+const generateSummary = async (currentSummary: string, conversationId: string, uid: string, chatId: number) => {
+    const session = ShortTermMemory.getInstance().getSession(conversationId)
+    const result = await run(agents.summary(currentSummary), '', {
+        session,
+        maxTurns: 3
+    })
+
+    if(result.finalOutput) {
+        MidTermMemory.getInstance().updateSummary(conversationId, result.finalOutput)
+        ShortTermMemory.getInstance().deleteSession(conversationId)
+        updateChatSummary(uid, chatId, result.finalOutput)
+        .catch(error => {
+            console.error('Error updating summary in firebase', error)
+        })
     }
 }

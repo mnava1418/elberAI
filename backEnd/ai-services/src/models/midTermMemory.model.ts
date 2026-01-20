@@ -61,6 +61,14 @@ class MidTermMemory {
             memory.turnsCount += 1
         }
     }
+
+    updateSummary(conversationId: string, newSummary: string) {
+        if(this.memories.has(conversationId)) {
+            const memory = this.memories.get(conversationId)!
+            memory.summary = newSummary
+            memory.turnsCount = 0
+        }
+    }
 }
 
 export default MidTermMemory

@@ -94,6 +94,17 @@ export const getChatSummary = async (uid: string, chatId: number) => {
         
     } catch (error) {
         console.error(error)
-        throw new Error('Unable to delete chat')
+        throw new Error('Unable to get chat summary')
+    }
+}
+
+export const updateChatSummary = async (uid: string, chatId: number, summary: string) => {
+    try {
+        const db = admin.database()
+        const ref = db.ref(`/${uid}/chats/${chatId}`)
+        await ref.update({summary})
+    } catch (error) {
+        console.error(error)
+        throw new Error('Unable to update chat summary')
     }
 }

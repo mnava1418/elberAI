@@ -28,3 +28,13 @@ export const chatTitleAgent = (title: string, lastMessage: string, conversationC
 
     return agent
 }
+
+export const summaryAgent = (currentSummary: string) => {
+    const agent = Agent.create({
+        name: 'Summary Generator',
+        model: 'gpt-4o-mini',
+        instructions: prompts.summaryPrompt(currentSummary),        
+    })
+
+    return agent
+}

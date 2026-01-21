@@ -65,6 +65,12 @@ class MidTermMemory {
 
         return ''
     }
+
+    deleteMemory(conversationId: string) {
+        if(this.memories.has(conversationId)) {
+            this.memories.delete(conversationId)
+        }
+    }
 }
 
 export default MidTermMemory

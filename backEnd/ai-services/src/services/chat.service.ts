@@ -1,6 +1,7 @@
 import admin from 'firebase-admin'
 import { ElberChat, ElberMessage, ElberRole } from '../models/elber.model'
 import ShortTermMemory from '../models/shortTermMemory.model'
+import MidTermMemory from '../models/midTermMemory.model'
 
 export const saveChatMessage = async (uid: string, chatId: number, role: ElberRole, content: string ) => {
     try {        
@@ -69,6 +70,7 @@ export const deleteChat = async (uid: string, chatId: number) => {
     try {
         const conversationId = `${uid}_${chatId.toString()}`
         ShortTermMemory.getInstance().deleteSession(conversationId)
+        MidTermMemory.getInstance().deleteMemory(conversationId)
         
         const db = admin.database()
         const ref = db.ref(`/${uid}/chats/${chatId}`)

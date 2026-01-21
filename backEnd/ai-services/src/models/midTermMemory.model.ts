@@ -19,46 +19,30 @@ class MidTermMemory {
         const currMemory = this.memories.get(conversationId)
 
         if(currMemory) {
-            return this.getCachedMemory(conversationId, currMemory)
-        } else {
-            return await this.getStoredMemory(conversationId, uid, chatId)
-        }
-    }
-
-    private getCachedMemory(conversationId: string, currMemory: MemoryEntry): MemoryEntry {
-        const now = Date.now()
-
-        if(currMemory.expiresAt > now) {
-            currMemory.expiresAt = now + SESSION_TTL_MS
             return currMemory
-        }
-        
-        return this.getNewMemory(conversationId, '')
-    }
+        } 
 
-    private async getStoredMemory(conversationId: string, uid: string, chatId: number): Promise<MemoryEntry> {
         const summary = await getChatSummary(uid, chatId)
         .catch(() => '')
-        
-        return this.getNewMemory(conversationId, summary)
-    }
 
-    private getNewMemory(conversationId: string, summary: string): MemoryEntry {
-        const now = Date.now()
-        const memory: MemoryEntry = {
+        const newMemory: MemoryEntry = {
             summary,
-            expiresAt: now + SESSION_TTL_MS,
-            turnsCount: 0
+            turnsCount: 0,
+            turns: []
         }
 
-        this.memories.set(conversationId, memory)
-        return memory
+        this.memories.set(conversationId, newMemory)
+        return newMemory
     }
 
-    increaseTurnsCount(conversationId: string) {
+    addTurn(conversationId: string, userMessage: string, assistantMessage: string) {
         if(this.memories.has(conversationId)) {
             const memory = this.memories.get(conversationId)!
             memory.turnsCount += 1
+            memory.turns.push({
+                assistantMessage,
+                userMessage
+            })
         }
     }
 
@@ -67,7 +51,19 @@ class MidTermMemory {
             const memory = this.memories.get(conversationId)!
             memory.summary = newSummary
             memory.turnsCount = 0
+            memory.turns = []
         }
+    }
+
+    formatTurns(conversationId: string) {
+        if(this.memories.has(conversationId)) {
+            const memory = this.memories.get(conversationId)!
+            return memory.turns
+            .map((t, i) => `Turno ${i + 1}\n Usuario: ${t.userMessage}\n Elber: ${t.assistantMessage}`)
+            .join("\n\n");
+        }
+
+        return ''
     }
 }
 

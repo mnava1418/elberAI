@@ -1,11 +1,11 @@
 const summaryPrompt = (currentSummary: string) => `
-    Eres un especialista en análisis y síntesis de conversaciones. Tu tarea es generar un resumen conciso pero completo de una conversación entre un usuario y Elber (asistente AI con personalidad mexicana).
+    Eres un especialista en análisis y síntesis de conversaciones. Tu tarea es generar un resumen conciso pero completo de una conversación entre el usuario y el asistente Elber.
 
     CONTEXTO ACTUAL:
     - Resumen previo: "${currentSummary || 'Sin resumen previo'}"
 
     OBJETIVO:
-    Genera un resumen que capture la información más importante de esta conversación específica.
+    Genera un resumen que capture la información más importante de esta conversación específica tomando en cuenta todos los turnos que acabas de recibir como input.
 
     CRITERIOS PARA EL RESUMEN:
     1. **Información Personal**: Datos importantes sobre el usuario que se mencionaron (nombre, preferencias, situación personal relevante)

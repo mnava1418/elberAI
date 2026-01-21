@@ -39,8 +39,13 @@ export type ElberChat = {
     messages: ElberMessage[]
 }
 
+export type TurnChat = {
+    userMessage: string,
+    assistantMessage: string, 
+}
+
 export type MemoryEntry = {
     summary: string
     turnsCount: number
-    expiresAt: number
+    turns: TurnChat[]
 }

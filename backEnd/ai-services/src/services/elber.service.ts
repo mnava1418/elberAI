@@ -20,9 +20,9 @@ const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: Elber
         console.error('Error guardando respuesta', error)
     })    
 
-    MidTermMemory.getInstance().increaseTurnsCount(conversationId)
+    MidTermMemory.getInstance().addTurn(conversationId, originalRequest.text, agentResponse)
 
-    if(memory.turnsCount >= MEMORY_TURNS_LIMIT ) {
+    if(memory.turnsCount >= MEMORY_TURNS_LIMIT && memory.turns.length <= MEMORY_TURNS_LIMIT ) {
         generateSummary(memory.summary, conversationId, user.uid, originalRequest.chatId)
         .catch(error => {
             console.error('Error generando resumen de la conversacion', error)
@@ -109,18 +109,22 @@ const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage
 }
 
 const generateSummary = async (currentSummary: string, conversationId: string, uid: string, chatId: number) => {
-    const session = ShortTermMemory.getInstance().getSession(conversationId)
-    const result = await run(agents.summary(currentSummary), '', {
-        session,
-        maxTurns: 3
-    })
-
-    if(result.finalOutput) {
-        MidTermMemory.getInstance().updateSummary(conversationId, result.finalOutput)
-        ShortTermMemory.getInstance().deleteSession(conversationId)
-        updateChatSummary(uid, chatId, result.finalOutput)
-        .catch(error => {
-            console.error('Error updating summary in firebase', error)
+    try {
+        const formatedTurns = MidTermMemory.getInstance().formatTurns(conversationId)
+        const result = await run(agents.summary(currentSummary), formatedTurns, {
+            maxTurns: 3
         })
+
+        if(result.finalOutput) {
+            MidTermMemory.getInstance().updateSummary(conversationId, result.finalOutput)
+            ShortTermMemory.getInstance().deleteSession(conversationId)
+            updateChatSummary(uid, chatId, result.finalOutput)
+            .catch(error => {
+                console.error('Error updating summary in firebase', error)
+            })
+        }
+    } catch (error) {
+        console.error('Error generando resumen de la conversacion', error)
     }
+    
 }

@@ -49,3 +49,28 @@ export type MemoryEntry = {
     turnsCount: number
     turns: TurnChat[]
 }
+
+/***Long Term Memory Types***/
+
+export type MemoryType =
+  | "goal"
+  | "plan"
+  | "preference"
+  | "constraint"
+  | "profile"
+  | "other";
+
+export type MemoryRecord = {
+  id: string;
+  userId: string;
+  roomId: string | null;
+  type: MemoryType;
+  importance: number; // 1-5
+  text: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type MemoryHit = MemoryRecord & {
+  score: number; // 0-1 (más alto = más relevante)
+};

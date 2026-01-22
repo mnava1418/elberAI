@@ -21,3 +21,7 @@ export const openaiCfg = {
 export const gateway = {
     secret: process.env.GATEWAY_SECRET
 }
+
+export const postgres = {
+    db: process.env.PG_DB
+}

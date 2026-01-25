@@ -43,6 +43,11 @@ const generateSummary = async (currentSummary: string, conversationId: string, u
             .catch(error => {
                 console.error('Error updating summary in firebase', error)
             })
+
+            extractLongTermMemory(result.finalOutput, uid, chatId)
+            .catch(error => {
+                console.error(error)
+            })
         }
     } catch (error) {
         console.error(error)
@@ -53,6 +58,7 @@ const generateSummary = async (currentSummary: string, conversationId: string, u
 const handleUserRelevantInformation = async (userText: string, uid: string, chatId: number) => {
     try {        
         const result = await run(agents.memory.relevantInfo(), userText)
+        console.info(result.finalOutput)
         
         if(result.finalOutput && result.finalOutput.isRelevant) {
             extractLongTermMemory(`${result.finalOutput.reasoning}. ${userText}`, uid, chatId)

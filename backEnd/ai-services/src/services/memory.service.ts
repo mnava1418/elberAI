@@ -4,6 +4,7 @@ import ShortTermMemory from "../models/shortTermMemory.model";
 import { updateChatSummary } from "./chat.service";
 import { run } from '@openai/agents';
 import agents from "../agents";
+import LongTermMemory from "../models/longTermMemory.model";
 
 const MEMORY_TURNS_LIMIT = 8
 
@@ -21,7 +22,7 @@ export const handleMemory = (elberResponse: ElberResponse) => {
     }
 
     /***Manejamos informacion que puede ser relevante del usuario***/
-    handleUserRelevantInformation(originalRequest.text)
+    handleUserRelevantInformation(originalRequest.text, user.uid, originalRequest.chatId)
     .catch(error => {
         console.error(error)
     })   
@@ -49,12 +50,12 @@ const generateSummary = async (currentSummary: string, conversationId: string, u
     }
 }
 
-const handleUserRelevantInformation = async (userText: string) => {
+const handleUserRelevantInformation = async (userText: string, uid: string, chatId: number) => {
     try {        
         const result = await run(agents.memory.relevantInfo(), userText)
         
         if(result.finalOutput && result.finalOutput.isRelevant) {
-            extractLongTermMemory(result.finalOutput.reasoning)
+            extractLongTermMemory(`${result.finalOutput.reasoning}. ${userText}`, uid, chatId)
             .catch(error => {
                 console.error(error)
             })
@@ -65,13 +66,13 @@ const handleUserRelevantInformation = async (userText: string) => {
     }
 }
 
-const extractLongTermMemory = async (text: string) => {
+const extractLongTermMemory = async (text: string, uid: string, chatId: number) => {
     try {
         const result = await run(agents.memory.ltm(), text)
         console.info(result.finalOutput)
 
         if(result.finalOutput && result.finalOutput.memories && result.finalOutput.memories.length > 0) {
-            console.log('Vamos a guardar memoria')
+            LongTermMemory.getInstance().ingestLTM(uid, chatId.toString(), result.finalOutput.memories)
         }
 
     } catch (error) {        

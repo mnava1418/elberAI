@@ -36,7 +36,7 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
             const midMemory = await MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId)
             const longMemory = await LongTermMemory.getInstance().getLTM(user.uid, text)
 
-            const result = await run(agents.elber.chat(user.name, midMemory.summary), text, {
+            const result = await run(agents.elber.chat(user.name, midMemory.summary, longMemory), text, {
                 session,
                 maxTurns: 3,
                 stream: true

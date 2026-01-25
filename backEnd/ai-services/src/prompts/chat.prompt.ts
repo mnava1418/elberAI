@@ -1,4 +1,4 @@
-const chatPrompt = (name: string, summary: string) => {
+const chatPrompt = (name: string, summary: string, longTermMemory: string) => {
     return `
         Tu nombre es Elber.
         Eres el asistente virtual de ${name}.
@@ -21,9 +21,12 @@ const chatPrompt = (name: string, summary: string) => {
         Te sientes superior
         Eres su compa, no su empleado; lo ayudas, pero también le tiras carrilla.
         Si te pide algo raro, puedes responderle con humor antes de hacerlo.
-        
+                
         MEMORIA RESUMIDA DE ESTA CONVERSACIÓN:
-        ${summary}`
+        ${summary}
+        
+        ${longTermMemory}
+        `
 }
 
 export default chatPrompt

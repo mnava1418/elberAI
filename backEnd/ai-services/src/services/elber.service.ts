@@ -1,33 +1,29 @@
 import { ElberEvent, ElberRequest, ElberResponse, ElberUser } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents';
 import agents from "../agents";
-import { saveChatMessage, updateTitle, updateChatSummary } from "./chat.service";
+import { saveChatMessage, updateTitle } from "./chat.service";
 import ShortTermMemory from "../models/shortTermMemory.model";
 import MidTermMemory from "../models/midTermMemory.model";
-
-const MEMORY_TURNS_LIMIT = 8
+import LongTermMemory from "../models/longTermMemory.model";
+import { handleMemory } from "./memory.service";
 
 const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
-    const { user, originalRequest, agentResponse, memory, conversationId } = elberResponse
+    const { user, originalRequest, agentResponse } = elberResponse
     
+    /***Generamos o actualizamos el titulo del chat***/
     generateChatTitle(user.uid, originalRequest, emitMessage)
     .catch(error => {
-        console.error('Error actualizando título:', error)
+        console.error(error)
     })
     
+    /***Guardamos respuesta de Elber en firbase para mantener el historial***/
     saveChatMessage(user.uid, originalRequest.chatId, 'assistant', agentResponse)
     .catch(error => {
         console.error('Error guardando respuesta', error)
     })    
 
-    MidTermMemory.getInstance().addTurn(conversationId, originalRequest.text, agentResponse)
-
-    if(memory.turnsCount >= MEMORY_TURNS_LIMIT && memory.turns.length <= MEMORY_TURNS_LIMIT ) {
-        generateSummary(memory.summary, conversationId, user.uid, originalRequest.chatId)
-        .catch(error => {
-            console.error('Error generando resumen de la conversacion', error)
-        })
-    } 
+    /***Manejamos la memoria medio y largo plazo***/
+    handleMemory(elberResponse)
 }
 
 export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
@@ -35,10 +31,12 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
         const {chatId, text} = request
         try {            
             const conversationId = `${user.uid}_${chatId.toString()}`
+            
             const session = ShortTermMemory.getInstance().getSession(conversationId)
             const midMemory = await MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId)
+            const longMemory = await LongTermMemory.getInstance().getLTM(user.uid, text)
 
-            const result = await run(agents.elber(user.name, midMemory.summary), text, {
+            const result = await run(agents.elber.chat(user.name, midMemory.summary), text, {
                 session,
                 maxTurns: 3,
                 stream: true
@@ -87,44 +85,20 @@ const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage
         const conversationId = `${uid}_${chatId.toString()}`
         const session = ShortTermMemory.getInstance().getSession(conversationId)
 
-        const result = await run(agents.chatTitle(title, text), text, {
+        const result = await run(agents.elber.chatTitle(title, text), text, {
             session,
             maxTurns: 3
         })           
         
         if(result.finalOutput && result.finalOutput.changeTitle) {
-            console.info(`Cambiando título: "${title}" → "${result.finalOutput.chatTitle}" | Razón: ${result.finalOutput.reasoning || 'No especificada'}`)
-            
             updateTitle(uid, chatId, result.finalOutput.chatTitle)
             .catch(error => {
                 console.error(error)
             })
             emitMessage('elber:title', chatId, result.finalOutput.chatTitle)
-        } else {
-            console.info(`Manteniendo título: "${title}" | Razón: ${result.finalOutput?.reasoning || 'No hay cambio necesario'}`)
         }            
     } catch (error) {
-        console.error('Error en generateChatTitle:', error)            
+        console.error(error)
+        throw  new Error('Error en generateChatTitle')   
     }
-}
-
-const generateSummary = async (currentSummary: string, conversationId: string, uid: string, chatId: number) => {
-    try {
-        const formatedTurns = MidTermMemory.getInstance().formatTurns(conversationId)
-        const result = await run(agents.summary(currentSummary), formatedTurns, {
-            maxTurns: 3
-        })
-
-        if(result.finalOutput) {
-            MidTermMemory.getInstance().updateSummary(conversationId, result.finalOutput)
-            ShortTermMemory.getInstance().deleteSession(conversationId)
-            updateChatSummary(uid, chatId, result.finalOutput)
-            .catch(error => {
-                console.error('Error updating summary in firebase', error)
-            })
-        }
-    } catch (error) {
-        console.error('Error generando resumen de la conversacion', error)
-    }
-    
 }

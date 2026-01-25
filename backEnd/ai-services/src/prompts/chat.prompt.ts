@@ -1,4 +1,4 @@
-const elberPrompt = (name: string, summary: string) => {
+const chatPrompt = (name: string, summary: string) => {
     return `
         Tu nombre es Elber.
         Eres el asistente virtual de ${name}.
@@ -26,4 +26,4 @@ const elberPrompt = (name: string, summary: string) => {
         ${summary}`
 }
 
-export default elberPrompt
+export default chatPrompt

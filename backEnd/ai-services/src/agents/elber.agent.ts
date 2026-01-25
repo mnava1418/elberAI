@@ -2,11 +2,11 @@ import { Agent } from "@openai/agents";
 import prompts from '../prompts'
 import { z } from "zod";
 
-export const elberAgent = (name: string, summary: string) => {
+export const chatAgent = (name: string, summary: string) => {
     const agent = Agent.create({
         name: 'Elber',
         model: 'gpt-4o-mini',
-        instructions: prompts.elberPrompt(name, summary),        
+        instructions: prompts.elber.chat(name, summary),        
     })
 
     return agent
@@ -22,18 +22,8 @@ export const chatTitleAgent = (title: string, lastMessage: string, conversationC
     const agent = Agent.create({
         name: 'Title Generator',
         model: 'gpt-4o-mini',
-        instructions: prompts.chatTitlePrompt(title, lastMessage, conversationContext),
+        instructions: prompts.elber.chatTitle(title, lastMessage, conversationContext),
         outputType: TitleEvent
-    })
-
-    return agent
-}
-
-export const summaryAgent = (currentSummary: string) => {
-    const agent = Agent.create({
-        name: 'Summary Generator',
-        model: 'gpt-4o-mini',
-        instructions: prompts.summaryPrompt(currentSummary),        
     })
 
     return agent

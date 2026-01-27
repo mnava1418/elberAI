@@ -55,11 +55,11 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
             for await(const event of result) {
                 if(event.type == 'raw_model_stream_event' && event.data.event) {
                     if(event.data.event.type == 'response.output_text.delta') {
-                        agentResponse = `${agentResponse}${event.data.event?.delta}`
+                        agentResponse = `${agentResponse}${event.data.event?.delta}`.trim()
                         emitMessage('elber:stream', chatId, event.data.event?.delta )
                     }
 
-                    if(event.data.event.type == 'response.completed' && !responseCompleted) {
+                    if(event.data.event.type == 'response.completed' && !responseCompleted && agentResponse.trim() != '') {
                         responseCompleted = true
                         emitMessage('elber:response', chatId, '' );
                         

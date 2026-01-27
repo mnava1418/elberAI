@@ -1,6 +1,6 @@
 import { MemoryHit, MemoryRecord } from "../../models/elber.model";
 import { pgPool } from "./ltmDB.service";
-import * as db from "../../config/memoryDBqueries.config"
+import * as db from "../../db/queries/memory.queries"
 
 type PgVectorSearch = {
     userId: string;

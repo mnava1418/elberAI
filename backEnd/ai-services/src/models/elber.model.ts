@@ -74,3 +74,7 @@ export type MemoryRecord = {
 export type MemoryHit = MemoryRecord & {
   score: number; // 0-1 (más alto = más relevante)
 };
+
+export type UserContext = {
+    userId: string
+}

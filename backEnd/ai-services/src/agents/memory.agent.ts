@@ -14,7 +14,7 @@ export const summaryAgent = (currentSummary: string) => {
 
 export const ltmAgent = () => {    
     const LTMItem = z.object({
-        text: z.string().describe('Informacion relevante para el usuario que puede ser usada en el futuro'),
+        text: z.string().describe('Informacion relevante para el usuario que puede ser usada en el futuro. SIEMPRE en primera persona'),
         type: z.string().describe('tipo de informacion. Puede ser unicamente: goal, plan, preference, constraint, profile u other '),
         importance: z.number().describe('que tan importante puede ser para el usuario'),
         reasoning: z.string().describe('breve explicación de porque esto puede ser relevante para el usuario en un futuro')

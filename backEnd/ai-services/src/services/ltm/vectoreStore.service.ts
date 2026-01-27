@@ -1,5 +1,6 @@
 import { MemoryHit, MemoryRecord } from "../../models/elber.model";
 import { pgPool } from "./ltmDB.service";
+import * as db from "../../config/memoryDBqueries.config"
 
 type PgVectorSearch = {
     userId: string;
@@ -40,16 +41,7 @@ class PgVectorMemoryStore {
         const { userId, queryEmbedding, topK, minImportance = 1 } = params;
 
         const result = await pgPool.query(
-            `
-            SELECT
-            id, user_id, room_id, type, importance, text, created_at, updated_at,
-            (1 - (embedding <=> $2::vector)) AS score
-            FROM user_memories
-            WHERE user_id = $1
-            AND importance >= $3
-            ORDER BY embedding <=> $2::vector ASC
-            LIMIT $4
-            `,
+            db.searchMemory,
             [userId, toPgVector(queryEmbedding), minImportance, topK]
         );
 
@@ -66,17 +58,22 @@ class PgVectorMemoryStore {
         }));
     }
 
+    async getUserInfo(userId: string): Promise<{text: string}[]> {
+        const result = await pgPool.query(
+            db.getUserData,
+            [userId]
+        )
+
+        return result.rows.map((row: any) => ({
+            text: row.text
+        }))
+    }
+
     async findNearDuplicate(params: PgVectorDup): Promise<{ id: string; score: number } | null> {
         const { userId, candidateEmbedding, threshold } = params;
 
         const result = await pgPool.query(
-            `
-            SELECT id, (1 - (embedding <=> $2::vector)) AS score
-            FROM user_memories
-            WHERE user_id = $1
-            ORDER BY embedding <=> $2::vector ASC
-            LIMIT 1
-            `,
+            db.findDuplicateMemory,
             [userId, toPgVector(candidateEmbedding)]
         );
 
@@ -135,11 +132,7 @@ class PgVectorMemoryStore {
         const { userId, roomId = null, type, importance, text, embedding } = params;
 
         const result = await pgPool.query(
-            `
-            INSERT INTO user_memories (user_id, room_id, type, importance, text, embedding)
-            VALUES ($1, $2, $3, $4, $5, $6::vector)
-            RETURNING id, user_id, room_id, type, importance, text, created_at, updated_at
-            `,
+            db.insertMemory,
             [userId, roomId, type, importance, text, toPgVector(embedding)]
         );
 

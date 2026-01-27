@@ -78,7 +78,8 @@ const extractLongTermMemory = async (text: string, uid: string, chatId: number) 
         console.info(result.finalOutput)
 
         if(result.finalOutput && result.finalOutput.memories && result.finalOutput.memories.length > 0) {
-            LongTermMemory.getInstance().ingestLTM(uid, chatId.toString(), result.finalOutput.memories)
+            const ltm = new LongTermMemory()
+            ltm.ingestLTM(uid, chatId.toString(), result.finalOutput.memories)
         }
 
     } catch (error) {        

@@ -24,6 +24,10 @@ class LongTermMemoryReader {
             minImportance            
         });
     }
+
+    async retriveAll(userId: string): Promise<{text: string}[]> {
+        return this.store.getUserInfo(userId)
+    }
 }
 
 export default LongTermMemoryReader

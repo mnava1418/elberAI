@@ -1,4 +1,4 @@
-import { ElberEvent, ElberRequest, ElberResponse, ElberUser } from "../models/elber.model";
+import { ElberEvent, ElberRequest, ElberResponse, ElberUser, UserContext } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents';
 import agents from "../agents";
 import { saveChatMessage, updateTitle } from "./chat.service";
@@ -34,12 +34,19 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
             
             const session = ShortTermMemory.getInstance().getSession(conversationId)
             const midMemory = await MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId)
-            const longMemory = await LongTermMemory.getInstance().getLTM(user.uid, text)
+
+            const ltm = new LongTermMemory()
+            const longMemory = await ltm.getMemory(user.uid, text)
+            
+            const userContext: UserContext = {
+                userId: user.uid
+            }            
 
             const result = await run(agents.elber.chat(user.name, midMemory.summary, longMemory), text, {
                 session,
                 maxTurns: 3,
-                stream: true
+                stream: true,
+                context: userContext
             })            
 
             let agentResponse = ''

@@ -8,6 +8,7 @@ const relevantInfoPrompt = `
     - El usuario está AFIRMANDO o DECLARANDO algo sobre sí mismo
     - El usuario está COMPARTIENDO datos personales (trabajo, gustos, experiencias, etc.)
     - El usuario está CONTANDO algo de su vida
+    - El usuario está EXPLICITAMENTE pidiendo recordar algo
     
     Ejemplos que deben devolver TRUE:
     - "Trabajo en Goldman Sachs"
@@ -15,6 +16,7 @@ const relevantInfoPrompt = `
     - "Tengo 25 años"
     - "Sabías que trabajo en Goldman Sachs?" (aquí está dando la información)
     - "Mi color favorito es el azul"
+    - "Recuerda que vivo en Nueva York"
 
     Devuelve TRUE SÓLO si es estable/útil:
     - objetivos (goal)

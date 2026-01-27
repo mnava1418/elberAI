@@ -4,17 +4,7 @@ import PgVectorMemoryStore from "../services/ltm/vectoreStore.service";
 import { MemoryHit } from "./elber.model";
 
 class LongTermMemory {
-    private static instance: LongTermMemory
-
-    static getInstance(): LongTermMemory {
-        if(!LongTermMemory.instance) {
-            LongTermMemory.instance = new LongTermMemory()
-        }
-
-        return LongTermMemory.instance
-    }
-
-    async getLTM(userId: string, userText: string): Promise<string> {
+    async getMemory(userId: string, userText: string): Promise<string> {
         try {
             const store = new PgVectorMemoryStore();
             const reader = new LongTermMemoryReader(store);
@@ -34,22 +24,36 @@ class LongTermMemory {
         }        
     }
 
+    async getUserData(userId: string) {
+        const store = new PgVectorMemoryStore();
+        const reader = new LongTermMemoryReader(store);
+        
+        const data = await reader.retriveAll(userId)
+        let lines = data.map((m, index) => `${index + 1}: ${m.text}`);
+
+        const longList = lines.length > 10
+        lines = lines.slice(0, 10)
+
+        if(lines.length === 0) return 'No se nada de ti'
+
+        return `
+            ${longList ? 'Se varias cosas de ti pero esto es lo más reciente. Si quieres otra cosa pregúntame al más especifico.' : 'Esto es lo que se de ti: \n'}
+            ${lines.join("\n")}
+        `.trim()
+    }
+
     buildLtmBlock(memories: MemoryHit[], opts?: {
-        // Umbral default para memorias "normales"
         minScore?: number;          // default 0.75
-        // Umbral especial para memorias tipo profile (ej. trabajo, nombre, etc.)
         minProfileScore?: number;   // default 0.35
         maxItems?: number;          // default 8
-        // Si no pasa nada los umbrales, ¿metemos los mejores N de todas formas?
         fallbackTopN?: number;      // default 1
-        // Para evitar meter memorias muy débiles en fallback
         fallbackMinScore?: number;  // default 0.30
     }): string {
         const minScore = opts?.minScore ?? 0.75;
         const minProfileScore = opts?.minProfileScore ?? 0.35;
         const maxItems = opts?.maxItems ?? 8;
 
-        const fallbackTopN = opts?.fallbackTopN ?? 1;         // mete 1 si no hay nada
+        const fallbackTopN = opts?.fallbackTopN ?? 1;
         const fallbackMinScore = opts?.fallbackMinScore ?? 0.30;
 
         // 1) Primero seleccionamos por umbrales “inteligentes”
@@ -91,7 +95,7 @@ class LongTermMemory {
             roomId,
             extracted,
             minImportanceToStore: 3,
-            dedupeThreshold: 0.88,
+            dedupeThreshold: 0.70,
         });
     }
 }

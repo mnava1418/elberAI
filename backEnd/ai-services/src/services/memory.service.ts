@@ -19,13 +19,13 @@ export const handleMemory = (elberResponse: ElberResponse) => {
         .catch(error => {
             console.error(error)
         })
+    } else {
+        /***Manejamos informacion que puede ser relevante del usuario***/
+        handleUserRelevantInformation(originalRequest.text, user.uid, originalRequest.chatId)
+        .catch(error => {
+            console.error(error)
+        })   
     }
-
-    /***Manejamos informacion que puede ser relevante del usuario***/
-    handleUserRelevantInformation(originalRequest.text, user.uid, originalRequest.chatId)
-    .catch(error => {
-        console.error(error)
-    })   
 }
 
 const generateSummary = async (currentSummary: string, conversationId: string, uid: string, chatId: number) => {

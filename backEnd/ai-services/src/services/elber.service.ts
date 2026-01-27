@@ -82,6 +82,11 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
 const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     try {
         const {chatId, text, title} = request
+
+        if(title != 'Chat Nuevo') {
+            return
+        }
+
         const conversationId = `${uid}_${chatId.toString()}`
         const session = ShortTermMemory.getInstance().getSession(conversationId)
 

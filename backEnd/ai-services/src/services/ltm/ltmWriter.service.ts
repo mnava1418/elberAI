@@ -63,6 +63,14 @@ class LongTermMemoryWriter {
             });
         }
     }
+
+    async deleteAll(userId: string) {
+        await this.store.deleteAll(userId)
+    }
+
+    async deleteMemories(userId: string, memoryIds: string[]) {
+        await this.store.deleteMemories(userId, memoryIds)
+    }
 }
 
 export default LongTermMemoryWriter

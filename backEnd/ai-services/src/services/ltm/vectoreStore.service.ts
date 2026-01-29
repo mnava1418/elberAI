@@ -148,6 +148,20 @@ class PgVectorMemoryStore {
             updatedAt: row.updated_at,
         };
     }
+
+    async deleteAll(userId: string) {
+        await pgPool.query(
+            db.deleteAll,
+            [userId]
+        )
+    }
+
+    async deleteMemories(userId: string, memoryIds: string[]) {
+        await pgPool.query(
+            db.deleteMemories,
+            [userId, memoryIds]
+        )
+    }
 }
 
 export default PgVectorMemoryStore

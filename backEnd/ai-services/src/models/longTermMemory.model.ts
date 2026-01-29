@@ -4,7 +4,7 @@ import PgVectorMemoryStore from "../services/ltm/vectoreStore.service";
 import { MemoryHit } from "./elber.model";
 
 class LongTermMemory {
-    async getMemory(userId: string, userText: string): Promise<string> {
+    async getMemory(userId: string, userText: string): Promise<MemoryHit[]> {
         try {
             const store = new PgVectorMemoryStore();
             const reader = new LongTermMemoryReader(store);
@@ -20,7 +20,7 @@ class LongTermMemory {
             return ltmBlock    
         } catch (error) {
             console.error('Error obteniendo long term memory', error)
-            return ''
+            return []
         }        
     }
 
@@ -43,23 +43,20 @@ class LongTermMemory {
     }
 
     buildLtmBlock(memories: MemoryHit[], opts?: {
-        minScore?: number;          // default 0.75
-        minProfileScore?: number;   // default 0.35
+        minScore?: number;          // default 0.75        
         maxItems?: number;          // default 8
         fallbackTopN?: number;      // default 1
         fallbackMinScore?: number;  // default 0.30
-    }): string {
-        const minScore = opts?.minScore ?? 0.75;
-        const minProfileScore = opts?.minProfileScore ?? 0.35;
+    }): MemoryHit[] {
+        const minScore = opts?.minScore ?? 0.75;        
         const maxItems = opts?.maxItems ?? 8;
-
         const fallbackTopN = opts?.fallbackTopN ?? 1;
-        const fallbackMinScore = opts?.fallbackMinScore ?? 0.30;
+        const fallbackMinScore = opts?.fallbackMinScore ?? 0.35;
 
         // 1) Primero seleccionamos por umbrales “inteligentes”
         const strong = memories.filter((m) => {
             const t = m.type ?? "other";
-            const threshold = t === "profile" ? minProfileScore : minScore;
+            const threshold = minScore;
             return m.score >= threshold;
         });
 
@@ -75,15 +72,7 @@ class LongTermMemory {
             selected = best.filter(m => m.score >= fallbackMinScore).slice(0, fallbackTopN);
         }
 
-        if (!selected.length) return "";
-
-        // 3) Formateo
-        const lines = selected.map((m) => `- ${m.text}`);
-
-        return `
-            MEMORIA LARGA DEL USUARIO (hechos recordados; si algo contradice al usuario hoy, dale prioridad a lo que diga hoy):
-            ${lines.join("\n")}
-            `.trim();
+        return selected        
     }
 
     async ingestLTM(userId: string, roomId: string, extracted: ExtractedMemory[]) {                 
@@ -97,6 +86,20 @@ class LongTermMemory {
             minImportanceToStore: 3,
             dedupeThreshold: 0.70,
         });
+    }
+
+    async resetMemory(userId: string) {
+        const store = new PgVectorMemoryStore();           
+        const writer = new LongTermMemoryWriter(store);
+
+        await writer.deleteAll(userId)
+    }
+
+    async deleteMemories(userId: string, memoryIds: string[]) {
+        const store = new PgVectorMemoryStore();           
+        const writer = new LongTermMemoryWriter(store);
+
+        await writer.deleteMemories(userId, memoryIds)
     }
 }
 

@@ -1,4 +1,4 @@
-import { MemoryHit, MemoryRecord } from "../../models/elber.model";
+import { MemoryHit, MemoryRecord, UserData } from "../../models/elber.model";
 import { pgPool } from "./ltmDB.service";
 import * as db from "../../db/queries/memory.queries"
 
@@ -58,14 +58,17 @@ class PgVectorMemoryStore {
         }));
     }
 
-    async getUserInfo(userId: string): Promise<{text: string}[]> {
+    async getUserInfo(userId: string): Promise<UserData[]> {
         const result = await pgPool.query(
             db.getUserData,
             [userId]
         )
 
         return result.rows.map((row: any) => ({
-            text: row.text
+            importance: row.importance,
+            info: row.text,
+            type: row.type,
+            updatedAt: row.updated_at
         }))
     }
 

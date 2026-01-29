@@ -10,11 +10,11 @@ export const searchMemory = `
 `
 
 export const getUserData = `
-    SELECT text
+    SELECT text, type, importance, updated_at
     FROM user_memories
     WHERE user_id = $1
     AND importance >= 3
-    ORDER BY created_at    
+    ORDER BY updated_at    
 `
 export const findDuplicateMemory = `
     SELECT id, (1 - (embedding <=> $2::vector)) AS score

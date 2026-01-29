@@ -1,7 +1,7 @@
 import LongTermMemoryReader from "../services/ltm/ltmReader.service";
 import LongTermMemoryWriter, { ExtractedMemory } from "../services/ltm/ltmWriter.service";
 import PgVectorMemoryStore from "../services/ltm/vectoreStore.service";
-import { MemoryHit } from "./elber.model";
+import { MemoryHit, UserData } from "./elber.model";
 
 class LongTermMemory {
     async getMemory(userId: string, userText: string): Promise<MemoryHit[]> {
@@ -24,22 +24,12 @@ class LongTermMemory {
         }        
     }
 
-    async getUserData(userId: string) {
+    async getUserData(userId: string): Promise<UserData[]> {
         const store = new PgVectorMemoryStore();
         const reader = new LongTermMemoryReader(store);
         
         const data = await reader.retriveAll(userId)
-        let lines = data.map((m, index) => `${index + 1}: ${m.text}`);
-
-        const longList = lines.length > 10
-        lines = lines.slice(0, 10)
-
-        if(lines.length === 0) return 'No se nada de ti'
-
-        return `
-            ${longList ? 'Se varias cosas de ti pero esto es lo más reciente. Si quieres otra cosa pregúntame al más especifico.' : 'Esto es lo que se de ti: \n'}
-            ${lines.join("\n")}
-        `.trim()
+        return data
     }
 
     buildLtmBlock(memories: MemoryHit[], opts?: {

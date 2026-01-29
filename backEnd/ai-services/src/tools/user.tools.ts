@@ -27,8 +27,9 @@ export const getUserData = tool({
         
         try {
             const ltm = new LongTermMemory()
-            const response = await ltm.getUserData(userContext.userId)
-            return response                
+            let data = await ltm.getUserData(userContext.userId)
+            data = data.slice(0,10)
+            return data            
         } catch (error) {
             return "Hubo un error al buscar información del usuario."   
         }        

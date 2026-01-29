@@ -78,3 +78,10 @@ export type MemoryHit = MemoryRecord & {
 export type UserContext = {
     userId: string
 }
+
+export type UserData = {
+    type: MemoryType,
+    importance: number,
+    info: string,
+    updatedAt: string
+}

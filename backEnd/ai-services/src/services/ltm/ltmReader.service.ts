@@ -1,4 +1,4 @@
-import { MemoryHit } from "../../models/elber.model";
+import { MemoryHit, UserData } from "../../models/elber.model";
 import { embedText } from "../ai.service";
 import PgVectorMemoryStore from "./vectoreStore.service";
 
@@ -25,7 +25,7 @@ class LongTermMemoryReader {
         });
     }
 
-    async retriveAll(userId: string): Promise<{text: string}[]> {
+    async retriveAll(userId: string): Promise<UserData[]> {
         return this.store.getUserInfo(userId)
     }
 }

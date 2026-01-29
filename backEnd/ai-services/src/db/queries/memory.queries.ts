@@ -28,3 +28,16 @@ export const insertMemory = `
     VALUES ($1, $2, $3, $4, $5, $6::vector)
     RETURNING id, user_id, room_id, type, importance, text, created_at, updated_at
 `
+
+export const deleteAll = `
+    DELETE
+    FROM user_memories
+    WHERE user_id = $1
+`
+
+export const deleteMemories = `
+    DELETE
+    FROM user_memories     
+    WHERE user_id = $1
+    AND id = ANY($2)
+`

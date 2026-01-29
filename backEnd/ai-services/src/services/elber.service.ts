@@ -1,4 +1,4 @@
-import { ElberEvent, ElberRequest, ElberResponse, ElberUser, UserContext } from "../models/elber.model";
+import { ElberEvent, ElberRequest, ElberResponse, ElberUser, MemoryHit, UserContext } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents';
 import agents from "../agents";
 import { saveChatMessage, updateTitle } from "./chat.service";
@@ -26,6 +26,20 @@ const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: Elber
     handleMemory(elberResponse)
 }
 
+const formatMemories = async (uid: string, text: string): Promise<string> => {
+    const ltm = new LongTermMemory()
+    const memories = await ltm.getMemory(uid, text)
+    
+    if (!memories.length) return '';
+
+    const lines = memories.map((m) => `- ${m.text}`);
+
+    return `
+        MEMORIA LARGA DEL USUARIO (hechos recordados; si algo contradice al usuario hoy, dale prioridad a lo que diga hoy):
+        ${lines.join("\n")}
+        `.trim();
+}
+
 export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     await withTrace('Elber workflow', async() => {
         const {chatId, text} = request
@@ -33,10 +47,8 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
             const conversationId = `${user.uid}_${chatId.toString()}`
             
             const session = ShortTermMemory.getInstance().getSession(conversationId)
-            const midMemory = await MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId)
-
-            const ltm = new LongTermMemory()
-            const longMemory = await ltm.getMemory(user.uid, text)
+            const midMemory = await MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId)            
+            const longMemory = await formatMemories(user.uid, text)
             
             const userContext: UserContext = {
                 userId: user.uid

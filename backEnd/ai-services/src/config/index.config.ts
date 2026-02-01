@@ -25,3 +25,8 @@ export const gateway = {
 export const postgres = {
     db: process.env.PG_DB
 }
+
+export const serper = {
+    searchURL: 'https://google.serper.dev/search',
+    secret: process.env.SERPER_API_KEY
+}

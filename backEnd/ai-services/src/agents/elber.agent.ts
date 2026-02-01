@@ -2,13 +2,18 @@ import { Agent } from "@openai/agents";
 import prompts from '../prompts'
 import { z } from "zod";
 import { deleteAllUserData, deleteUserData, getUserData } from "../tools/user.tools";
+import { webSearch } from "../tools/search.tools";
 
 export const chatAgent = (name: string, summary: string, longTermMemory: string) => {
+    const userTools = [getUserData, deleteAllUserData, deleteUserData]
+    const searchTools = [webSearch]
+    const tools = [...userTools, ...searchTools]
+
     const agent = Agent.create({
         name: 'Elber',
         model: 'gpt-4o-mini',
         instructions: prompts.elber.chat(name, summary, longTermMemory), 
-        tools: [getUserData as any, deleteAllUserData, deleteUserData]       
+        tools: tools as any       
     })
 
     return agent

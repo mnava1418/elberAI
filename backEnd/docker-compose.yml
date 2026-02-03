@@ -1,81 +1,116 @@
 services:
-  # postgres:
-  #   image: pgvector/pgvector:pg16
-  #   container_name: elber_pg
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #     POSTGRES_DB: elber
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - elber_pgdata:/var/lib/postgresql/data
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: elber_pg
+    environment:
+      POSTGRES_USER: 
+      POSTGRES_PASSWORD: 
+      POSTGRES_DB: elber
+    ports:
+      - "5432:5432"
+    volumes:
+      - elber_pgdata:/var/lib/postgresql/data
+    mem_limit: 900m
+    cpus: "0.75"
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=768MB"
+      - "-c"
+      - "work_mem=4MB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      - "-c"
+      - "max_connections=30"
+      - "-c"
+      - "log_min_duration_statement=500"
+    restart: always
   gateway:
-    build: 
+    build:
       context: .
-      dockerfile: api-gateway/Dockerfile 
-    container_name: gateway
+      dockerfile: api-gateway/Dockerfile
+    container_name: elber_gateway
     ports:
       - "4040:4040"
     env_file:
       - ./api-gateway/.env
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: "/usr/src/elber/api-gateway/creds/googleCred.json"
+      NODE_OPTIONS: "--max-old-space-size=220"
     volumes:
       - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/api-gateway/creds/googleCred.json:ro
     depends_on:
       - ai
       - auth
       - notification
+      - postgres
     expose:
       - "4040"
+    mem_limit: 350m
+    cpus: "0.50"
     restart: always
+
   ai:
-    build: 
+    build:
       context: .
-      dockerfile: ai-services/Dockerfile 
-    container_name: ai
+      dockerfile: ai-services/Dockerfile
+    container_name: elber_ai
     ports:
       - "4042:4042"
     env_file:
       - ./ai-services/.env
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: "/usr/src/elber/ai-services/creds/googleCred.json"
+      NODE_OPTIONS: "--max-old-space-size=320"
     volumes:
       - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/ai-services/creds/googleCred.json:ro
     expose:
       - "4042"
+    mem_limit: 550m
+    cpus: "0.75"
     restart: always
+
   auth:
-    build: 
+    build:
       context: .
-      dockerfile: auth-services/Dockerfile 
-    container_name: auth
+      dockerfile: auth-services/Dockerfile
+    container_name: elber_auth
     env_file:
       - ./auth-services/.env
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: "/usr/src/elber/auth-services/creds/googleCred.json"
+      NODE_OPTIONS: "--max-old-space-size=180"
     volumes:
       - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/auth-services/creds/googleCred.json:ro
     expose:
       - "4041"
+    mem_limit: 300m
+    cpus: "0.40"
     restart: always
+
   notification:
-    build: 
+    build:
       context: .
-      dockerfile: notification-services/Dockerfile 
-    container_name: notification
+      dockerfile: notification-services/Dockerfile
+    container_name: elber_notification
     env_file:
       - ./notification-services/.env
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: "/usr/src/elber/notification-services/creds/googleCred.json"
+      NODE_OPTIONS: "--max-old-space-size=180"
     volumes:
       - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/notification-services/creds/googleCred.json:ro
     expose:
       - "4041"
+    mem_limit: 300m
+    cpus: "0.40"
     restart: always
+
 networks:
   default:
     driver: bridge
+
 volumes:
   elber_pgdata:

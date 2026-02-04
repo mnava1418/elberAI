@@ -104,7 +104,7 @@ services:
     volumes:
       - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/notification-services/creds/googleCred.json:ro
     expose:
-      - "4041"
+      - "4043"
     mem_limit: 300m
     cpus: "0.40"
     restart: always

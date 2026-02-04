@@ -30,6 +30,6 @@ RUN cd ./notification-services && npm install --production
 # 8. Copiamos todo el dist generado
 COPY --from=builder /usr/src/elber/notification-services/dist ./notification-services/dist
 
-EXPOSE 4041
+EXPOSE 4043
 
 CMD ["node", "/usr/src/elber/notification-services/dist/bin/www.js"]

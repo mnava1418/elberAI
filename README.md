@@ -5,6 +5,7 @@ AI personal Assistant
 docker system prune -af
 docker compose build --no-cache
 docker compose up -d
+docker compose up -d --build <container>
 docker compose down
 docker stats
 

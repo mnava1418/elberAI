@@ -12,3 +12,5 @@ docker stats
 docker compose logs -f
 docker compose logs -f <container>
 docker images
+
+disk -> comando especial que hice para revisar el estado del disco duro

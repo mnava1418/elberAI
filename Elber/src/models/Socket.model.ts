@@ -107,11 +107,28 @@ class SocketModel {
         const currentUser = getAuth().currentUser
         
         if(this.socket && this.socket.connected && currentUser) {
+
+            const timeStamp = new Date().toLocaleString('es-MX', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            });
+
             const elberRequest: ElberRequest = {
                 chatId,
                 text: userMessage.content,
-                userName: currentUser.displayName || '',
-                title
+                user: {
+                    name: currentUser.displayName || '',
+                    uid: currentUser.uid || '',
+                },                
+                title,
+                timeStamp
             }
             this.socket.emit('user:ask', elberRequest )
         } else {

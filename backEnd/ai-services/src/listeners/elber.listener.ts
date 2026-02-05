@@ -12,8 +12,9 @@ const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEve
     };
     
     socket.on('user:ask', (payload: ElberRequest) => {
-        const {userName, text, chatId} = payload
-        const user: ElberUser = {uid, name: userName}
+        const {text, chatId} = payload
+        payload.user.uid = uid
+        
         if(uid) {
             console.info(`Processing ask from ${uid}`)                        
 
@@ -22,7 +23,7 @@ const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEve
                 console.error(error)
             })
             
-            chat(user, payload, emitChatResponse)
+            chat(payload, emitChatResponse)
         }
     })
 }

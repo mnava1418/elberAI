@@ -4,7 +4,7 @@ import { z } from "zod";
 import { deleteAllUserData, deleteUserData, getUserData } from "../tools/user.tools";
 import { webSearch } from "../tools/search.tools";
 
-export const chatAgent = (name: string, summary: string, longTermMemory: string) => {
+export const chatAgent = (name: string, summary: string, longTermMemory: string, timeStamp: string) => {
     const userTools = [getUserData, deleteAllUserData, deleteUserData]
     const searchTools = [webSearch]
     const tools = [...userTools, ...searchTools]
@@ -12,7 +12,7 @@ export const chatAgent = (name: string, summary: string, longTermMemory: string)
     const agent = Agent.create({
         name: 'Elber',
         model: 'gpt-4o-mini',
-        instructions: prompts.elber.chat(name, summary, longTermMemory), 
+        instructions: prompts.elber.chat(name, summary, longTermMemory, timeStamp), 
         tools: tools as any       
     })
 

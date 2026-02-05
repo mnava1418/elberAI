@@ -8,7 +8,8 @@ import LongTermMemory from "../models/longTermMemory.model";
 import { handleMemory } from "./memory.service";
 
 const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
-    const { user, originalRequest, agentResponse } = elberResponse
+    const { originalRequest, agentResponse } = elberResponse
+    const { user } = originalRequest
     
     /***Generamos o actualizamos el titulo del chat***/
     generateChatTitle(user.uid, originalRequest, emitMessage)
@@ -40,9 +41,9 @@ const formatMemories = async (uid: string, text: string): Promise<string> => {
         `.trim();
 }
 
-export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     await withTrace('Elber workflow', async() => {
-        const {chatId, text} = request
+        const {chatId, text, user, timeStamp} = request
         try {            
             const conversationId = `${user.uid}_${chatId.toString()}`
             
@@ -54,7 +55,7 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
                 userId: user.uid
             }            
 
-            const result = await run(agents.elber.chat(user.name, midMemory.summary, longMemory), text, {
+            const result = await run(agents.elber.chat(user.name, midMemory.summary, longMemory, timeStamp), text, {
                 session,
                 maxTurns: 3,
                 stream: true,
@@ -76,7 +77,6 @@ export const chat = async(user: ElberUser, request: ElberRequest, emitMessage: (
                         emitMessage('elber:response', chatId, '' );
                         
                         const elberResponse: ElberResponse = {
-                            user,
                             agentResponse,
                             conversationId,
                             originalRequest: request,

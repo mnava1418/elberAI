@@ -9,7 +9,8 @@ import LongTermMemory from "../models/longTermMemory.model";
 const MEMORY_TURNS_LIMIT = 8
 
 export const handleMemory = (elberResponse: ElberResponse) => {
-    const { user, originalRequest, agentResponse, memory, conversationId } = elberResponse
+    const { originalRequest, agentResponse, memory, conversationId } = elberResponse
+    const { user } = originalRequest
 
     /***Manejamos memoria a mediano plazo***/
     MidTermMemory.getInstance().addTurn(conversationId, originalRequest.text, agentResponse)

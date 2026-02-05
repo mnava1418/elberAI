@@ -10,14 +10,14 @@ export type ElberUser = {
 }
 
 export type ElberRequest = {
-    userName: string,
+    user: ElberUser,
     text: string,
     chatId: number,
-    title: string 
+    title: string
+    timeStamp: string
 }
 
-export type ElberResponse = {
-    user: ElberUser,
+export type ElberResponse = {    
     originalRequest: ElberRequest,
     agentResponse: string,
     memory: MemoryEntry,

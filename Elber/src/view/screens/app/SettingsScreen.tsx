@@ -66,7 +66,7 @@ const SettingsScreen = () => {
     )
 
     return (
-        <MainView navBarTitle='Ajustes' leftAction={showMenu} leftIcon='menu-outline' applyPadding={false}>
+        <MainView navBarTitle='Ajustes' leftAction={showMenu} leftIcon='menu-outline'>
             <ScrollView style={settingsStyle.container} showsVerticalScrollIndicator={false}>
                 {/* Sección del Perfil */}
                 <View style={settingsStyle.profileSection}>

@@ -4,7 +4,6 @@ import { appColors } from "./main.style";
 const settingsStyle = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: appColors.primary,
     },
 
     profileSection: {
@@ -43,7 +42,6 @@ const settingsStyle = StyleSheet.create({
     },
 
     sectionHeader: {
-        paddingHorizontal: 16,
         paddingVertical: 12,
         paddingTop: 20,
     },
@@ -58,7 +56,6 @@ const settingsStyle = StyleSheet.create({
 
     section: {
         backgroundColor: appColors.secondary,
-        marginHorizontal: 16,
         borderRadius: 12,
         marginBottom: 8,
     },

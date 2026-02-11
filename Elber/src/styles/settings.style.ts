@@ -54,6 +54,13 @@ const settingsStyle = StyleSheet.create({
         letterSpacing: 0.5,
     },
 
+    sectionSubTitle: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: appColors.subtitle,
+        letterSpacing: 0.5,
+    },
+
     section: {
         backgroundColor: appColors.secondary,
         borderRadius: 12,
@@ -103,7 +110,25 @@ const settingsStyle = StyleSheet.create({
 
     logoutSection: {
         paddingHorizontal: 16,
-        paddingVertical: 24,
+        paddingVertical: 20,
+    },
+
+    infoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
+    infoLabel: {
+        fontSize: 16,
+        color: appColors.subtitle,
+        fontWeight: '500',
+        minWidth: 80,
+    },
+
+    infoValue: {
+        fontSize: 16,
+        color: appColors.text,
+        flex: 1,
     },
 });
 

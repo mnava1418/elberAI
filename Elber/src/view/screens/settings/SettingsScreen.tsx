@@ -115,7 +115,6 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
                     )}
                 </View>
 
-                {/* Botón de Cerrar Sesión */}
                 <View style={settingsStyle.logoutSection}>
                     <Button 
                         type='primary' 

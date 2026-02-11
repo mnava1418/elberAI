@@ -10,14 +10,18 @@ import settingsStyle from '../../../styles/settings.style'
 import { DrawerActions, useNavigation } from '@react-navigation/native'
 import AppIcon from '../../components/ui/AppIcon'
 import { hideAlert, showAlert } from '../../../store/actions/elber.actions'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { SettingsStackParamList } from './SettingsNavigator'
 
-const SettingsScreen = () => {
+type SettingsProps = NativeStackScreenProps<SettingsStackParamList, 'Settings'>;
+
+const SettingsScreen = ({navigation}: SettingsProps) => {
     const {state, dispatch} = useContext(GlobalContext)
     const {name, email} = selectUserProfile(state.user)
-    const navigation = useNavigation()
+    const menuNav = useNavigation()
 
     const showMenu = () => {
-        navigation.dispatch(DrawerActions.toggleDrawer)
+        menuNav.dispatch(DrawerActions.toggleDrawer)
     }
 
     const handleAlert = (btnText: string, title: string, text: string, action?: () => void) => {
@@ -87,7 +91,8 @@ const SettingsScreen = () => {
                     {renderSettingItem(
                         'person-outline',
                         'Perfil',
-                        'Consulta tu información personal'
+                        'Consulta tu información personal',
+                        () => navigation.navigate('ProfileSettings')
                     )}
                 </View>
 

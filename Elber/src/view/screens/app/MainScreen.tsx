@@ -1,5 +1,4 @@
 import {createDrawerNavigator} from '@react-navigation/drawer'
-import SettingsScreen from './SettingsScreen';
 import Alert from '../../components/ui/Alert';
 import ChatScreen from './ChatScreen';
 import { useContext, useEffect } from 'react';
@@ -9,6 +8,7 @@ import { setChats } from '../../../store/actions/chat.actions';
 import { getSelectedChatId, selectChats } from '../../../store/selectors/chat.selector';
 import SideMenuContent from '../../components/ui/SideMenu';
 import SocketModel from '../../../models/Socket.model';
+import SettingsNavigator from '../settings/SettingsNavigator';
 
 const Drawer = createDrawerNavigator()
 
@@ -56,7 +56,7 @@ const MainScreen = () => {
                     )
                 })}
     
-                <Drawer.Screen name='Ajustes' component={SettingsScreen} />
+                <Drawer.Screen name='Ajustes' component={SettingsNavigator} />
             </Drawer.Navigator>
             <Alert />
         </>

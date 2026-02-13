@@ -54,6 +54,14 @@ class ShortTermMemory {
             }
         })
     }
+
+    deleteUserSessions(uid: string) {
+        for (const conversationId of this.sessions.keys()) {
+            if (conversationId.startsWith(uid)) {
+                this.sessions.delete(conversationId)
+            }
+        }
+    }
 }
 
 export default ShortTermMemory

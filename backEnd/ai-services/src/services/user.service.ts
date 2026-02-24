@@ -1,11 +1,15 @@
 import admin from 'firebase-admin'
 import ShortTermMemory from '../models/shortTermMemory.model'
 import MidTermMemory from '../models/midTermMemory.model'
+import LongTermMemory from '../models/longTermMemory.model'
 
 export const deleteProfile = async (uid: string) => {
     try {
         ShortTermMemory.getInstance().deleteUserSessions(uid)
         MidTermMemory.getInstance().deleteUserMemory(uid)
+
+        const ltm = new LongTermMemory()    
+        await ltm.resetMemory(uid)
 
         const db = admin.database()
         const ref = db.ref(`/${uid}`)

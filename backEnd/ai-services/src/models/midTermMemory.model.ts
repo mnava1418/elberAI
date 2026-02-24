@@ -71,6 +71,14 @@ class MidTermMemory {
             this.memories.delete(conversationId)
         }
     }
+
+    deleteUserMemory(uid: string) {
+        for (const conversationId of this.memories.keys()) {
+            if (conversationId.startsWith(uid)) {
+                this.memories.delete(conversationId)
+            }
+        }
+    }
 }
 
 export default MidTermMemory

@@ -10,6 +10,7 @@ import { selectUserProfile } from '../../../store/selectors/user.selector'
 import Button from '../../components/ui/Button'
 import { hideAlert, showAlert } from '../../../store/actions/elber.actions'
 import * as userServices from '../../../services/user.service'
+import Spinner from '../../components/ui/Spinner'
 
 type ProfileSettingsProps = NativeStackScreenProps<SettingsStackParamList, 'ProfileSettings'>;
 
@@ -18,6 +19,7 @@ const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
     const {name, email} = selectUserProfile(state.user)
 
     const [message, setMessage] = useState('')
+    const [isProcessing, setIsProcessing] = useState(false)
 
     const deleteProfile = () => {
         userServices.deleteProfile()
@@ -26,6 +28,9 @@ const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
         })
         .catch(error => {
             setMessage(error.message)
+        })
+        .finally(() => {
+            setIsProcessing(false)
         })
     }
 
@@ -37,6 +42,7 @@ const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
             text: 'Esta acción eliminará permanentemente tu perfil y todos tus datos. No podrás recuperar tu información una vez eliminada. ¿Estás completamente seguro?',
             isVisible: true,
             onPress: () => {
+                setIsProcessing(true)
                 deleteProfile()
                 dispatch(hideAlert())
             }
@@ -70,11 +76,7 @@ const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
                 </View>
                 {message.length > 0 ? getResponse() : <></>  }
                 <View style={settingsStyle.logoutSection}>
-                    <Button 
-                        type='primary' 
-                        title='Eliminar Perfil' 
-                        onPress={ confirmDeleteProfile }
-                    />
+                    {isProcessing ? <Spinner /> :  <Button type='primary' title='Eliminar Perfil' onPress={ confirmDeleteProfile } />}
                 </View>
             </View>
         </MainView>

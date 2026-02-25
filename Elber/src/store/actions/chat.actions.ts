@@ -40,3 +40,7 @@ export const deleteChatAction = (chatId: number): ChatAction => ({
     type: 'DELETE_CHAT',
     chatId
 })
+
+export const deleteAllChatsAction = (): ChatAction => ({
+    type: 'DELETE_ALL_CHATS'
+})

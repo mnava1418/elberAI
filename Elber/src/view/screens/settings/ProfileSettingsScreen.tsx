@@ -11,6 +11,7 @@ import Button from '../../components/ui/Button'
 import { hideAlert, showAlert } from '../../../store/actions/elber.actions'
 import * as userServices from '../../../services/user.service'
 import Spinner from '../../components/ui/Spinner'
+import { deleteAllChatsAction } from '../../../store/actions/chat.actions'
 
 type ProfileSettingsProps = NativeStackScreenProps<SettingsStackParamList, 'ProfileSettings'>;
 
@@ -25,6 +26,7 @@ const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
         userServices.deleteProfile()
         .then((response) => {
             setMessage(response)
+            dispatch(deleteAllChatsAction());
         })
         .catch(error => {
             setMessage(error.message)

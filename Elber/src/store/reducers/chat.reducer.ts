@@ -101,6 +101,7 @@ export type ChatAction =
 | { type: 'PROCESS_STREAM', chunk: string }
 | { type: 'UPDATE_CHAT_TITLE', title: string }
 | { type: 'DELETE_CHAT', chatId: number }
+| { type: 'DELETE_ALL_CHATS'}
 | { type: 'LOG_OUT' }
 
 export const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
@@ -121,6 +122,8 @@ export const chatReducer = (state: ChatState, action: ChatAction): ChatState => 
             return updateChatTitle(state, action.title)
         case 'DELETE_CHAT':
             return deleteChat(state, action.chatId)
+        case 'DELETE_ALL_CHATS':
+            return {...state, chats: new Map<number, ElberChat>(), selectedChatId: -1}
         default:
             return state;
     }

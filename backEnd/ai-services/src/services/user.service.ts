@@ -9,11 +9,13 @@ export const deleteProfile = async (uid: string) => {
         MidTermMemory.getInstance().deleteUserMemory(uid)
 
         const ltm = new LongTermMemory()    
-        await ltm.resetMemory(uid)
-
         const db = admin.database()
         const ref = db.ref(`/${uid}`)
-        await ref.remove()       
+        
+        await Promise.all([
+            ltm.resetMemory(uid),
+            ref.remove()
+        ])
     } catch (error) {
         console.error(error)
         throw new Error(`Unable to delete profile for:${uid}`)

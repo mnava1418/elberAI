@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import MainView from '../../components/ui/MainView'
 import CustomText from '../../components/ui/CustomText'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
@@ -9,6 +9,7 @@ import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectUserProfile } from '../../../store/selectors/user.selector'
 import Button from '../../components/ui/Button'
 import { hideAlert, showAlert } from '../../../store/actions/elber.actions'
+import * as userServices from '../../../services/user.service'
 
 type ProfileSettingsProps = NativeStackScreenProps<SettingsStackParamList, 'ProfileSettings'>;
 
@@ -16,17 +17,38 @@ const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
     const {state, dispatch} = useContext(GlobalContext)
     const {name, email} = selectUserProfile(state.user)
 
-    const handleDeleteProfile = () => {
+    const [message, setMessage] = useState('')
+
+    const deleteProfile = () => {
+        userServices.deleteProfile()
+        .then((response) => {
+            setMessage(response)
+        })
+        .catch(error => {
+            setMessage(error.message)
+        })
+    }
+
+    const confirmDeleteProfile = () => {
+        setMessage('')
         dispatch(showAlert({
             btnText: 'Eliminar Perfil', 
             title: 'Eliminar Perfil', 
             text: 'Esta acción eliminará permanentemente tu perfil y todos tus datos. No podrás recuperar tu información una vez eliminada. ¿Estás completamente seguro?',
             isVisible: true,
             onPress: () => {
-
+                deleteProfile()
                 dispatch(hideAlert())
             }
         }))
+    }
+
+    const getResponse = () => {
+        return(
+            <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 8}}>
+                <CustomText type='text' text={message} />
+            </View>
+        )
     }
 
     return (
@@ -46,11 +68,12 @@ const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
                         <CustomText text={email} style={settingsStyle.infoValue} type='text' />
                     </View>
                 </View>
+                {message.length > 0 ? getResponse() : <></>  }
                 <View style={settingsStyle.logoutSection}>
                     <Button 
                         type='primary' 
                         title='Eliminar Perfil' 
-                        onPress={ handleDeleteProfile }
+                        onPress={ confirmDeleteProfile }
                     />
                 </View>
             </View>

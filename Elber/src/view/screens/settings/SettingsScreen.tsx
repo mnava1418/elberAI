@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import MainView from '../../components/ui/MainView'
 import Button from '../../components/ui/Button'
 import { logOut } from '../../../services/auth.service'
@@ -12,6 +12,7 @@ import AppIcon from '../../components/ui/AppIcon'
 import { hideAlert, showAlert } from '../../../store/actions/elber.actions'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { SettingsStackParamList } from './SettingsNavigator'
+import Spinner from '../../components/ui/Spinner'
 
 type SettingsProps = NativeStackScreenProps<SettingsStackParamList, 'Settings'>;
 
@@ -19,6 +20,7 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
     const {state, dispatch} = useContext(GlobalContext)
     const {name, email} = selectUserProfile(state.user)
     const menuNav = useNavigation()
+    const [isProcessing, setIsProcessing] = useState(false)
 
     const showMenu = () => {
         menuNav.dispatch(DrawerActions.toggleDrawer)
@@ -116,15 +118,21 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
                 </View>
 
                 <View style={settingsStyle.logoutSection}>
-                    <Button 
-                        type='primary' 
-                        title='Cerrar Sesión' 
-                        onPress={() => {
-                            handleAlert('Cerrar Sesión', 'Cerrar Sesión', '¿Estás seguro de que quieres cerrar sesión?', 
-                                () => logOut(dispatch)
-                            )
-                        }}
-                    />
+                    {isProcessing ? <Spinner />
+                        :
+                        <Button 
+                            type='primary' 
+                            title='Cerrar Sesión' 
+                            onPress={() => {
+                                handleAlert('Cerrar Sesión', 'Cerrar Sesión', '¿Estás seguro de que quieres cerrar sesión?', 
+                                    () => {
+                                        setIsProcessing(true)
+                                        logOut(dispatch)
+                                    }
+                                )
+                            }}
+                        />
+                    }
                 </View>
             </ScrollView>
         </MainView>

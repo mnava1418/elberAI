@@ -12,7 +12,8 @@ export const server = {
 
 export const paths = {
     auth_services: process.env.AUTH_SERVICE,
-    ai_services: process.env.AI_SERVICE
+    ai_services: process.env.AI_SERVICE,
+    notification_services: process.env.NOTIFICATION_SERVICE
 }
 
 export const firebase = {

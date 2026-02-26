@@ -5,7 +5,7 @@ import Voice from '@react-native-voice/voice'
 import { openSettings } from 'react-native-permissions'
 import { ElberChatResponse } from "../../models/elber.model"
 import handleChatResponse from "../../services/elber.service"
-import { hideAlert, showAlert } from "../../store/actions/elber.actions"
+import { showAlert } from "../../store/actions/elber.actions"
 
 const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.Dispatch<React.SetStateAction<string>>) => {
     const [isListening, setIsListening] = useState(false)
@@ -34,7 +34,6 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
                 btnText: 'Habilitar',
                 onPress: () => {
                     openSettings('application')
-                    dispatch(hideAlert())
                 }
             }))
         }

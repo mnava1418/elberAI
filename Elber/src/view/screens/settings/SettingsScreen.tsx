@@ -9,7 +9,7 @@ import { selectUserProfile } from '../../../store/selectors/user.selector'
 import settingsStyle from '../../../styles/settings.style'
 import { DrawerActions, useNavigation } from '@react-navigation/native'
 import AppIcon from '../../components/ui/AppIcon'
-import { hideAlert, showAlert } from '../../../store/actions/elber.actions'
+import { showAlert } from '../../../store/actions/elber.actions'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { SettingsStackParamList } from './SettingsNavigator'
 import Spinner from '../../components/ui/Spinner'
@@ -36,8 +36,6 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
                 if(action) {
                     action()
                 }
-
-                dispatch(hideAlert())
             }
         }))
     }

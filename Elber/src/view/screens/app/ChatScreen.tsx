@@ -6,7 +6,7 @@ import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectChatInfo } from '../../../store/selectors/chat.selector'
 import * as chatServices from '../../../services/chat.service'
 import { deleteChatAction } from '../../../store/actions/chat.actions'
-import { hideAlert, showAlert } from '../../../store/actions/elber.actions'
+import { showAlert } from '../../../store/actions/elber.actions'
 
 const ChatScreen = () => {
     const navigation = useNavigation()
@@ -35,7 +35,6 @@ const ChatScreen = () => {
         text: '¿Estás seguro de que deseas eliminar este chat? Esta acción no se puede deshacer.',
         onPress: () => {
           deleteChat()
-          dispatch(hideAlert())
         }
       }))
     }

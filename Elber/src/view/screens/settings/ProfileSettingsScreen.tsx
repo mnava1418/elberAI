@@ -8,7 +8,7 @@ import settingsStyle from '../../../styles/settings.style'
 import { GlobalContext } from '../../../store/GlobalProvider'
 import { selectUserProfile } from '../../../store/selectors/user.selector'
 import Button from '../../components/ui/Button'
-import { hideAlert, showAlert } from '../../../store/actions/elber.actions'
+import { showAlert } from '../../../store/actions/elber.actions'
 import * as userServices from '../../../services/user.service'
 import Spinner from '../../components/ui/Spinner'
 import { deleteAllChatsAction } from '../../../store/actions/chat.actions'
@@ -46,7 +46,6 @@ const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
             onPress: () => {
                 setIsProcessing(true)
                 deleteProfile()
-                dispatch(hideAlert())
             }
         }))
     }

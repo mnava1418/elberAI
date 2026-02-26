@@ -8,6 +8,10 @@ router.get('/', (req: Request, res: Response) => {
     res.json({ message: 'ELBER AI Services is running!' });
 });
 
+router.get('/health', (req: Request, res: Response) => {
+    res.status(200).json({ endPoint: '/ai' });
+});
+
 router.use('/chat', chatRoutes)
 router.use('/user', userRoutes)
 

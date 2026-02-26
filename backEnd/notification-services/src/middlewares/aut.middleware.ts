@@ -4,6 +4,11 @@ import { auth } from "../config/index.config";
 
 export const validateToken = (req: Request, res: Response, next: NextFunction) => {
     try {
+        if(req.originalUrl == '/health') {
+            next()
+            return
+        }
+
         const authToken = req.headers.authorization
 
         if(!authToken) {

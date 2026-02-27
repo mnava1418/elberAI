@@ -112,6 +112,14 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
                         'Ayuda y Soporte',
                         'Obtén ayuda y contacto',
                         () => handleAlert('Continuar', 'Ayuda', 'Contacta con soporte: martin@namart.tech'),
+                        undefined,
+                        true
+                    )}
+                    {renderSettingItem(
+                        'wifi-outline',
+                        'Endpoints',
+                        'Monitoreo de endpoints',
+                        () => navigation.navigate('EndpointsSettings')
                     )}
                 </View>
 

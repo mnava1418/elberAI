@@ -117,8 +117,8 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
                     )}
                     {renderSettingItem(
                         'wifi-outline',
-                        'Endpoints',
-                        'Monitoreo de endpoints',
+                        'Servicios',
+                        'Monitoreo de servicios',
                         () => navigation.navigate('EndpointsSettings')
                     )}
                 </View>

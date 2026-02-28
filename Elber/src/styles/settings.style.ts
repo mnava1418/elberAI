@@ -116,6 +116,7 @@ const settingsStyle = StyleSheet.create({
     infoRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginVertical: 4
     },
 
     infoLabel: {
@@ -128,7 +129,6 @@ const settingsStyle = StyleSheet.create({
     infoValue: {
         fontSize: 16,
         color: appColors.text,
-        flex: 1,
     },
 });
 

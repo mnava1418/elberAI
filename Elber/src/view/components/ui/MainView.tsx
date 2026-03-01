@@ -1,9 +1,8 @@
 import React, { PropsWithChildren } from 'react'
-import { ImageBackground, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { appColors } from '../../../styles/main.style';
 import NavBar from '../navBar/NavBar';
-
-const backgroundImage = require('../../../assets/images/mainBackground.png');
+import LinearGradient from 'react-native-linear-gradient';
 
 interface MainViewProps extends PropsWithChildren {
     navBarTitle?: string
@@ -28,21 +27,25 @@ const MainView = ({
     rightIcon = ''
 }: MainViewProps) => {
     return (
-        <ImageBackground source={backgroundImage} style={{flex: 1}} blurRadius={100}>
-            <View style={{flex: 1, position: 'relative'}}>
-                <View
-                    style={[
-                        StyleSheet.absoluteFillObject,
-                        {backgroundColor: appColors.primary,zIndex: 1, opacity: 0.5}
-                    ]}
-                    pointerEvents="none"
-                />
-                { showNavBar ? <NavBar title={navBarTitle} leftAction={leftAction} leftIcon={leftIcon} rightAction={rightAction} rightIcon={rightIcon} /> : <></>}
-                <View style={[{flex: 1, paddingHorizontal: applyPadding ? 20 : 0, zIndex: 2}, style]}>
-                    {children}
-                </View>
+        <LinearGradient 
+            colors={['#D16BA5', '#000000']} 
+            locations={[0, 1]}
+            style={{flex: 1, position: 'relative'}}
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0, y: 1 }}
+        >
+            <View
+                style={[
+                    StyleSheet.absoluteFillObject,
+                    {backgroundColor: appColors.primary,zIndex: 1, opacity: 0.7}
+                ]}
+                pointerEvents="none"
+            />
+            { showNavBar ? <NavBar title={navBarTitle} leftAction={leftAction} leftIcon={leftIcon} rightAction={rightAction} rightIcon={rightIcon} /> : <></>}
+            <View style={[{flex: 1, paddingHorizontal: applyPadding ? 20 : 0, zIndex: 2}, style]}>
+                {children}
             </View>
-        </ImageBackground>
+        </LinearGradient>
     )
 }
 

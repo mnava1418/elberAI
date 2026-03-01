@@ -128,7 +128,8 @@ class SocketModel {
                     uid: currentUser.uid || '',
                 },                
                 title,
-                timeStamp
+                timeStamp,
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
             }
             this.socket.emit('user:ask', elberRequest )
         } else {

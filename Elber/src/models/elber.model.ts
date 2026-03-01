@@ -16,8 +16,9 @@ export type ElberRequest = {
     user: ElberUser,
     text: string,
     chatId: number,
-    title: string
-    timeStamp: string
+    title: string,
+    timeStamp: string,
+    timeZone: string
 }
 
 export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title'

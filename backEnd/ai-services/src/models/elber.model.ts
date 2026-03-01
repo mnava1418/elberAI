@@ -14,7 +14,8 @@ export type ElberRequest = {
     text: string,
     chatId: number,
     title: string
-    timeStamp: string
+    timeStamp: string,
+    timeZone: string
 }
 
 export type ElberResponse = {    
@@ -76,7 +77,8 @@ export type MemoryHit = MemoryRecord & {
 };
 
 export type UserContext = {
-    userId: string
+    userId: string,
+    timeZone: string
 }
 
 export type UserData = {

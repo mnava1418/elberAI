@@ -1,4 +1,4 @@
-import { ElberEvent, ElberRequest, ElberResponse, ElberUser, MemoryHit, UserContext } from "../models/elber.model";
+import { ElberEvent, ElberRequest, ElberResponse, UserContext } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents';
 import agents from "../agents";
 import { saveChatMessage, updateTitle } from "./chat.service";
@@ -43,7 +43,7 @@ const formatMemories = async (uid: string, text: string): Promise<string> => {
 
 export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     await withTrace('Elber workflow', async() => {
-        const {chatId, text, user, timeStamp} = request
+        const {chatId, text, user, timeStamp, timeZone} = request
         try {            
             const conversationId = `${user.uid}_${chatId.toString()}`
             
@@ -52,7 +52,8 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
             const longMemory = await formatMemories(user.uid, text)
             
             const userContext: UserContext = {
-                userId: user.uid
+                userId: user.uid,
+                timeZone
             }            
 
             const result = await run(agents.elber.chat(user.name, midMemory.summary, longMemory, timeStamp), text, {

@@ -1,0 +1,21 @@
+# Core dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.23.2
+python-dotenv==1.0.0
+requests==2.31.0
+pydantic==2.4.2
+pydantic-settings==2.0.3
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.12.1
+
+# Async support
+httpx==0.25.1
+aiofiles==23.2.1
+
+# Development dependencies
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.9.1
+flake8==6.1.0

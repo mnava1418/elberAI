@@ -18,7 +18,6 @@
 - [🔒 Security](#-security)
 - [🐳 Docker Deployment](#-docker-deployment)
 - [💻 Development Setup](#-development-setup)
-- [🤝 Contributing](#-contributing)
 
 ## 🎯 Overview
 

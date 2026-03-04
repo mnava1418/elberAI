@@ -21,4 +21,4 @@ export type ElberRequest = {
     timeZone: string
 }
 
-export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title'
+export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title' | 'elber:cancelled'

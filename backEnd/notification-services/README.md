@@ -6,7 +6,7 @@
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![OAuth2](https://img.shields.io/badge/OAuth2-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://oauth.net/2/)
 
-> **Enterprise-grade notification microservice** with advanced security, OAuth2 authentication, and scalable email delivery system built for high-traffic applications.
+> **Notification microservice** with advanced security, OAuth2 authentication, and scalable email delivery system built for high-traffic applications.
 
 ## 📋 Table of Contents
 - [🎯 Overview](#-overview)
@@ -304,20 +304,6 @@ src/
 └── types/              # TypeScript definitions
 ```
 
-## 🤝 Contributing
-
-### **🔄 Development Guidelines**
-1. **Type Safety**: All code must pass strict TypeScript compilation
-2. **Security First**: JWT validation required for all endpoints
-3. **Clean Architecture**: Maintain separation of concerns
-4. **Error Handling**: Comprehensive try-catch blocks with logging
-
-### **📋 Code Standards**
-- ✅ Strict TypeScript configuration
-- ✅ Express middleware pattern
-- ✅ Async/await for all operations
-- ✅ Comprehensive error logging
-- ✅ Environment-based configuration
 
 ---
 

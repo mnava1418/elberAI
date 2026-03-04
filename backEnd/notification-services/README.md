@@ -323,7 +323,7 @@ src/
 
 <div align="center">
 
-**Built with ❤️ by [Martin Navarro](https://github.com/mnavapena)**
+**Built with ❤️ by [Martin Nava](https://github.com/mnava1418)**
 
 *Showcasing enterprise-level Node.js architecture, security best practices, and scalable microservice design*
 

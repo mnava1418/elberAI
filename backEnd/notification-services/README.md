@@ -1,250 +1,330 @@
+# 🚀 ElberAI Notification Service
 
-# Notification Services
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![OAuth2](https://img.shields.io/badge/OAuth2-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://oauth.net/2/)
 
-Complete microservice for email notifications with JWT authentication, rate limiting, and Gmail OAuth2 integration.
+> **Enterprise-grade notification microservice** with advanced security, OAuth2 authentication, and scalable email delivery system built for high-traffic applications.
 
-## 🚀 Features
+## 📋 Table of Contents
+- [🎯 Overview](#-overview)
+- [✨ Key Features](#-key-features)  
+- [🛠 Tech Stack](#-tech-stack)
+- [⚡ Quick Start](#-quick-start)
+- [📚 API Documentation](#-api-documentation)
+- [🏗 Architecture](#-architecture)
+- [🔒 Security](#-security)
+- [🐳 Docker Deployment](#-docker-deployment)
+- [💻 Development Setup](#-development-setup)
+- [🤝 Contributing](#-contributing)
 
-- **Secure Email Delivery**: OAuth2 authentication with Gmail SMTP
-- **JWT Authentication**: Protected API endpoints with token validation  
-- **Rate Limiting**: Built-in request throttling (100 requests per 15 minutes)
-- **Template System**: Dynamic HTML email templates with multiple message types
-- **Multi-recipient Support**: BCC functionality for bulk notifications
-- **Security Headers**: Helmet.js integration for enhanced security
-- **Docker Ready**: Multi-stage build for optimized production deployment
-- **TypeScript**: Full type safety and modern development experience
+## 🎯 Overview
 
-## 📧 Email Types Supported
+A **production-ready microservice** designed to handle enterprise-level email notifications with **OAuth2 integration**, **JWT authentication**, and **rate limiting**. Built with **Clean Architecture** principles, this service manages multiple notification workflows including user access requests, account verification, and password recovery with **HTML templating** and **multi-stage Docker builds**.
 
-1. **Access Requests**: User registration requests with admin notifications
-2. **Access Responses**: Approval/rejection notifications with access codes
-3. **Account Verification**: Email verification links for new accounts  
-4. **Password Recovery**: Secure password reset functionality
+## ✨ Key Features
+
+- 🔐 **OAuth2 + JWT Security** - Enterprise-grade authentication with Google OAuth2 and internal JWT validation
+- 📧 **Multi-Template Email System** - Dynamic HTML templates for different notification types 
+- 🚦 **Rate Limiting & DDoS Protection** - 100 requests/15min per IP with Helmet security headers
+- 🏗 **Clean Architecture** - Modular design with controllers, services, middleware layers
+- 🐳 **Multi-Stage Docker Build** - Optimized production images with minimal attack surface
+- 📊 **Type-Safe Development** - Strict TypeScript with comprehensive type definitions
+- ⚡ **High Performance** - Async email delivery with connection pooling
 
 ## 🛠 Tech Stack
 
-- **Runtime**: Node.js with TypeScript
-- **Framework**: Express.js
-- **Email Service**: Nodemailer with Gmail OAuth2
-- **Authentication**: JWT (JSON Web Tokens)
-- **Security**: Helmet.js, Express Rate Limit
-- **Build Tool**: TypeScript Compiler
-- **Deployment**: Docker with multi-stage build
+### **Core Technologies**
+| Technology | Purpose | Version |
+|------------|---------|---------|
+| [![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) | Type-safe development | ^5.9.2 |
+| [![Node.js](https://img.shields.io/badge/-Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/) | Runtime environment | LTS 20+ |
+| [![Express](https://img.shields.io/badge/-Express-000000?logo=express&logoColor=white)](https://expressjs.com/) | Web framework | ^5.2.1 |
 
-## 📁 Project Structure
+### **Security & Authentication**
+| Technology | Purpose |
+|------------|---------|
+| [![JWT](https://img.shields.io/badge/-JWT-000000?logo=jsonwebtokens&logoColor=white)](https://jwt.io/) | Token authentication |
+| [![Helmet](https://img.shields.io/badge/-Helmet-663399?logo=helm&logoColor=white)](https://helmetjs.github.io/) | Security headers |
+| [![OAuth2](https://img.shields.io/badge/-OAuth2-4285F4?logo=google&logoColor=white)](https://oauth.net/2/) | Google SMTP integration |
 
+### **Email & Communication**
+| Technology | Purpose |
+|------------|---------|
+| [![Nodemailer](https://img.shields.io/badge/-Nodemailer-339933?logo=nodemailer&logoColor=white)](https://nodemailer.com/) | Email delivery |
+| HTML Templates | Dynamic content generation |
+
+### **DevOps & Deployment**
+| Technology | Purpose |
+|------------|---------|
+| [![Docker](https://img.shields.io/badge/-Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/) | Containerization |
+| Multi-stage builds | Production optimization |
+
+## ⚡ Quick Start
+
+```bash
+# 🚀 Clone and setup
+git clone <repository>
+cd notification-services
+
+# 📦 Install dependencies
+npm install
+
+# ⚙️ Configure environment
+cp .env.template .env
+# Edit .env with your credentials
+
+# 🏃‍♂️ Development mode
+npm run dev
+
+# 🏗 Production build
+npm run build && npm start
 ```
-src/
-├── app.ts              # Express app configuration
-├── bin/www.ts          # Server entry point
-├── config/             # Environment and service configuration
-├── controllers/        # Request handlers for email operations
-├── middlewares/        # JWT authentication and security
-├── routes/             # API endpoint definitions
-├── services/           # Email service logic and Gmail integration
-├── templates/          # HTML email templates
-└── types/              # TypeScript type definitions
-```
 
-## 🚦 API Endpoints
+**🌐 Service available at:** `http://localhost:4043`
 
-### Base URL
-```
-http://localhost:4043
-```
+## 📚 API Documentation
 
-### Health Check
+### **Authentication Required** 🔒
+All endpoints require JWT token in Authorization header: `Bearer <token>`
+
+### **Core Endpoints**
+
+<details>
+<summary><strong>📋 Health Check</strong></summary>
+
 ```http
 GET /health
 ```
+**Response:**
+```json
+{
+  "endPoint": "/notification"
+}
+```
+</details>
 
-### Email Operations (All require JWT authentication)
+<details>
+<summary><strong>📧 Access Request</strong></summary>
 
-#### Request Access
 ```http
 POST /email/requestAccess
 Content-Type: application/json
 Authorization: Bearer <jwt_token>
 
 {
-    "userEmail": "user@example.com",
-    "approveURL": "https://app.com/approve/123",
-    "rejectURL": "https://app.com/reject/123" 
+  "userEmail": "user@example.com",
+  "approveURL": "https://app.com/approve/123",
+  "rejectURL": "https://app.com/reject/123"
 }
 ```
+**Workflow:** Sends confirmation to user + admin notification with approve/reject links
+</details>
 
-#### Access Response  
+<details>
+<summary><strong>✅ Access Response</strong></summary>
+
 ```http
 POST /email/accessResponse
 Content-Type: application/json
-Authorization: Bearer <jwt_token>
 
 {
-    "email": "user@example.com",
-    "isApproved": true,
-    "accessCode": 123456
+  "email": "user@example.com",
+  "isApproved": true,
+  "accessCode": 123456
 }
 ```
+</details>
 
-#### Verify Account
+<details>
+<summary><strong>🔐 Account Verification</strong></summary>
+
 ```http
 POST /email/verifyAccount
 Content-Type: application/json
-Authorization: Bearer <jwt_token>
 
 {
-    "email": "user@example.com",
-    "name": "John Doe",
-    "link": "https://app.com/verify/abc123"
+  "email": "user@example.com",
+  "name": "Juan Pérez",
+  "link": "https://app.com/verify/abc123"
 }
 ```
+</details>
 
-#### Reset Password
+<details>
+<summary><strong>🔄 Password Reset</strong></summary>
+
 ```http
 POST /email/resetPassword
-Content-Type: application/json  
-Authorization: Bearer <jwt_token>
+Content-Type: application/json
 
 {
-    "email": "user@example.com",
-    "recoverLink": "https://app.com/reset/xyz789"
+  "email": "user@example.com",
+  "recoverLink": "https://app.com/reset/xyz789"
 }
 ```
+</details>
 
-## ⚙️ Environment Configuration
+## 🏗 Architecture
 
-Create a `.env` file with the following variables:
-
-```env
-# Gmail OAuth2 Credentials (Service Account JSON file path)
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
-
-# Server Configuration
-NOTIFICATION_PORT=4043
-
-# JWT Secret for internal service authentication  
-INTERNAL_TOKEN=your_jwt_secret_here
+```mermaid
+graph TB
+    A[API Gateway] --> B[JWT Middleware]
+    B --> C[Rate Limiter]
+    C --> D[Email Controller]
+    D --> E[Email Service]
+    E --> F[Template Engine]
+    E --> G[OAuth2 Transporter]
+    G --> H[Gmail SMTP]
+    
+    subgraph "Security Layer"
+        B
+        C
+        I[Helmet Headers]
+    end
+    
+    subgraph "Business Logic"
+        D
+        E
+        F
+    end
+    
+    subgraph "External Services"
+        H
+        J[Google OAuth2]
+    end
 ```
 
-## 🔑 Gmail OAuth2 Setup
+### **🔧 Design Patterns Implemented**
+- **Repository Pattern** - Service layer abstraction
+- **Factory Pattern** - Email template generation  
+- **Strategy Pattern** - Multiple notification types
+- **Middleware Chain** - Request processing pipeline
+- **Dependency Injection** - Configuration management
 
-1. Create a Google Cloud Project
-2. Enable Gmail API  
-3. Create a Service Account
-4. Download the JSON credentials file
-5. Set the file path in `GOOGLE_APPLICATION_CREDENTIALS`
+## 🔒 Security
+
+### **🛡 Security Measures Implemented**
+
+| Feature | Implementation | Purpose |
+|---------|----------------|---------|
+| **JWT Validation** | `jsonwebtoken` | Service-to-service authentication |
+| **Rate Limiting** | `express-rate-limit` | 100 req/15min per IP - DDoS protection |
+| **OWASP Headers** | `helmet` | XSS, CSRF, clickjacking protection |
+| **OAuth2 Integration** | Google Service Account | Secure SMTP authentication |
+| **Environment Isolation** | `.env` files | Credential security |
+| **Input Validation** | Express middleware | Prevent injection attacks |
+
+### **🔐 Authentication Flow**
+```typescript
+// JWT middleware validates internal service calls
+export const validateToken = (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers.authorization?.split(' ')[1]
+    jwt.verify(token, auth.token as string)
+    // Proceeds only if valid JWT
+}
+```
 
 ## 🐳 Docker Deployment
 
-### Build Image
-```bash
-# From the parent directory containing notification-services/
-docker build -f notification-services/Dockerfile -t elber-notifications .
+### **Multi-Stage Production Build**
+```dockerfile
+# Optimized for production with minimal attack surface
+FROM node:20-alpine AS builder
+# Build stage with dev dependencies
+
+FROM node:20-alpine
+# Runtime stage with only production deps
+EXPOSE 4043
+CMD ["node", "dist/bin/www.js"]
 ```
 
-### Run Container
+### **🚀 Deploy Commands**
 ```bash
+# 🏗 Build production image
+docker build -t notification-service .
+
+# 🏃‍♂️ Run container
 docker run -p 4043:4043 \
-  -e GOOGLE_APPLICATION_CREDENTIALS=/app/creds/gmail-creds.json \
-  -e NOTIFICATION_PORT=4043 \  
+  -e GOOGLE_APPLICATION_CREDENTIALS=/app/creds/google.json \
   -e INTERNAL_TOKEN=your_jwt_secret \
-  -v /path/to/creds:/app/creds \
-  elber-notifications
+  notification-service
+
+# 🌐 Docker Compose (recommended)
+docker-compose up -d
 ```
 
-## 🚀 Local Development
+## 💻 Development Setup
 
-### Prerequisites
-- Node.js 20+
-- npm or yarn
-- Gmail OAuth2 service account
+### **🔧 Prerequisites**
+- Node.js 20+ 
+- npm/yarn
+- Google OAuth2 credentials
+- Docker (optional)
 
-### Installation
+### **📝 Environment Configuration**
 ```bash
-# Install dependencies
+# Required environment variables
+GOOGLE_APPLICATION_CREDENTIALS=path/to/google/creds.json
+NOTIFICATION_PORT=4043
+INTERNAL_TOKEN=your_jwt_secret_key
+```
+
+### **🛠 Development Workflow**
+```bash
+# 📦 Install dependencies
 npm install
 
-# Create environment file
-cp .env.template .env
-# Edit .env with your configuration
-
-# Development mode (with hot reload)
+# 🔥 Hot reload development
 npm run dev
 
-# Build for production
+# 🧪 Type checking
+npx tsc --noEmit
+
+# 🏗 Production build
 npm run build
 
-# Start production server  
+# 🚀 Start production server
 npm start
 ```
 
-### Development URL
+### **📊 Project Structure**
 ```
-http://localhost:4043
-```
-
-## 🔒 Security Features
-
-- **JWT Authentication**: All endpoints protected except health check
-- **Rate Limiting**: 100 requests per 15 minutes per IP
-- **Security Headers**: Helmet.js provides comprehensive security headers
-- **Input Validation**: Express built-in JSON parsing with limits
-- **OAuth2**: Secure email sending without storing passwords
-- **Environment Variables**: Sensitive data externalized from code
-
-## 🏗 Architecture Highlights
-
-- **Microservice Design**: Focused single responsibility (notifications)
-- **Clean Architecture**: Separation of concerns with controllers, services, and routes  
-- **Type Safety**: Full TypeScript implementation
-- **Error Handling**: Graceful error management and logging
-- **Template Engine**: Reusable HTML email templates with dynamic content
-- **Multi-stage Docker**: Optimized production builds
-- **Configuration Management**: Environment-based config with validation
-
-## 🧪 Testing
-
-```bash
-# Test endpoints with curl
-curl -X GET http://localhost:4043/health
-
-# Test with authentication
-curl -X POST http://localhost:4043/email/verifyAccount \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \  
-  -d '{"email":"test@example.com","name":"Test User","link":"https://verify.com"}'
+src/
+├── app.ts              # Express app configuration
+├── bin/www.ts          # Server bootstrap
+├── config/             # Environment configuration
+├── controllers/        # Request handlers
+├── middlewares/        # Custom middleware
+├── routes/             # API routes definition
+├── services/           # Business logic layer
+├── templates/          # HTML email templates
+└── types/              # TypeScript definitions
 ```
 
-## 📊 Performance & Monitoring
+## 🤝 Contributing
 
-- **Rate Limiting**: Prevents API abuse
-- **Request Logging**: All requests logged for monitoring
-- **Health Endpoint**: Service status checking
-- **Graceful Shutdowns**: Proper connection cleanup
-- **Memory Efficient**: Alpine Linux base image
+### **🔄 Development Guidelines**
+1. **Type Safety**: All code must pass strict TypeScript compilation
+2. **Security First**: JWT validation required for all endpoints
+3. **Clean Architecture**: Maintain separation of concerns
+4. **Error Handling**: Comprehensive try-catch blocks with logging
 
-## 🔧 Customization
-
-### Adding New Email Types
-1. Add new enum value in `types/email.type.ts`
-2. Create template function in `templates/email.template.ts`  
-3. Update switch statement in `services/email.service.ts`
-4. Add controller method and route
-
-### Extending Authentication
-The JWT middleware can be extended to support:
-- Role-based access control
-- API key authentication
-- Rate limiting per user
+### **📋 Code Standards**
+- ✅ Strict TypeScript configuration
+- ✅ Express middleware pattern
+- ✅ Async/await for all operations
+- ✅ Comprehensive error logging
+- ✅ Environment-based configuration
 
 ---
 
-## 👨‍💻 Developer
+<div align="center">
 
-**Martín Nava**
-- Email: martin@namart.tech
-- This microservice demonstrates expertise in Node.js, TypeScript, email automation, security, and containerization.
+**Built with ❤️ by [Martin Navarro](https://github.com/mnavapena)**
 
----
+*Showcasing enterprise-level Node.js architecture, security best practices, and scalable microservice design*
 
-*Part of the ELBER AI Platform - A comprehensive AI assistant ecosystem*
+</div>

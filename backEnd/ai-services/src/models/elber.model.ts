@@ -1,4 +1,4 @@
-export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title'
+export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title' | 'elber:cancelled'
 
 export enum ElberAction {
     CHAT_TEXT = 'chat_text'

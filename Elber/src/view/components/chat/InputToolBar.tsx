@@ -69,8 +69,12 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
         dispatch(isWaitingForElber(true))
         dispatch(addChatMessage(chatId, newMessage))
         
-        SocketModel.getInstance().sendMessage(chatId, chatInfo.name, newMessage, dispatch)  
+        SocketModel.getInstance().sendMessage(chatId, chatInfo.name!, newMessage, dispatch)  
         setInputText('')
+    }
+
+    const handleCancel = () => {
+        SocketModel.getInstance().cancelMessage(chatInfo.id, dispatch)
     }
 
     useEffect(() => {
@@ -92,10 +96,12 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                     autoCapitalize='sentences'
                     placeholder={isListening ? 'Escuchando...' : 'Preguuuuntame caon...'}
                     placeholderTextColor={appColors.subtitle}
+                    editable={!isStreaming}
                 />  
-                {inputText.trim() === '' && !isListening ? <ChatBtn type='secondary' icon='mic-outline' onPress={handleVoice} /> : <></>}
-                {isListening ? <ChatBtn type='primary' icon='stop' onPress={handleVoice} /> : <></>}
-                {inputText.trim() !== '' && !isListening ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
+                {inputText.trim() === '' && !isListening && !isStreaming ? <ChatBtn type='secondary' icon='mic-outline' onPress={handleVoice} /> : <></>}
+                {isListening && !isStreaming ? <ChatBtn type='primary' icon='stop' onPress={handleVoice} /> : <></>}
+                {inputText.trim() !== '' && !isListening && !isStreaming ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
+                {isStreaming ? <ChatBtn type='primary' icon='stop' onPress={handleCancel} /> : <></>}
             </View>
         </Animated.View>
     )

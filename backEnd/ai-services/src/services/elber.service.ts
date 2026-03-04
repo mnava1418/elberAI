@@ -41,7 +41,7 @@ const formatMemories = async (uid: string, text: string): Promise<string> => {
         `.trim();
 }
 
-export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
     await withTrace('Elber workflow', async() => {
         const {chatId, text, user, timeStamp, timeZone} = request
         try {            
@@ -65,8 +65,14 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
 
             let agentResponse = ''
             let responseCompleted = false
+            let wasCancelled = false
 
             for await(const event of result) {
+                if(abortController?.signal.aborted) {
+                    wasCancelled = true
+                    break
+                }
+
                 if(event.type == 'raw_model_stream_event' && event.data.event) {
                     if(event.data.event.type == 'response.output_text.delta') {
                         agentResponse = `${agentResponse}${event.data.event?.delta}`.trim()
@@ -91,6 +97,19 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
                         emitMessage('elber:error', chatId, 'Error en la respuesta de Elber agent');
                     }                    
                 }
+            }
+
+            if(wasCancelled && agentResponse.trim() !== '' && !responseCompleted) {
+                emitMessage('elber:cancelled', chatId, '');
+                
+                const elberResponse: ElberResponse = {
+                    agentResponse,
+                    conversationId,
+                    originalRequest: request,
+                    memory: midMemory
+                }
+                
+                handleResponse(elberResponse, emitMessage)
             }
         } catch (error) {
             console.error(error)

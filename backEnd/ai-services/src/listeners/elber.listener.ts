@@ -1,11 +1,12 @@
 import { DefaultEventsMap, Socket, Server } from "socket.io";
-import { ElberEvent, ElberRequest, ElberUser } from "../models/elber.model";
+import { ElberEvent, ElberRequest } from "../models/elber.model";
 import { chat } from "../services/elber.service";
 import { saveChatMessage } from "../services/chat.service";
 
 const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
     
     const uid = socket.data.user.uid
+    const activeChats = new Map<number, AbortController>()
 
     const emitChatResponse = (event: ElberEvent, chatId: number, text: string) => {        
         io.to(uid).emit(event, chatId, text);
@@ -23,7 +24,21 @@ const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEve
                 console.error(error)
             })
             
-            chat(payload, emitChatResponse)
+            const abortController = new AbortController()
+            activeChats.set(chatId, abortController)
+            
+            chat(payload, emitChatResponse, abortController)
+            .finally(() => {
+                activeChats.delete(chatId)
+            })
+        }
+    })
+
+    socket.on('user:cancel', (chatId: number) => {
+        console.info(`Cancelling chat ${chatId} from ${uid}`)
+        const abortController = activeChats.get(chatId)
+        if(abortController) {
+            abortController.abort()
         }
     })
 }

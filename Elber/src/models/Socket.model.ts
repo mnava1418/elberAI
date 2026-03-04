@@ -100,6 +100,10 @@ class SocketModel {
                 console.error(text)
                 handleChatResponse(dispatch, 'elber:error',  {chatId, text: "No manches, se me hizo bolas el engrudo! Dame un minuto pa' recomponerme." })
             })
+
+            this.socket.on('elber:cancelled', (chatId: number, text: string) => {
+                handleChatResponse(dispatch, 'elber:cancelled', {chatId, text})
+            })
         }
     }
 
@@ -132,6 +136,16 @@ class SocketModel {
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
             }
             this.socket.emit('user:ask', elberRequest )
+        } else {
+            handleChatResponse(dispatch, 'elber:error',  {chatId, text: "¡Pinche conexión se hizo la desaparecida y nos dejó tirados! Intenta de nuevo." })
+        }
+    }
+
+    cancelMessage(chatId: number, dispatch: (value: any) => void) {
+        const currentUser = getAuth().currentUser
+
+        if(this.socket && this.socket.connected && currentUser) {
+            this.socket.emit('user:cancel', chatId)
         } else {
             handleChatResponse(dispatch, 'elber:error',  {chatId, text: "¡Pinche conexión se hizo la desaparecida y nos dejó tirados! Intenta de nuevo." })
         }

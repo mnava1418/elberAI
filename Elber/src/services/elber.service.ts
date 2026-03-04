@@ -16,6 +16,10 @@ const handleChatResponse = (dispatch: (value: any) => void, event: ElberEvent, c
             break;
         case 'elber:title':
             handleTitleEvent(dispatch, chatResponse)
+            break;
+        case 'elber:cancelled':
+            handleCancelledEvent(dispatch)
+            break;
         default:
             break;
     }
@@ -48,6 +52,11 @@ const handleErrorEvent = (dispatch: (value: any) => void, chatResponse: ElberCha
 
 const handleTitleEvent = (dispatch: (value: any) => void, chatResponse: ElberChatResponse) => {
     dispatch(updateChatTitle(chatResponse.text))
+}
+
+const handleCancelledEvent = (dispatch: (value: any) => void) => {
+    dispatch(elberIsStreaming(false))
+    dispatch(isWaitingForElber(false))
 }
 
 export default handleChatResponse

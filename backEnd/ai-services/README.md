@@ -1,4 +1,4 @@
-# 🤖 Elber AI Services - Advanced AI Microservice Architecture
+# 🤖 AI Services
 
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue)](https://www.typescriptlang.org/)

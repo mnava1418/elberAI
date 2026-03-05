@@ -66,7 +66,7 @@ A **production-ready microservice** designed to handle enterprise-level email no
 ```bash
 # 🚀 Clone and setup
 git clone <repository>
-cd notification-services
+cd backEnd/notification-services
 
 # 📦 Install dependencies
 npm install

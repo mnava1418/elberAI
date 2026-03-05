@@ -73,7 +73,7 @@ Elber AI Services is a **sophisticated microservice** that demonstrates advanced
 ```bash
 # Clone and install
 git clone <repo-url>
-cd ai-services
+cd backEnd/ai-services
 npm install
 
 # Environment setup
@@ -292,12 +292,6 @@ src/
 ├── loaders/         # Service initialization  
 └── config/          # Environment configuration
 ```
-
-### **Performance Optimizations**
-- **Connection pooling** for database operations
-- **WebSocket optimizations** (60s ping timeout, 25s intervals)
-- **Memory management** for long-running conversations
-- **Graceful error recovery** for AI stream interruptions
 
 ---
 **🎯 Built for Scale:** This microservice demonstrates production-ready patterns for AI applications, real-time systems, and enterprise security. Perfect showcase for senior AI/ML engineering roles.

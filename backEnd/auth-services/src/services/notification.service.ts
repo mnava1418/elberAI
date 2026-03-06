@@ -4,7 +4,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 
 const sendEmail = async (endPoint: string, data: Record<string, any>) => {
     try {
-        const token = jwt.sign({}, auth.internal as string);
+        const token = jwt.sign({}, auth.internal as string, { expiresIn: '10m' });
 
         const config: AxiosRequestConfig = {
             headers: {

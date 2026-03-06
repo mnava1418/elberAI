@@ -9,18 +9,19 @@ tech_research_task:
   expected_output: >
     JSON estructurado con exactamente 3 noticias de tecnología:
     {
-      "tech_news": [
+      "category": "technology",
+      "articles": [
         {
           "title": "título de la noticia",
           "summary": "resumen de 2-3 líneas",
           "source": "fuente original",
           "url": "enlace completo",
-          "date": "fecha publicación",
-          "relevance_score": "1-10",
-          "geographic_scope": "Internacional",
-          "category": "IA/startup/gadget/ciberseguridad/empresarial"
+          "published_date": "fecha publicación",
+          "relevance_score": 8.5
         }
-      ]
+      ],
+      "total_articles_found": 25,
+      "research_timestamp": "2024-03-06T10:30:00Z"
     }
   agent: tech_reporter
 
@@ -37,34 +38,63 @@ sports_research_task:
   expected_output: >
     JSON estructurado con exactamente 3 noticias de deportes masculinos:
     {
-      "sports_news": [
+      "category": "sports",
+      "articles": [
         {
           "title": "título de la noticia",
-          "summary": "resumen de 2-3 líneas", 
+          "summary": "resumen de 2-3 líneas",
           "source": "fuente original",
           "url": "enlace completo",
-          "date": "fecha publicación",
-          "relevance_score": "1-10",
-          "sport_category": "fútbol_europeo/tenis_masculino/formula_1",
-          "league_tournament": "La Liga/Champions/Premier/ATP/F1"
+          "published_date": "fecha publicación",
+          "relevance_score": 8.5
         }
-      ]
+      ],
+      "total_articles_found": 25,
+      "research_timestamp": "2024-03-06T10:30:00Z"
     }
   agent: sports_reporter
 
+geopolitics_research_task:
+  description: >
+    Buscar y analizar las noticias más relevantes del día en geopolítica.
+    Enfocar en: relaciones internacionales, conflictos, diplomacia, sanciones económicas, 
+    tratados internacionales, movimientos geopolíticos globales y crisis internacionales.
+    Cobertura: Internacional.
+    CRÍTICO: Aplicar ranking automático para seleccionar ÚNICAMENTE las TOP 3 noticias más relevantes.
+    Considerar criterios: impacto geopolítico, consecuencias diplomáticas, alcance internacional.
+    Fecha actual: {current_date}
+  expected_output: >
+    JSON estructurado con exactamente 3 noticias de geopolítica:
+    {
+      "category": "geopolitics",
+      "articles": [
+        {
+          "title": "título de la noticia",
+          "summary": "resumen de 2-3 líneas",
+          "source": "fuente original",
+          "url": "enlace completo",
+          "published_date": "fecha publicación",
+          "relevance_score": 8.5
+        }
+      ],
+      "total_articles_found": 25,
+      "research_timestamp": "2024-03-06T10:30:00Z"
+    }
+  agent: geopolitics_reporter
+
 editorial_curation_task:
   description: >
-    Recibir las 6 noticias pre-seleccionadas (3 tech + 3 deportes) de los reporteros.
+    Recibir las 9 noticias pre-seleccionadas (3 tech + 3 deportes + 3 geopolítica) de los reporteros.
     Responsabilidades críticas:
-    1. Agregación de las 6 noticias
+    1. Agregación de las 9 noticias
     2. Deduplicación inteligente basada en similaridad semántica
-    3. Verificar que no haya overlap entre categorías tech y deportes
+    3. Verificar que no haya overlap entre categorías tech, deportes y geopolítica
     4. Re-ranking final si hay conflictos de relevancia
     5. FILTRADO EDITORIAL CRÍTICO: Eliminar cualquier tipo de tendencia política,
        amarillismo, sensacionalismo, clickbait o sesgo ideológico de las noticias.
        Mantener únicamente información factual, objetiva y verificable.
        Rechazar noticias con títulos engañosos o contenido manipulativo.
-    6. Estructurar para el Copy Editor manteniendo máximo 6 noticias limpias y objetivas
+    6. Estructurar para el Copy Editor manteniendo máximo 9 noticias limpias y objetivas
     Asegurar coherencia editorial, balance entre secciones y neutralidad informativa.
   expected_output: >
     JSON curado con las noticias finales organizadas por sección:
@@ -76,12 +106,15 @@ editorial_curation_task:
         "sports_section": [  
           {noticias deportes curadas con metadatos editoriales}
         ],
+        "geopolitics_section": [
+          {noticias geopolítica curadas con metadatos editoriales}
+        ],
         "editorial_notes": "notas del editor sobre decisiones tomadas",
         "total_articles": "número total de artículos seleccionados"
       }
     }
   agent: editor_in_chief
-  context: [tech_research_task, sports_research_task]
+  context: [tech_research_task, sports_research_task, geopolitics_research_task]
 
 newsletter_creation_task:
   description: >
@@ -97,7 +130,11 @@ newsletter_creation_task:
        - Encabezado de la noticia (título atractivo)
        - Cuerpo de la noticia (resumen y contexto)
        - Liga a la fuente original (claramente identificada)
-    5. FOOTER CONSISTENTE: Información de contacto especificando que Elber envió el newsletter
+    5. SECCIÓN GEOPOLÍTICA: Exactamente 3 noticias (relaciones internacionales, conflictos, diplomacia) con formato idéntico:
+       - Encabezado de la noticia (título atractivo)
+       - Cuerpo de la noticia (resumen y contexto)
+       - Liga a la fuente original (claramente identificada)
+    6. FOOTER CONSISTENTE: Información de contacto especificando que Elber envió el newsletter
     
     CONSISTENCIA VISUAL CRÍTICA:
     - Mantener EXACTAMENTE los mismos colores, tipografías y espaciados
@@ -118,7 +155,7 @@ newsletter_creation_task:
     Newsletter completo en formato HTML responsive CON DISEÑO CONSISTENTE:
     - HTML válido y optimizado para email clients
     - CSS inline para compatibilidad máxima (móvil/desktop)
-    - ESTRUCTURA FIJA: Encabezado → Saludo+Resumen → Sección Tech → Sección Deportes → Footer
+    - ESTRUCTURA FIJA: Encabezado → Saludo+Resumen → Sección Tech → Sección Deportes → Sección Geopolítica → Footer
     - Cada noticia con formato estándar: [Encabezado] + [Cuerpo] + [Liga fuente]
     - Links funcionales a fuentes originales claramente identificados
     - CONSISTENCIA VISUAL: Mismos colores, tipografías, espaciados y layout en cada envío
@@ -130,25 +167,24 @@ newsletter_creation_task:
 email_distribution_task:
   description: >
     Enviar el newsletter HTML al email específico: {recipient_email}
-    Funcionalidades requeridas:
-    1. Validación de HTML antes del envío
-    2. Personalización con el nombre del destinatario: {recipient_name}
-    3. Cumplimiento con regulaciones anti-spam
-    4. Configurar asunto del email como: "Elber News - {current_date}"
-    Usar servicios: SendGrid, Mailgun o SMTP configurado.
-    Email de destino: {recipient_email}
+    Pasos requeridos:
+    1. Validar que el HTML del newsletter esté completo
+    2. Configurar asunto: "Elber News - {current_date}"
+    3. Personalizar con nombre: {recipient_name}
+    4. Enviar usando servicio de email configurado
+    5. Reportar resultado del envío
+    
+    En caso de error, capturar detalles específicos para debugging.
   expected_output: >
-    Reporte detallado de distribución:
+    Reporte de distribución en formato JSON:
     {
-      "distribution_report": {
-        "send_date": "fecha y hora de envío",
-        "recipient_email": "email específico de destino",
-        "successful_send": "true/false",
-        "delivery_status": "delivered/bounced/failed",
-        "error_details": "detalles del error si falló",
-        "email_subject": "asunto del email enviado",
-        "tracking_enabled": "true/false", 
-      }
+      "status": "success",
+      "recipient_email": "{recipient_email}",
+      "send_date": "2024-03-06T10:30:00Z",
+      "successful_send": true,
+      "delivery_status": "delivered",
+      "error_details": null,
+      "email_subject": true,      
     }
   agent: mailer_agent
   context: [newsletter_creation_task]

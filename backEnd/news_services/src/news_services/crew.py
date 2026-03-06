@@ -39,6 +39,15 @@ class NewsServices():
         )
 
     @agent
+    def geopolitics_reporter(self) -> Agent:
+        """Reportero Senior de Geopolítica - Busca TOP 3 noticias geopolítica"""
+        return Agent(
+            config=self.agents_config['geopolitics_reporter'],
+            verbose=True,
+            tools=[self.search_tool]
+        )
+
+    @agent
     def editor_in_chief(self) -> Agent:
         """Editor en Jefe Senior - Cura las 6 noticias pre-seleccionadas"""
         return Agent(
@@ -84,12 +93,21 @@ class NewsServices():
         )
 
     @task
+    def geopolitics_research_task(self) -> Task:
+        """FASE 1C: Recolección Paralela - Investigación Geopolítica"""
+        return Task(
+            config=self.tasks_config['geopolitics_research_task'],
+            agent=self.geopolitics_reporter(),
+            output_json=ResearchOutput,
+        )
+
+    @task
     def editorial_curation_task(self) -> Task:
-        """FASE 2: Curaduría Secuencial - Editor recibe 6 noticias pre-filtradas"""
+        """FASE 2: Curaduría Secuencial - Editor recibe 9 noticias pre-filtradas"""
         return Task(
             config=self.tasks_config['editorial_curation_task'],
             agent=self.editor_in_chief(),
-            context=[self.tech_research_task(), self.sports_research_task()],
+            context=[self.tech_research_task(), self.sports_research_task(), self.geopolitics_research_task()],
             output_json=CuratedNews,
         )
 

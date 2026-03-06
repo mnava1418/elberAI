@@ -13,7 +13,7 @@ class NewsArticle(BaseModel):
 
 class ResearchOutput(BaseModel):
     """Modelo para la salida de las tareas de investigación"""
-    category: str  # "technology" o "sports"
+    category: str
     articles: List[NewsArticle]
     total_articles_found: int
     research_timestamp: str

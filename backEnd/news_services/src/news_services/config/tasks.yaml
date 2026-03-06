@@ -1,17 +1,137 @@
-research_task:
+tech_research_task:
   description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is {current_year}.
+    Buscar y analizar las noticias más relevantes del día en tecnología.
+    Enfocar en: IA, startups, gadgets, ciberseguridad y tech empresarial.
+    Cobertura: México e Internacional.
+    CRÍTICO: Aplicar ranking automático para seleccionar ÚNICAMENTE las TOP 3 noticias más relevantes.
+    Considerar criterios: impacto en la industria, novedad, alcance mediático.
+    Fecha actual: {current_date}
   expected_output: >
-    A list with 10 bullet points of the most relevant information about {topic}
-  agent: researcher
+    JSON estructurado con exactamente 3 noticias de tecnología:
+    {
+      "tech_news": [
+        {
+          "title": "título de la noticia",
+          "summary": "resumen de 2-3 líneas",
+          "source": "fuente original",
+          "url": "enlace completo",
+          "date": "fecha publicación",
+          "relevance_score": "1-10",
+          "geographic_scope": "México/Internacional",
+          "category": "IA/startup/gadget/ciberseguridad/empresarial"
+        }
+      ]
+    }
+  agent: tech_reporter
 
-reporting_task:
+sports_research_task:
   description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
+    Buscar y analizar las noticias más relevantes del día en deportes masculinos.
+    Especialización EXCLUSIVA:
+    - Fútbol Europeo: La Liga (Real Madrid, Barcelona, Atlético), Champions League, Premier League
+    - Tenis Masculino: ATP Tour, Grand Slams, rankings
+    - Fórmula 1: Carreras, pilotos, equipos, clasificaciones
+    EXCLUIR: Deportes femeninos y otros deportes no especificados.
+    CRÍTICO: Aplicar ranking automático para seleccionar ÚNICAMENTE las TOP 3 noticias más relevantes.
+    Fecha actual: {current_date}
   expected_output: >
-    A fully fledged report with the main topics, each with a full section of information.
-    Formatted as markdown without '```'
-  agent: reporting_analyst
+    JSON estructurado con exactamente 3 noticias de deportes masculinos:
+    {
+      "sports_news": [
+        {
+          "title": "título de la noticia",
+          "summary": "resumen de 2-3 líneas", 
+          "source": "fuente original",
+          "url": "enlace completo",
+          "date": "fecha publicación",
+          "relevance_score": "1-10",
+          "sport_category": "fútbol_europeo/tenis_masculino/formula_1",
+          "league_tournament": "La Liga/Champions/Premier/ATP/F1"
+        }
+      ]
+    }
+  agent: sports_reporter
+
+editorial_curation_task:
+  description: >
+    Recibir las 6 noticias pre-seleccionadas (3 tech + 3 deportes) de los reporteros.
+    Responsabilidades críticas:
+    1. Agregación de las 6 noticias
+    2. Deduplicación inteligente basada en similaridad semántica
+    3. Verificar que no haya overlap entre categorías tech y deportes
+    4. Re-ranking final si hay conflictos de relevancia
+    5. FILTRADO EDITORIAL CRÍTICO: Eliminar cualquier tipo de tendencia política,
+       amarillismo, sensacionalismo, clickbait o sesgo ideológico de las noticias.
+       Mantener únicamente información factual, objetiva y verificable.
+       Rechazar noticias con títulos engañosos o contenido manipulativo.
+    6. Estructurar para el Copy Editor manteniendo máximo 6 noticias limpias y objetivas
+    Asegurar coherencia editorial, balance entre secciones y neutralidad informativa.
+  expected_output: >
+    JSON curado con las noticias finales organizadas por sección:
+    {
+      "curated_newsletter": {
+        "tech_section": [
+          {noticias tech curadas con metadatos editoriales}
+        ],
+        "sports_section": [  
+          {noticias deportes curadas con metadatos editoriales}
+        ],
+        "editorial_notes": "notas del editor sobre decisiones tomadas",
+        "total_articles": "número total de artículos seleccionados"
+      }
+    }
+  agent: editor_in_chief
+  context: [tech_research_task, sports_research_task]
+
+newsletter_creation_task:
+  description: >
+    Convertir la selección curada en un newsletter HTML profesional y responsive.
+    ESTRUCTURA ESPECÍFICA REQUERIDA:
+    - Header con fecha del día
+    - Sección Tecnología (hasta 3 noticias)
+    - Sección Deportes (hasta 3 noticias: fútbol europeo, tenis, F1)
+    - Footer con disclaimers
+    TONE OF VOICE: Amigo cagado con humor mexicano (sin ser ñero).
+    Eres ingenioso, bromista y sarcástico. Usa expresiones mexicanas divertidas,
+    albures sutiles, referencias pop culturales mexicanas y sarcasmo inteligente.
+    Haz que leer las noticias sea entretenido como platicar con tu compa más chistoso.
+    Ejemplos de tono: "No manches, la IA ahora hace esto...", "Órale pues, resulta que...",
+    "Como diría mi abuela: tal para cual", "¿A poco sí? Pues resulta que...".
+    Integrar links originales y metadatos de fuente.
+    Asegurar compatibilidad con clientes de email.
+  expected_output: >
+    Newsletter completo en formato HTML responsive:
+    - HTML válido y optimizado para email clients
+    - CSS inline para compatibilidad máxima
+    - Links funcionales a fuentes originales
+    - Estructura clara de secciones
+    - Footer con información de contacto y unsubscribe
+    - Diseño profesional y legible en móvil/desktop
+  agent: copy_editor
+  context: [editorial_curation_task]
+
+email_distribution_task:
+  description: >
+    Enviar el newsletter HTML al email específico: {recipient_email}
+    Funcionalidades requeridas:
+    1. Validación de HTML antes del envío
+    2. Personalización con el nombre del destinatario: {recipient_name}
+    3. Cumplimiento con regulaciones anti-spam
+    4. Configurar asunto del email como: "Newsletter Diario - Tecnología y Deportes - {current_date}"
+    Usar servicios: SendGrid, Mailgun o SMTP configurado.
+    Email de destino: {recipient_email}
+  expected_output: >
+    Reporte detallado de distribución:
+    {
+      "distribution_report": {
+        "send_date": "fecha y hora de envío",
+        "recipient_email": "email específico de destino",
+        "successful_send": "true/false",
+        "delivery_status": "delivered/bounced/failed",
+        "error_details": "detalles del error si falló",
+        "email_subject": "asunto del email enviado",
+        "tracking_enabled": "true/false", 
+      }
+    }
+  agent: mailer_agent
+  context: [newsletter_creation_task]

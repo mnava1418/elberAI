@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import sendEmail from './notification.service';
 
 export const generateToken = (payload: object) => {
-    return jwt.sign(payload, auth.token as string);
+    return jwt.sign(payload, auth.token as string, { expiresIn: '24h' });
 };
 
 export const requestAccess = async (email: string): Promise<RequestResponseModel> => {

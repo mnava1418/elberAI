@@ -2,10 +2,12 @@
 name = "news_services"
 version = "0.1.0"
 description = "news-services using crewAI"
-authors = [{ name = "Your Name", email = "you@example.com" }]
+authors = [{ name = "Martin Nava", email = "martin@namart.tech" }]
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "crewai[tools]==1.10.1"
+    "crewai[tools]==1.10.1",
+    "requests>=2.25.0",
+    "PyJWT>=2.0.0"
 ]
 
 [project.scripts]

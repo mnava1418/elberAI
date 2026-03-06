@@ -89,3 +89,23 @@ export const resetPassword = (req: Request, res: Response) => {
 
     res.json({result: true}).status(200)
 }
+
+export const send = (req: Request, res: Response) => {
+    try {
+        const { to, subject, message } = req.body
+
+        const emailInput: SendEmailInput = { 
+            to, 
+            subject,
+            messageType: EmailMessageType.OpenEmail,
+            message
+        }
+
+        sendEmail(emailInput)
+
+    } catch (error: any) {
+        console.error('Error sending email', error)        
+    }
+
+    res.json({result: true}).status(200)
+}

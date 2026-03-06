@@ -1,7 +1,7 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
-from crewai_tools import SerperDevTool, ScrapeWebsiteTool, WebsiteSearchTool
+from crewai_tools import SerperDevTool
 from datetime import datetime
 
 from news_services.tools.email_tool import EmailTool
@@ -16,28 +16,7 @@ class NewsServices():
 
     def __init__(self):
         self.search_tool = SerperDevTool()
-        self.scrape_tool = ScrapeWebsiteTool()
-        
-        # Herramienta para envío de emails
         self.email_tool = EmailTool()
-        
-        # Herramientas de búsqueda en sitios específicos para tecnología
-        self.tech_search_tools = [
-            WebsiteSearchTool(website="https://techcrunch.com"),
-            WebsiteSearchTool(website="https://www.theverge.com"),
-            WebsiteSearchTool(website="https://arstechnica.com"),
-            WebsiteSearchTool(website="https://www.wired.com"),
-        ]
-        
-        # Herramientas de búsqueda en sitios específicos para deportes
-        self.sports_search_tools = [
-            WebsiteSearchTool(website="https://www.espn.com"),
-            WebsiteSearchTool(website="https://www.marca.com"),
-            WebsiteSearchTool(website="https://as.com"),
-            WebsiteSearchTool(website="https://www.goal.com"),
-            WebsiteSearchTool(website="https://www.formula1.com"),
-            WebsiteSearchTool(website="https://www.atptour.com"),
-        ]
 
     # AGENTES ESPECIALIZADOS PARA NEWSLETTER
     
@@ -47,7 +26,7 @@ class NewsServices():
         return Agent(
             config=self.agents_config['tech_reporter'],
             verbose=True,
-            tools=[self.search_tool, self.scrape_tool] + self.tech_search_tools
+            tools=[self.search_tool]
         )
 
     @agent
@@ -56,7 +35,7 @@ class NewsServices():
         return Agent(
             config=self.agents_config['sports_reporter'],
             verbose=True,
-            tools=[self.search_tool, self.scrape_tool] + self.sports_search_tools
+            tools=[self.search_tool]
         )
 
     @agent
@@ -137,13 +116,7 @@ class NewsServices():
     @crew
     def crew(self) -> Crew:
         """
-        Crea el crew del Sistema de Newsletter Automatizado
-        
-        FLUJO DE TRABAJO:
-        1. FASE RECOLECCIÓN (Paralelo): tech_research + sports_research  
-        2. FASE CURADURÍA (Secuencial): editorial_curation (recibe 6 noticias)
-        3. FASE PRODUCCIÓN (Secuencial): newsletter_creation (genera HTML)
-        4. FASE DISTRIBUCIÓN (Secuencial): email_distribution (envía y reporta)
+        Crea el crew del Sistema de Newsletter Automatizado        
         """
         
         return Crew(

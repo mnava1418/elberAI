@@ -1,0 +1,24 @@
+[project]
+name = "news_services"
+version = "0.1.0"
+description = "news-services using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools]==1.10.1"
+]
+
+[project.scripts]
+news_services = "news_services.main:run"
+run_crew = "news_services.main:run"
+train = "news_services.main:train"
+replay = "news_services.main:replay"
+test = "news_services.main:test"
+run_with_trigger = "news_services.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"

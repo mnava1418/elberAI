@@ -4,7 +4,8 @@ export enum EmailMessageType {
     UserAccessGranted,
     UserAccessDenied,
     VerifyEmail,
-    RecoverPassword
+    RecoverPassword,
+    OpenEmail
 }
 
 export type MailOptions = {
@@ -39,4 +40,5 @@ export type SendEmailInput = {
     subject: string,
     messageType: EmailMessageType
     payload?: RequestAccessPayload | RequestCodePayload | VerifyEmailPayload | RecoverPasswordPayload | undefined
+    message?: string 
 }

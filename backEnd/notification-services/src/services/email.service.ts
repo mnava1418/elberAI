@@ -11,7 +11,7 @@ import { email } from '../config/index.config'
 import nodemailer from 'nodemailer'
 import { EmailMessageType, MailOptions, RecoverPasswordPayload, RequestAccessPayload, RequestCodePayload, SendEmailInput, VerifyEmailPayload } from '../types/email.type'
 
-const getMessage = ({messageType, payload}: SendEmailInput) => {
+const getMessage = ({messageType, payload, message}: SendEmailInput) => {
     switch (messageType) {
         case EmailMessageType.UserRequestAccess:
             return userRequestAccessTemplate()           
@@ -29,6 +29,8 @@ const getMessage = ({messageType, payload}: SendEmailInput) => {
         case EmailMessageType.RecoverPassword:
             const {recoverLink} = payload as RecoverPasswordPayload
             return recoverPasswordTemplate(recoverLink)
+        case EmailMessageType.OpenEmail:
+            return message || ''
         default:
             return ''
     }

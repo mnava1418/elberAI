@@ -117,7 +117,7 @@ services:
     env_file:
       - ./news_services/.env
     volumes:
-      - ./news_services/cron.log:/usr/src/elber/cron.log
+      - ./news_services/cron.log:/usr/src/elber/news_services/cron.log
     mem_limit: 400m
     cpus: "0.30"
     restart: always

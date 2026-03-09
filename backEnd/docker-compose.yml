@@ -109,6 +109,19 @@ services:
     cpus: "0.40"
     restart: always
 
+  news:
+    build:
+      context: .
+      dockerfile: news_services/Dockerfile
+    container_name: elber_news_cron
+    env_file:
+      - ./news_services/.env
+    volumes:
+      - ./news_services/cron.log:/usr/src/elber/cron.log
+    mem_limit: 400m
+    cpus: "0.30"
+    restart: always
+
 networks:
   default:
     driver: bridge

@@ -64,7 +64,7 @@ export const sendEmail = async (input: SendEmailInput) => {
 
     const addresses = to.split(',')
 
-    if(to.length > 1) {
+    if(addresses.length > 1) {
         mailOptions.bcc = addresses
     } else {
         mailOptions.to = addresses[0]

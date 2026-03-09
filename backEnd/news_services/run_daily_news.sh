@@ -10,4 +10,4 @@ cd /usr/src/elber/news_services
 source .venv/bin/activate && uv run run_with_trigger
 
 # Log de la ejecución
-echo "$(date): Daily news service executed" >> /usr/src/elber/news_services/cron.log
+echo "$(date): Daily news service executed" >> /usr/src/elber/news_services/logs/cron.log

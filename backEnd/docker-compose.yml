@@ -117,7 +117,7 @@ services:
     env_file:
       - ./news_services/.env
     volumes:
-      - news_logs:/usr/src/elber/news_services
+      - news_logs:/usr/src/elber/news_services/logs
     mem_limit: 400m
     cpus: "0.30"
     restart: always

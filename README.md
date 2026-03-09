@@ -14,3 +14,7 @@ docker compose logs -f <container>
 docker images
 
 disk -> comando especial que hice para revisar el estado del disco duro
+
+
+checar auth service, que si mande notificaciones
+checar si se borro lo que tengo en postgress

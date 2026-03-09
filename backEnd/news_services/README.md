@@ -20,7 +20,23 @@ crewai install
 ```
 ### Customizing
 
-**Add your `OPENAI_API_KEY` into the `.env` file**
+**Add your API keys into the `.env` file**
+
+#### Required API Keys:
+1. **OpenAI API Key**: Para el modelo de IA principal
+2. **Serper API Key**: Para búsqueda web (obtén una gratis en [serper.dev](https://serper.dev/))
+3. **SendGrid API Key**: Para envío de emails (obtén una en [sendgrid.com](https://sendgrid.com/))
+4. **Sender Email**: Email verificado en SendGrid desde el cual se enviarán los newsletters
+
+#### Herramientas Implementadas:
+- **SerperDevTool**: Búsqueda web general con Google
+- **ScrapeWebsiteTool**: Scraping de páginas web específicas  
+- **EmailTool**: Envío de newsletters via SendGrid con tracking
+- **WebsiteSearchTool**: Búsquedas en sitios especializados
+- **ScrapeWebsiteTool**: Scraping de páginas web específicas  
+- **WebsiteSearchTool**: Búsquedas en sitios especializados
+  - Tech: TechCrunch, The Verge, Ars Technica, Wired
+  - Sports: ESPN, Marca, AS, Goal.com, Formula1.com, ATP Tour
 
 - Modify `src/news_services/config/agents.yaml` to define your agents
 - Modify `src/news_services/config/tasks.yaml` to define your tasks

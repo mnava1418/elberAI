@@ -22,11 +22,8 @@ RUN uv sync
 # Configurar el script de cron
 RUN chmod +x /usr/src/elber/news_services/run_daily_news.sh
 
-# Configurar el cron job
-RUN echo "0 7 * * * /usr/src/elber/news_services/run_daily_news.sh >> /usr/src/elber/news_services/cron.log 2>&1" | crontab -
-
-# Crear archivo de log
-RUN touch /usr/src/elber/news_services/cron.log
+# Configurar el cron job - sin redirección a archivo
+RUN echo "0 7 * * * /usr/src/elber/news_services/run_daily_news.sh" | crontab -
 
 # Script para iniciar cron y mantener el contenedor corriendo
-CMD ["sh", "-c", "cron && tail -f /usr/src/elber/news_services/cron.log"]
+CMD ["sh", "-c", "cron && while true; do sleep 60; done"]

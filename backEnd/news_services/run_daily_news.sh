@@ -9,5 +9,5 @@ cd /usr/src/elber/news_services
 # Activar entorno virtual y ejecutar
 source .venv/bin/activate && uv run run_with_trigger
 
-# Log de la ejecución
-echo "$(date): Daily news service executed" >> /usr/src/elber/news_services/cron.log
+# Log de la ejecución - a stdout para Docker logs
+echo "$(date): Daily news service executed"

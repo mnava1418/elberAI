@@ -5,6 +5,8 @@ tech_research_task:
     Cobertura: Internacional.
     CRÍTICO: Aplicar ranking automático para seleccionar ÚNICAMENTE las TOP 3 noticias más relevantes.
     Considerar criterios: impacto en la industria, novedad, alcance mediático.
+    IDIOMA OBLIGATORIO: Todo el contenido final debe ser en ESPAÑOL MEXICANO.
+    TRADUCCIÓN AUTOMÁTICA: Si las fuentes están en inglés u otros idiomas, traducir automáticamente a español mexicano natural.
     Fecha actual: {current_date}
   expected_output: >
     JSON estructurado con exactamente 3 noticias de tecnología:
@@ -29,11 +31,13 @@ sports_research_task:
   description: >
     Buscar y analizar las noticias más relevantes del día en deportes masculinos.
     Especialización EXCLUSIVA:
-    - Fútbol Europeo: La Liga (Real Madrid, Barcelona, Atlético), Champions League, Premier League
+    - Fútbol Europeo: La Liga del fútbol español, Champions League, Premier League
     - Tenis Masculino: ATP Tour, Grand Slams, rankings
     - Fórmula 1: Carreras, pilotos, equipos, clasificaciones
     EXCLUIR: Deportes femeninos y otros deportes no especificados.
     CRÍTICO: Aplicar ranking automático para seleccionar ÚNICAMENTE las TOP 3 noticias más relevantes.
+    IDIOMA OBLIGATORIO: Todo el contenido final debe ser en ESPAÑOL MEXICANO.
+    TRADUCCIÓN AUTOMÁTICA: Si las fuentes están en inglés u otros idiomas, traducir automáticamente a español mexicano natural.
     Fecha actual: {current_date}
   expected_output: >
     JSON estructurado con exactamente 3 noticias de deportes masculinos:
@@ -62,6 +66,8 @@ geopolitics_research_task:
     Cobertura: Internacional.
     CRÍTICO: Aplicar ranking automático para seleccionar ÚNICAMENTE las TOP 3 noticias más relevantes.
     Considerar criterios: impacto geopolítico, consecuencias diplomáticas, alcance internacional.
+    IDIOMA OBLIGATORIO: Todo el contenido final debe ser en ESPAÑOL MEXICANO.
+    TRADUCCIÓN AUTOMÁTICA: Si las fuentes están en inglés u otros idiomas, traducir automáticamente a español mexicano natural.
     Fecha actual: {current_date}
   expected_output: >
     JSON estructurado con exactamente 3 noticias de geopolítica:
@@ -82,20 +88,76 @@ geopolitics_research_task:
     }
   agent: geopolitics_reporter
 
+fact_checking_task:
+  description: >
+    Recibir y validar las 9 noticias pre-seleccionadas (3 tech + 3 deportes + 3 geopolítica) de los reporteros.
+    Responsabilidades críticas de verificación:
+    1. VALIDACIÓN DE CONTENIDO: Verificar que cada resumen refleje correctamente el contenido de la fuente original
+    2. VERIFICACIÓN DE FUENTES: Confirmar que las URLs sean funcionales y las fuentes sean confiables
+    3. CONTROL DE CALIDAD: Detectar información incorrecta, desactualizada o malinterpretada
+    4. DETECCIÓN DE SESGOS: Identificar y señalar contenido tendencioso, sensacionalista o clickbait
+    5. VALIDACIÓN DE FECHAS: Confirmar que las noticias sean realmente del día actual
+    6. COHERENCIA CONTEXTUAL: Verificar que los títulos y resúmenes sean consistentes con el contenido real
+    7. FILTRADO DE DUPLICADOS: Detectar noticias similares entre categorías
+    8. CONTROL DE IDIOMA: Asegurar traducción completa y correcta al español mexicano
+    
+    CRITERIOS DE RECHAZO: Rechazar noticias que contengan:
+    - Información no verificable o especulativa
+    - Fuentes poco confiables o URLs rotas
+    - Contenido sensacionalista o títulos engañosos
+    - Información desactualizada o incorrecta
+    - Sesgos políticos o ideológicos evidentes
+    
+    PROCESO: Analizar cada una de las 9 noticias y generar un reporte de validación con
+    recomendaciones de aprobación, modificación o rechazo para cada una.
+  expected_output: >
+    JSON estructurado con validación completa de las 9 noticias:
+    {
+      "validation_report": {
+        "tech_articles": [
+          {
+            "original_title": "título original",
+            "validation_status": "approved/needs_revision/rejected",
+            "accuracy_score": 9.2,
+            "source_reliability": "high/medium/low",
+            "content_quality": "factual/speculative/misleading",
+            "fact_check_notes": "observaciones específicas",
+            "recommended_changes": "modificaciones sugeridas si aplica"
+          }
+        ],
+        "sports_articles": [
+          {"misma estructura para deportes"}
+        ],
+        "geopolitics_articles": [
+          {"misma estructura para geopolítica"}
+        ],
+        "overall_assessment": {
+          "total_articles_validated": 9,
+          "approved_count": 7,
+          "needs_revision_count": 2,
+          "rejected_count": 0,
+          "quality_score": 8.5,
+          "validation_timestamp": "{current_date}"
+        }
+      }
+    }
+  agent: fact_checker
+  context: [tech_research_task, sports_research_task, geopolitics_research_task]
+
 editorial_curation_task:
   description: >
-    Recibir las 9 noticias pre-seleccionadas (3 tech + 3 deportes + 3 geopolítica) de los reporteros.
+    Recibir el reporte de validación del fact-checker y las noticias verificadas para curaduría final.
     Responsabilidades críticas:
-    1. Agregación de las 9 noticias
-    2. Deduplicación inteligente basada en similaridad semántica
-    3. Verificar que no haya overlap entre categorías tech, deportes y geopolítica
-    4. Re-ranking final si hay conflictos de relevancia
-    5. FILTRADO EDITORIAL CRÍTICO: Eliminar cualquier tipo de tendencia política,
-       amarillismo, sensacionalismo, clickbait o sesgo ideológico de las noticias.
-       Mantener únicamente información factual, objetiva y verificable.
-       Rechazar noticias con títulos engañosos o contenido manipulativo.
-    6. Estructurar para el Copy Editor manteniendo máximo 9 noticias limpias y objetivas
+    1. Revisar reporte de validación y aplicar recomendaciones del fact-checker
+    2. Agregación de noticias aprobadas y revisadas
+    3. Deduplicación inteligente basada en similaridad semántica
+    4. Verificar que no haya overlap entre categorías tech, deportes y geopolítica
+    5. Re-ranking final si hay conflictos de relevancia
+    6. APLICAR RECOMENDACIONES DEL FACT-CHECKER: Implementar cambios sugeridos,
+       rechazar noticias marcadas como problemáticas y aplicar revisiones necesarias
+    7. Estructurar para el Copy Editor manteniendo máximo 9 noticias validadas y curadas
     Asegurar coherencia editorial, balance entre secciones y neutralidad informativa.
+    NOTA: El filtrado de calidad ya fue realizado por el fact-checker, enfocar en organización editorial.
   expected_output: >
     JSON curado con las noticias finales organizadas por sección:
     {
@@ -114,7 +176,7 @@ editorial_curation_task:
       }
     }
   agent: editor_in_chief
-  context: [tech_research_task, sports_research_task, geopolitics_research_task]
+  context: [fact_checking_task]
 
 newsletter_creation_task:
   description: >
@@ -142,12 +204,17 @@ newsletter_creation_task:
     - Mismo layout responsive para móvil/desktop
     - Elementos gráficos y divisores consistentes entre secciones
     
+    IDIOMA FINAL OBLIGATORIO: TODO el newsletter debe estar en ESPAÑOL MEXICANO.
+    PROHIBIDO usar inglés, incluir texto en otros idiomas o dejar contenido sin traducir.
+    
     TONE OF VOICE: Amigo cagado con humor mexicano (sin ser ñero).
     Eres ingenioso, bromista y sarcástico. Usa expresiones mexicanas divertidas,
     albures sutiles, referencias pop culturales mexicanas y sarcasmo inteligente.
     Haz que leer las noticias sea entretenido como platicar con tu compa más chistoso.
     Ejemplos de tono: "No manches, la IA ahora hace esto...", "Órale pues, resulta que...",
     "Como diría mi abuela: tal para cual", "¿A poco sí? Pues resulta que...".
+    
+    CONTROL DE CALIDAD: Revisar que no haya palabras en inglés ni texto sin traducir.
     
     Integrar links originales y metadatos de fuente.
     Asegurar compatibilidad con clientes de email.
@@ -169,10 +236,9 @@ email_distribution_task:
     Enviar el newsletter HTML al email específico: {recipient_email}
     Pasos requeridos:
     1. Validar que el HTML del newsletter esté completo
-    2. Configurar asunto: "Elber News - {current_date}"
-    3. Personalizar con nombre: {recipient_name}
-    4. Enviar usando servicio de email configurado
-    5. Reportar resultado del envío
+    2. Configurar asunto: "Elber News - {current_date}"    
+    3. Enviar usando servicio de email configurado
+    4. Reportar resultado del envío
     
     En caso de error, capturar detalles específicos para debugging.
   expected_output: >

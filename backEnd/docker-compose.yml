@@ -96,6 +96,8 @@ services:
       context: .
       dockerfile: notification-services/Dockerfile
     container_name: elber_notification
+    ports:
+      - "4043:4043"
     env_file:
       - ./notification-services/.env
     environment:

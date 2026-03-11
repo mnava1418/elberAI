@@ -7,7 +7,12 @@ dotenv.config({
 
 export const email = {
     cred: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-    from: 'martin@namart.tech'
+    from: 'martin@namart.tech',
+    newsletter: 'newsletter@namart.tech',
+    newsletterMembers: [        
+        'mnavapena@gmail.com',
+        'martin1418@hotmail.com'
+    ]
 }
 
 export const server = {

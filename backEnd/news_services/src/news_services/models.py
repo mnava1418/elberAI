@@ -2,6 +2,54 @@ from pydantic import BaseModel
 from typing import List, Optional
 from enum import Enum
 
+class ValidationStatus(Enum):
+    """Estados de validación para fact-checking"""
+    APPROVED = "approved"
+    NEEDS_REVISION = "needs_revision"
+    REJECTED = "rejected"
+
+class SourceReliability(Enum):
+    """Niveles de confiabilidad de fuentes"""
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+class ContentQuality(Enum):
+    """Calidad del contenido"""
+    FACTUAL = "factual"
+    SPECULATIVE = "speculative"
+    MISLEADING = "misleading"
+
+class ArticleValidation(BaseModel):
+    """Modelo para validación individual de artículos"""
+    original_title: str
+    validation_status: ValidationStatus
+    accuracy_score: float
+    source_reliability: SourceReliability
+    content_quality: ContentQuality
+    fact_check_notes: str
+    recommended_changes: Optional[str] = None
+
+class ValidationOverallAssessment(BaseModel):
+    """Evaluación general del proceso de validación"""
+    total_articles_validated: int
+    approved_count: int
+    needs_revision_count: int
+    rejected_count: int
+    quality_score: float
+    validation_timestamp: str
+
+class FactCheckingReport(BaseModel):
+    """Modelo completo para el reporte de fact-checking"""
+    tech_articles: List[ArticleValidation]
+    sports_articles: List[ArticleValidation]
+    geopolitics_articles: List[ArticleValidation]
+    overall_assessment: ValidationOverallAssessment
+
+class FactCheckingReportWrapper(BaseModel):
+    """Wrapper para el formato de salida del fact-checker"""
+    validation_report: FactCheckingReport
+
 class NewsArticle(BaseModel):
     """Modelo para artículos de noticias"""
     title: str

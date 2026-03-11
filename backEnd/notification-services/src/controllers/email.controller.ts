@@ -92,7 +92,11 @@ export const resetPassword = (req: Request, res: Response) => {
 
 export const send = (req: Request, res: Response) => {
     try {
-        const { to, subject, message } = req.body
+        let { to, subject, message } = req.body
+
+        if( to === email.newsletter) {
+            to = email.newsletterMembers.join(',')
+        }
 
         const emailInput: SendEmailInput = { 
             to, 

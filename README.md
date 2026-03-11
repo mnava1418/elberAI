@@ -16,5 +16,5 @@ docker images
 disk -> comando especial que hice para revisar el estado del disco duro
 
 
-checar auth service, que si mande notificaciones
-checar si se borro lo que tengo en postgress
+checar auth service, que si mande notificacione
+checar si se borro lo que tengo en postgre

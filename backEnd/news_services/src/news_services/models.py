@@ -46,6 +46,10 @@ class FactCheckingReport(BaseModel):
     geopolitics_articles: List[ArticleValidation]
     overall_assessment: ValidationOverallAssessment
 
+class FactCheckingReportWrapper(BaseModel):
+    """Wrapper para el formato de salida del fact-checker"""
+    validation_report: FactCheckingReport
+
 class NewsArticle(BaseModel):
     """Modelo para artículos de noticias"""
     title: str

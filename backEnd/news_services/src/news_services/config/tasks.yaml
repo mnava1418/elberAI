@@ -5,6 +5,8 @@ tech_research_task:
     Cobertura: Internacional.
     CRÍTICO: Aplicar ranking automático para seleccionar ÚNICAMENTE las TOP 3 noticias más relevantes.
     Considerar criterios: impacto en la industria, novedad, alcance mediático.
+    IDIOMA OBLIGATORIO: Todo el contenido final debe ser en ESPAÑOL MEXICANO.
+    TRADUCCIÓN AUTOMÁTICA: Si las fuentes están en inglés u otros idiomas, traducir automáticamente a español mexicano natural.
     Fecha actual: {current_date}
   expected_output: >
     JSON estructurado con exactamente 3 noticias de tecnología:
@@ -34,6 +36,8 @@ sports_research_task:
     - Fórmula 1: Carreras, pilotos, equipos, clasificaciones
     EXCLUIR: Deportes femeninos y otros deportes no especificados.
     CRÍTICO: Aplicar ranking automático para seleccionar ÚNICAMENTE las TOP 3 noticias más relevantes.
+    IDIOMA OBLIGATORIO: Todo el contenido final debe ser en ESPAÑOL MEXICANO.
+    TRADUCCIÓN AUTOMÁTICA: Si las fuentes están en inglés u otros idiomas, traducir automáticamente a español mexicano natural.
     Fecha actual: {current_date}
   expected_output: >
     JSON estructurado con exactamente 3 noticias de deportes masculinos:
@@ -62,6 +66,8 @@ geopolitics_research_task:
     Cobertura: Internacional.
     CRÍTICO: Aplicar ranking automático para seleccionar ÚNICAMENTE las TOP 3 noticias más relevantes.
     Considerar criterios: impacto geopolítico, consecuencias diplomáticas, alcance internacional.
+    IDIOMA OBLIGATORIO: Todo el contenido final debe ser en ESPAÑOL MEXICANO.
+    TRADUCCIÓN AUTOMÁTICA: Si las fuentes están en inglés u otros idiomas, traducir automáticamente a español mexicano natural.
     Fecha actual: {current_date}
   expected_output: >
     JSON estructurado con exactamente 3 noticias de geopolítica:
@@ -96,6 +102,8 @@ editorial_curation_task:
        Rechazar noticias con títulos engañosos o contenido manipulativo.
     6. Estructurar para el Copy Editor manteniendo máximo 9 noticias limpias y objetivas
     Asegurar coherencia editorial, balance entre secciones y neutralidad informativa.
+    SALVAGUARDA DE IDIOMA: Verificar que TODO el contenido esté en ESPAÑOL MEXICANO.
+    Rechazar cualquier content que no esté completamente traducido al español.
   expected_output: >
     JSON curado con las noticias finales organizadas por sección:
     {
@@ -142,12 +150,17 @@ newsletter_creation_task:
     - Mismo layout responsive para móvil/desktop
     - Elementos gráficos y divisores consistentes entre secciones
     
+    IDIOMA FINAL OBLIGATORIO: TODO el newsletter debe estar en ESPAÑOL MEXICANO.
+    PROHIBIDO usar inglés, incluir texto en otros idiomas o dejar contenido sin traducir.
+    
     TONE OF VOICE: Amigo cagado con humor mexicano (sin ser ñero).
     Eres ingenioso, bromista y sarcástico. Usa expresiones mexicanas divertidas,
     albures sutiles, referencias pop culturales mexicanas y sarcasmo inteligente.
     Haz que leer las noticias sea entretenido como platicar con tu compa más chistoso.
     Ejemplos de tono: "No manches, la IA ahora hace esto...", "Órale pues, resulta que...",
     "Como diría mi abuela: tal para cual", "¿A poco sí? Pues resulta que...".
+    
+    CONTROL DE CALIDAD: Revisar que no haya palabras en inglés ni texto sin traducir.
     
     Integrar links originales y metadatos de fuente.
     Asegurar compatibilidad con clientes de email.

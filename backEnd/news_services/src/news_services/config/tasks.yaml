@@ -88,22 +88,76 @@ geopolitics_research_task:
     }
   agent: geopolitics_reporter
 
+fact_checking_task:
+  description: >
+    Recibir y validar las 9 noticias pre-seleccionadas (3 tech + 3 deportes + 3 geopolítica) de los reporteros.
+    Responsabilidades críticas de verificación:
+    1. VALIDACIÓN DE CONTENIDO: Verificar que cada resumen refleje correctamente el contenido de la fuente original
+    2. VERIFICACIÓN DE FUENTES: Confirmar que las URLs sean funcionales y las fuentes sean confiables
+    3. CONTROL DE CALIDAD: Detectar información incorrecta, desactualizada o malinterpretada
+    4. DETECCIÓN DE SESGOS: Identificar y señalar contenido tendencioso, sensacionalista o clickbait
+    5. VALIDACIÓN DE FECHAS: Confirmar que las noticias sean realmente del día actual
+    6. COHERENCIA CONTEXTUAL: Verificar que los títulos y resúmenes sean consistentes con el contenido real
+    7. FILTRADO DE DUPLICADOS: Detectar noticias similares entre categorías
+    8. CONTROL DE IDIOMA: Asegurar traducción completa y correcta al español mexicano
+    
+    CRITERIOS DE RECHAZO: Rechazar noticias que contengan:
+    - Información no verificable o especulativa
+    - Fuentes poco confiables o URLs rotas
+    - Contenido sensacionalista o títulos engañosos
+    - Información desactualizada o incorrecta
+    - Sesgos políticos o ideológicos evidentes
+    
+    PROCESO: Analizar cada una de las 9 noticias y generar un reporte de validación con
+    recomendaciones de aprobación, modificación o rechazo para cada una.
+  expected_output: >
+    JSON estructurado con validación completa de las 9 noticias:
+    {
+      "validation_report": {
+        "tech_articles": [
+          {
+            "original_title": "título original",
+            "validation_status": "approved/needs_revision/rejected",
+            "accuracy_score": 9.2,
+            "source_reliability": "high/medium/low",
+            "content_quality": "factual/speculative/misleading",
+            "fact_check_notes": "observaciones específicas",
+            "recommended_changes": "modificaciones sugeridas si aplica"
+          }
+        ],
+        "sports_articles": [
+          {"misma estructura para deportes"}
+        ],
+        "geopolitics_articles": [
+          {"misma estructura para geopolítica"}
+        ],
+        "overall_assessment": {
+          "total_articles_validated": 9,
+          "approved_count": 7,
+          "needs_revision_count": 2,
+          "rejected_count": 0,
+          "quality_score": 8.5,
+          "validation_timestamp": "{current_date}"
+        }
+      }
+    }
+  agent: fact_checker
+  context: [tech_research_task, sports_research_task, geopolitics_research_task]
+
 editorial_curation_task:
   description: >
-    Recibir las 9 noticias pre-seleccionadas (3 tech + 3 deportes + 3 geopolítica) de los reporteros.
+    Recibir el reporte de validación del fact-checker y las noticias verificadas para curaduría final.
     Responsabilidades críticas:
-    1. Agregación de las 9 noticias
-    2. Deduplicación inteligente basada en similaridad semántica
-    3. Verificar que no haya overlap entre categorías tech, deportes y geopolítica
-    4. Re-ranking final si hay conflictos de relevancia
-    5. FILTRADO EDITORIAL CRÍTICO: Eliminar cualquier tipo de tendencia política,
-       amarillismo, sensacionalismo, clickbait o sesgo ideológico de las noticias.
-       Mantener únicamente información factual, objetiva y verificable.
-       Rechazar noticias con títulos engañosos o contenido manipulativo.
-    6. Estructurar para el Copy Editor manteniendo máximo 9 noticias limpias y objetivas
+    1. Revisar reporte de validación y aplicar recomendaciones del fact-checker
+    2. Agregación de noticias aprobadas y revisadas
+    3. Deduplicación inteligente basada en similaridad semántica
+    4. Verificar que no haya overlap entre categorías tech, deportes y geopolítica
+    5. Re-ranking final si hay conflictos de relevancia
+    6. APLICAR RECOMENDACIONES DEL FACT-CHECKER: Implementar cambios sugeridos,
+       rechazar noticias marcadas como problemáticas y aplicar revisiones necesarias
+    7. Estructurar para el Copy Editor manteniendo máximo 9 noticias validadas y curadas
     Asegurar coherencia editorial, balance entre secciones y neutralidad informativa.
-    SALVAGUARDA DE IDIOMA: Verificar que TODO el contenido esté en ESPAÑOL MEXICANO.
-    Rechazar cualquier content que no esté completamente traducido al español.
+    NOTA: El filtrado de calidad ya fue realizado por el fact-checker, enfocar en organización editorial.
   expected_output: >
     JSON curado con las noticias finales organizadas por sección:
     {
@@ -122,7 +176,7 @@ editorial_curation_task:
       }
     }
   agent: editor_in_chief
-  context: [tech_research_task, sports_research_task, geopolitics_research_task]
+  context: [fact_checking_task]
 
 newsletter_creation_task:
   description: >

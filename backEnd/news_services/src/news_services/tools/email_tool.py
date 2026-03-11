@@ -78,7 +78,8 @@ class EmailTool(BaseTool):
                 "successful_send": success,
                 "delivery_status": "queued" if success else "failed",
                 "error_details": None if success else f"HTTP {response.status_code}: {response.text}",
-                "email_subject": subject                
+                "tracking_enabled": False,
+                "estimated_delivery_time": "5-10 minutes" if success else None                
             }
             
             return json.dumps({"distribution_report": distribution_report}, indent=2)
@@ -92,6 +93,7 @@ class EmailTool(BaseTool):
                     "successful_send": False,
                     "delivery_status": "failed",
                     "error_details": str(e),
-                    "retry_attempts": 0
+                    "tracking_enabled": False,
+                    "estimated_delivery_time": None
                 }
             })

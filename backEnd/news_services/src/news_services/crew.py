@@ -122,11 +122,16 @@ class NewsServices():
 
     @task
     def editorial_curation_task(self) -> Task:
-        """FASE 2B: Curaduría Secuencial - Editor recibe noticias validadas del fact-checker"""
+        """FASE 2B: Curaduría Secuencial - Editor recibe noticias validadas del fact-checker y artículos originales"""
         return Task(
             config=self.tasks_config['editorial_curation_task'],
             agent=self.editor_in_chief(),
-            context=[self.fact_checking_task()],
+            context=[
+                self.fact_checking_task(),
+                self.tech_research_task(), 
+                self.sports_research_task(), 
+                self.geopolitics_research_task()
+            ],
             output_json=CuratedNews,
         )
 

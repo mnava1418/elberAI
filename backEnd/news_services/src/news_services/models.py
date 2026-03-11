@@ -1,6 +1,9 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 from enum import Enum
+
+if TYPE_CHECKING:
+    pass  # Para forward references
 
 class ValidationStatus(Enum):
     """Estados de validación para fact-checking"""
@@ -29,6 +32,8 @@ class ArticleValidation(BaseModel):
     content_quality: ContentQuality
     fact_check_notes: str
     recommended_changes: Optional[str] = None
+    # Incluimos el artículo completo para preservar los datos
+    validated_article: Optional['NewsArticle'] = None
 
 class ValidationOverallAssessment(BaseModel):
     """Evaluación general del proceso de validación"""
@@ -58,6 +63,7 @@ class NewsArticle(BaseModel):
     url: str    
     published_date: Optional[str] = None
     relevance_score: Optional[float] = None
+    category: Optional[str] = None  # Agregado para identificar tech/deportes/geopolitics
 
 class ResearchOutput(BaseModel):
     """Modelo para la salida de las tareas de investigación"""
@@ -66,12 +72,21 @@ class ResearchOutput(BaseModel):
     total_articles_found: int
     research_timestamp: str
 
-class CuratedNews(BaseModel):
-    """Modelo para las noticias curadas por el editor"""
-    selected_articles: List[NewsArticle]
+class CuratedNewsSection(BaseModel):
+    """Modelo para una sección específica de noticias"""
+    articles: List[NewsArticle]
+
+class CuratedNewsletterContent(BaseModel):
+    """Contenido curado del newsletter organizando por secciones"""
+    tech_section: List[NewsArticle]
+    sports_section: List[NewsArticle]  
+    geopolitics_section: List[NewsArticle]
     editorial_notes: str
-    curation_rationale: str
-    final_selection_count: int
+    total_articles: int
+
+class CuratedNews(BaseModel):
+    """Modelo para las noticias curadas por el editor - Coincide con expected_output del YAML"""
+    curated_newsletter: CuratedNewsletterContent
 
 class DistributionStatus(Enum):
     """Estados de distribución"""

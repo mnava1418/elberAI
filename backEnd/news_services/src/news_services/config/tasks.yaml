@@ -19,7 +19,8 @@ tech_research_task:
           "source": "fuente original",
           "url": "enlace completo",
           "published_date": "fecha publicación",
-          "relevance_score": 8.5
+          "relevance_score": 8.5,
+          "category": "technology"
         }
       ],
       "total_articles_found": 25,
@@ -50,7 +51,8 @@ sports_research_task:
           "source": "fuente original",
           "url": "enlace completo",
           "published_date": "fecha publicación",
-          "relevance_score": 8.5
+          "relevance_score": 8.5,
+          "category": "sports"
         }
       ],
       "total_articles_found": 25,
@@ -80,7 +82,8 @@ geopolitics_research_task:
           "source": "fuente original",
           "url": "enlace completo",
           "published_date": "fecha publicación",
-          "relevance_score": 8.5
+          "relevance_score": 8.5,
+          "category": "geopolitics"
         }
       ],
       "total_articles_found": 25,
@@ -122,14 +125,57 @@ fact_checking_task:
             "source_reliability": "high/medium/low",
             "content_quality": "factual/speculative/misleading",
             "fact_check_notes": "observaciones específicas",
-            "recommended_changes": "modificaciones sugeridas si aplica"
+            "recommended_changes": "modificaciones sugeridas si aplica",
+            "validated_article": {
+              "title": "título de la noticia validada",
+              "summary": "resumen validado",
+              "source": "fuente original",
+              "url": "enlace completo",
+              "published_date": "fecha publicación",
+              "relevance_score": 8.5,
+              "category": "technology"
+            }
           }
         ],
         "sports_articles": [
-          {"misma estructura para deportes"}
+          {
+            "original_title": "título original",
+            "validation_status": "approved/needs_revision/rejected",
+            "accuracy_score": 9.2,
+            "source_reliability": "high/medium/low",
+            "content_quality": "factual/speculative/misleading",
+            "fact_check_notes": "observaciones específicas",
+            "recommended_changes": "modificaciones sugeridas si aplica",
+            "validated_article": {
+              "title": "título de la noticia validada",
+              "summary": "resumen validado",
+              "source": "fuente original",
+              "url": "enlace completo",
+              "published_date": "fecha publicación",
+              "relevance_score": 8.5,
+              "category": "sports"
+            }
+          }
         ],
         "geopolitics_articles": [
-          {"misma estructura para geopolítica"}
+          {
+            "original_title": "título original",
+            "validation_status": "approved/needs_revision/rejected",
+            "accuracy_score": 9.2,
+            "source_reliability": "high/medium/low",
+            "content_quality": "factual/speculative/misleading",
+            "fact_check_notes": "observaciones específicas",
+            "recommended_changes": "modificaciones sugeridas si aplica",
+            "validated_article": {
+              "title": "título de la noticia validada",
+              "summary": "resumen validado",
+              "source": "fuente original",
+              "url": "enlace completo",
+              "published_date": "fecha publicación",
+              "relevance_score": 8.5,
+              "category": "geopolitics"
+            }
+          }
         ],
         "overall_assessment": {
           "total_articles_validated": 9,

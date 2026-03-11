@@ -31,7 +31,7 @@ sports_research_task:
   description: >
     Buscar y analizar las noticias más relevantes del día en deportes masculinos.
     Especialización EXCLUSIVA:
-    - Fútbol Europeo: La Liga (Real Madrid, Barcelona, Atlético), Champions League, Premier League
+    - Fútbol Europeo: La Liga del fútbol español, Champions League, Premier League
     - Tenis Masculino: ATP Tour, Grand Slams, rankings
     - Fórmula 1: Carreras, pilotos, equipos, clasificaciones
     EXCLUIR: Deportes femeninos y otros deportes no especificados.
@@ -236,10 +236,9 @@ email_distribution_task:
     Enviar el newsletter HTML al email específico: {recipient_email}
     Pasos requeridos:
     1. Validar que el HTML del newsletter esté completo
-    2. Configurar asunto: "Elber News - {current_date}"
-    3. Personalizar con nombre: {recipient_name}
-    4. Enviar usando servicio de email configurado
-    5. Reportar resultado del envío
+    2. Configurar asunto: "Elber News - {current_date}"    
+    3. Enviar usando servicio de email configurado
+    4. Reportar resultado del envío
     
     En caso de error, capturar detalles específicos para debugging.
   expected_output: >

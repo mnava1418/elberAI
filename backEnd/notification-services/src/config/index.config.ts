@@ -10,8 +10,7 @@ export const email = {
     from: 'martin@namart.tech',
     newsletter: 'newsletter@namart.tech',
     newsletterMembers: [        
-        'mnavapena@gmail.com',
-        'martin1418@hotmail.com'
+        'martin@namart.tech'
     ]
 }
 

@@ -193,15 +193,23 @@ fact_checking_task:
 editorial_curation_task:
   description: >
     Recibir el reporte de validación del fact-checker y las noticias verificadas para curaduría final.
+    
+    RESTRICCIÓN CRÍTICA: SOLO procesar noticias con validation_status="approved" del fact-checker.
+    PROHIBIDO: Usar cualquier noticia marcada como "needs_revision" o "rejected".
+    
     Responsabilidades críticas:
     1. Revisar reporte de validación y aplicar recomendaciones del fact-checker
-    2. Agregación de noticias aprobadas y revisadas
-    3. Deduplicación inteligente basada en similaridad semántica
-    4. Verificar que no haya overlap entre categorías tech, deportes y geopolítica
-    5. Re-ranking final si hay conflictos de relevancia
-    6. APLICAR RECOMENDACIONES DEL FACT-CHECKER: Implementar cambios sugeridos,
-       rechazar noticias marcadas como problemáticas y aplicar revisiones necesarias
-    7. Estructurar para el Copy Editor manteniendo máximo 9 noticias validadas y curadas
+    2. FILTRAR EXCLUSIVAMENTE noticias con status "approved" del validation_report
+    3. Agregación ÚNICAMENTE de noticias aprobadas por el fact-checker
+    4. Deduplicación inteligente basada en similaridad semántica (SOLO entre aprobadas)
+    5. Verificar que no haya overlap entre categorías tech, deportes y geopolítica
+    6. Re-ranking final si hay conflictos de relevancia (SOLO entre aprobadas)
+    7. RECHAZAR COMPLETAMENTE cualquier noticia no aprobada por fact-checker
+    8. Estructurar para el Copy Editor manteniendo SOLO noticias validadas y aprobadas
+    
+    VALIDACIÓN OBLIGATORIA: Antes de procesar, confirmar que todas las noticias 
+    seleccionadas tengan validation_status="approved" en el fact_checking_task.
+    
     Asegurar coherencia editorial, balance entre secciones y neutralidad informativa.
     NOTA: El filtrado de calidad ya fue realizado por el fact-checker, enfocar en organización editorial.
   expected_output: >
@@ -226,7 +234,14 @@ editorial_curation_task:
 
 newsletter_creation_task:
   description: >
-    Convertir la selección curada en un newsletter HTML profesional, responsive y con FORMATO CONSISTENTE.
+    Convertir ÚNICAMENTE las noticias aprobadas por el fact_checker en un newsletter HTML profesional, responsive y con FORMATO CONSISTENTE.
+    
+    RESTRICCIÓN CRÍTICA: SOLO usar noticias que tengan validation_status="approved" del fact_checking_task.
+    PROHIBIDO: Incluir cualquier noticia que no haya sido explícitamente aprobada por el fact_checker.
+    
+    VALIDACIÓN PREVIA OBLIGATORIA: Antes de crear el newsletter, verificar que todas las noticias 
+    a incluir provengan del conjunto de noticias aprobadas en el fact_checking_task.
+    
     ESTRUCTURA ESPECÍFICA REQUERIDA (MISMO FORMATO SIEMPRE):
     1. ENCABEZADO: Fecha del día prominente y diseño de marca consistente
     2. SALUDO PERSONALIZADO: Dirigido al destinatario con resumen ejecutivo de lo más relevante del día
@@ -275,7 +290,7 @@ newsletter_creation_task:
     - Footer estándar con información de contacto mencionando a Elber
     - Diseño profesional y legible garantizado en móvil/desktop
   agent: copy_editor
-  context: [editorial_curation_task]
+  context: [editorial_curation_task, fact_checking_task]
 
 email_distribution_task:
   description: >

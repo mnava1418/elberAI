@@ -5,7 +5,7 @@ from crewai_tools import SerperDevTool
 from datetime import datetime
 
 from news_services.tools.email_tool import EmailTool
-from news_services.models import ResearchOutput, CuratedNews, EmailDistributionReport
+from news_services.models import ResearchOutput, CuratedNews, EmailDistributionReport, FactCheckingReportWrapper
 
 @CrewBase
 class NewsServices():
@@ -48,8 +48,17 @@ class NewsServices():
         )
 
     @agent
+    def fact_checker(self) -> Agent:
+        """Verificador Senior - Valida precisión y calidad de las 9 noticias"""
+        return Agent(
+            config=self.agents_config['fact_checker'],
+            verbose=True,
+            tools=[self.search_tool]
+        )
+
+    @agent
     def editor_in_chief(self) -> Agent:
-        """Editor en Jefe Senior - Cura las 6 noticias pre-seleccionadas"""
+        """Editor en Jefe Senior - Cura las noticias validadas por el fact-checker"""
         return Agent(
             config=self.agents_config['editor_in_chief'],
             verbose=True
@@ -102,12 +111,22 @@ class NewsServices():
         )
 
     @task
+    def fact_checking_task(self) -> Task:
+        """FASE 2A: Validación Secuencial - Fact-checker valida 9 noticias de reporteros"""
+        return Task(
+            config=self.tasks_config['fact_checking_task'],
+            agent=self.fact_checker(),
+            context=[self.tech_research_task(), self.sports_research_task(), self.geopolitics_research_task()],
+            output_json=FactCheckingReportWrapper,
+        )
+
+    @task
     def editorial_curation_task(self) -> Task:
-        """FASE 2: Curaduría Secuencial - Editor recibe 9 noticias pre-filtradas"""
+        """FASE 2B: Curaduría Secuencial - Editor recibe noticias validadas del fact-checker"""
         return Task(
             config=self.tasks_config['editorial_curation_task'],
             agent=self.editor_in_chief(),
-            context=[self.tech_research_task(), self.sports_research_task(), self.geopolitics_research_task()],
+            context=[self.fact_checking_task()],
             output_json=CuratedNews,
         )
 
@@ -149,6 +168,5 @@ class NewsServices():
         return {
             "current_date": datetime.now().strftime("%d de %B de %Y"),
             "current_year": datetime.now().year,
-            "recipient_email": "martin@namart.tech",
-            "recipient_name": "Martin Nava"
+            "recipient_email": "newsletter@namart.tech",            
         }

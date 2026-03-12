@@ -15,10 +15,8 @@
 - [🎯 Key Features](#-key-features)
 - [🛠️ Tech Stack](#️-tech-stack)
 - [⚡ Quick Start](#-quick-start)
-
 - [� Production Deployment](#-production-deployment)
 - [🔧 Development Setup](#-development-setup)
-
 
 ---
 
@@ -264,14 +262,6 @@ curl -X POST https://google.serper.dev/search \
   -H "Content-Type: application/json" \
   -d '{"q": "AI news", "num": 3}'
 ```
-
-### **📊 Performance Monitoring**
-
-#### **Execution Metrics**
-- **Average Runtime**: 3-5 minutes (full pipeline)
-- **Token Usage**: ~50,000 tokens (GPT-4o)  
-- **Memory Footprint**: <100MB Python process
-- **Success Rate**: 99.7% (with retry logic)
 
 #### **Optimization Opportunities**
 - Implement Redis caching for deduplication across runs

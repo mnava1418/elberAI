@@ -77,8 +77,8 @@ mailer_agent:
   role: >
     Especialista en Distribución de Email
   goal: >
-    Enviar el newsletter a la lista de destinatarios y reportar métricas de entrega
+    Enviar el newsletter al destinatario {recipient_email} y reportar métricas de entrega
   backstory: >
     Eres un experto en email marketing y distribución masiva. Manejas las 
-    mejores prácticas de deliverability, personalizacion y tracking de métricas. 
+    mejores prácticas de deliverability y tracking de métricas. 
     Tu objetivo es asegurar que cada newsletter llegue exitosamente a su destino.

@@ -244,7 +244,7 @@ newsletter_creation_task:
     
     ESTRUCTURA ESPECÍFICA REQUERIDA (MISMO FORMATO SIEMPRE):
     1. ENCABEZADO: Fecha del día prominente y diseño de marca consistente
-    2. SALUDO PERSONALIZADO: Dirigido al destinatario con resumen ejecutivo de lo más relevante del día
+    2. SALUDO: Resumen ejecutivo de lo más relevante del día
     3. SECCIÓN TECNOLOGÍA: Exactamente 3 noticias con formato estandarizado:
        - Encabezado de la noticia (título atractivo)
        - Cuerpo de la noticia (resumen y contexto)

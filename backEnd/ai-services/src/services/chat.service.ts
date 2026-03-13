@@ -81,6 +81,20 @@ export const deleteChat = async (uid: string, chatId: number) => {
     }
 }
 
+export const deleteAllChats = async (uid: string) => {
+    try {
+        ShortTermMemory.getInstance().deleteUserSessions(uid)
+        MidTermMemory.getInstance().deleteUserMemory(uid)
+        
+        const db = admin.database()
+        const ref = db.ref(`/${uid}/chats`)
+        await ref.remove()        
+    } catch (error) {
+        console.error(error)
+        throw new Error('Unable to delete chat')
+    }
+}
+
 export const getChatSummary = async (uid: string, chatId: number) => {
     try {
         const db = admin.database()

@@ -32,3 +32,20 @@ export const deleteUserChat = async (req: Request, res: Response) => {
         res.status(500).json({error: 'Error al eliminar el chat'})
     }
 }
+
+export const deleteAllUserChats = async (req: Request, res: Response) => {
+    try {
+        const uid = req.headers['x-user-uid'] as string
+        
+        if (!uid) {
+            return res.status(400).json({error: 'Missing uid or chatId'})
+        }
+        
+        await chatService.deleteAllChats(uid)        
+        res.status(200).json({message: 'Chat eliminado exitosamente'})
+        
+    } catch (error) {
+        console.error('Delete all chats error:', error)
+        res.status(500).json({error: 'Error al eliminar todos los chats'})
+    }
+}

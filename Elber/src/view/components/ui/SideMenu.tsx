@@ -7,7 +7,9 @@ import sideMenuStyles from '../../../styles/sideMenu.style';
 import { appColors } from '../../../styles/main.style';
 import { GlobalContext } from '../../../store/GlobalProvider';
 import { useContext } from 'react';
-import { selectChat } from '../../../store/actions/chat.actions';
+import { deleteAllChatsAction, selectChat } from '../../../store/actions/chat.actions';
+import { showAlert } from '../../../store/actions/elber.actions';
+import * as chatServices from '../../../services/chat.service'
 
 type SideMenuProps = {
     props: any,
@@ -28,6 +30,31 @@ const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) =>
 
         return chatId ? chatId === selectedChatId : activeRouteName === routeName;
     };
+
+    const deleteAllChats = () => {
+        chatServices.deleteAllChats()
+        .then(() => {
+            context.dispatch(deleteAllChatsAction())
+        })
+        .catch(error => {
+            console.error(error)
+        })
+        .finally(() => {
+            navigateToScreen('Chat Nuevo', {id: -1})
+        })
+    }
+
+    const confirmDeleteChat = () => {
+        context.dispatch(showAlert({
+            btnText: 'Eliminar Chats',
+            isVisible: true,
+            title: 'Eliminar Chats',
+            text: '¿Estás seguro de que deseas eliminar todos tus chat? Esta acción no se puede deshacer.',
+            onPress: () => {
+                deleteAllChats()
+            }
+        }))
+    }
 
     return (
         <DrawerContentScrollView {...props} style={sideMenuStyles.container}>
@@ -54,9 +81,26 @@ const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) =>
                 )}
                 labelStyle={sideMenuStyles.itemLabel}
                 style={sideMenuStyles.item}
-            />             
-
-            {chatEntries.length > 0 ? <View style={sideMenuStyles.separator} /> : <></>}
+            />     
+  
+            {chatEntries.length > 0 ? 
+                <>
+                    <DrawerItem                
+                        label="Eliminar Chats"
+                        onPress={confirmDeleteChat}
+                        icon={({ focused, size }) => (
+                            <Icon 
+                                name="trash-outline" 
+                                size={size} 
+                                color={appColors.subtitle} 
+                            />
+                        )}
+                        labelStyle={sideMenuStyles.itemLabel}
+                        style={sideMenuStyles.item}
+                    />              
+                    <View style={sideMenuStyles.separator} />
+                </> 
+                : <></>}
 
             {chatEntries.map(chat=> {
                 return(

@@ -62,4 +62,28 @@ export const deleteChat = async (chatId: number): Promise<void> => {
     }
 }
 
+export const deleteAllChats = async (): Promise<void> => {
+    try {
+        const currentUser = getAuth().currentUser
+
+        if(currentUser === null) {
+            throw new Error('User not authenticated.');
+        }
+
+        const token = await getIdToken(currentUser, true)
+
+        const config: AxiosRequestConfig = {
+            headers: {
+                Authorization : `Bearer ${token}`
+            },
+        }       
+        
+        await apiDelete<{message: string}>(`${BACK_URL}/ai/chat/all`, config)
+        
+    } catch (error) {
+        console.error(error)
+        throw new Error('Unable to delete all chats')
+    }
+}
+
         

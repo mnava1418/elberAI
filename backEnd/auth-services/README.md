@@ -1,325 +1,77 @@
-# 🔐 Auth Services
+# Auth Services
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white)](https://firebase.google.com/)
-[![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)](https://jwt.io/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+Elber's authentication service. It handles the entire access flow: from the moment a user requests to join the system to when they have their account created and verified.
 
-> **High-Performance Microservice** | Authentication system with advanced access control, real-time Firebase integration, and automated email workflows.
+## What does it do?
 
-## 🚀 Overview
+### Controlled access flow (manual approval)
+Elber does not allow open registration. Every new user must go through a manual approval process:
 
-A production-ready authentication microservice designed for scalable applications, featuring a sophisticated **manual approval system**, **JWT token management**, and **real-time Firebase integration**. Built with security-first principles and modern DevOps practices.
+1. **The user requests access** by submitting their email (`POST /access/request`). The system saves the request in Firebase and sends two emails: one to the user confirming the request was received, and one to the administrator with two links (approve / reject).
 
-**🎯 Key Business Value:**
-- **Zero unauthorized access** with manual approval workflow
-- **Instant notifications** through integrated email system
+2. **The administrator reviews** by clicking one of the links in the email. Each link contains a signed JWT that encodes the decision. The `/access/review` endpoint decodes that token and updates the status in Firebase.
 
----
+3. **If approved**, the system generates a 6-digit numeric code and emails it to the user.
 
-## ✨ Core Features
+4. **The user validates the code** (`POST /access/validateCode`). If the code is correct, they can proceed to registration.
 
-- 🛡️ **Advanced Security Stack** - Helmet, CORS, Rate Limiting, JWT validation
-- 🔄 **Manual Approval Workflow** - Admin-controlled access with email notifications
-- ⚡ **Real-time Firebase Integration** - Live status updates and data persistence
-- 📧 **Automated Email System** - Seamless notification service integration
-- 🐳 **Multi-stage Docker Build** - Optimized container deployment
-- 🏗️ **Clean Architecture** - Separation of concerns with service/controller pattern
+5. **The user registers** (`POST /user/signUp`). The service verifies that access is approved, that no account with that email already exists, and creates the account in Firebase Authentication.
 
----
+### Password recovery
+The user can request a recovery link (`POST /user/resetPassword`). The service generates a Firebase password reset link and sends it by email through the notification service.
 
-## 🛠️ Tech Stack
+## Port
 
-| Category | Technology | Purpose |
-|----------|------------|---------|
-| **Runtime** | Node.js 20 + TypeScript | Type-safe backend development |
-| **Framework** | Express.js | RESTful API framework |
-| **Database** | Firebase Realtime DB | Real-time data synchronization |
-| **Authentication** | JWT + bcryptjs | Secure token management |
-| **Security** | Helmet + Rate Limiting | Production security measures |
-| **DevOps** | Docker + Multi-stage Build | Container orchestration |
-| **Architecture** | Microservices + Proxy Pattern | Scalable system design |
+Runs on port `4041`.
 
----
+## Endpoints
 
-## 🚀 Quick Start
+| Method | Route | Description | Auth required |
+|---|---|---|---|
+| POST | `/access/request` | Request access to the system | No |
+| POST | `/access/validateCode` | Validate the 6-digit code | No |
+| GET | `/access/review` | Approve or reject a request (admin) | Signed JWT in query param |
+| POST | `/user/signUp` | Create a user account | No |
+| POST | `/user/resetPassword` | Send a password recovery link | No |
+| GET | `/health` | Health check | No |
 
-### Prerequisites
-```bash
-# Required environment
-Node.js 20+
-Docker & Docker Compose
-Firebase Project Setup
+> All endpoints validate that the request comes from the API Gateway via the `x-api-gateway-secret` header.
+
+## Environment variables
+
+```
+AUTH_PORT=4041
+GOOGLE_APPLICATION_CREDENTIALS=  # Path to the Firebase Admin SDK JSON file
+FIREBASE_DB=          # Firebase Realtime Database URL
+JWT_TOKEN=            # Secret for signing approval tokens
+HOST=                 # Service host
+GATEWAY_SECRET=       # Shared secret with the API Gateway
+API_GATEWAY=          # API Gateway URL
+INTERNAL_TOKEN=       # Token for calling notification-services
+NOTIFICATION_SERVICE= # Notification service URL
 ```
 
-### 🔧 Local Development
-```bash
-# 1. Clone and navigate
-cd backEnd/auth-services
+## Commands
 
-# 2. Install dependencies
+```bash
 npm install
-
-# 3. Environment setup
 cp .env.template .env
-# Configure: JWT_TOKEN, FIREBASE_DB, GOOGLE_APPLICATION_CREDENTIALS
-
-# 4. Start development server
-npm run dev
-# 🟢 Server running on http://localhost:3001
+npm run dev     # Development with hot reload
+npm run build   # Compile TypeScript
+npm start       # Production
 ```
 
-### 🐳 Docker Deployment
-```bash
-# Build optimized image
-docker build -t elber-auth-service .
+## Code structure
 
-# Run container
-docker run -p 3001:3001 \
-  --env-file .env \
-  elber-auth-service
-
-# Or use docker-compose
-docker-compose up auth-services
 ```
-
----
-
-## 📚 API Documentation
-
-<details>
-<summary><strong>🔑 Access Management Endpoints</strong></summary>
-
-### Request Access
-```http
-POST /access/request
-Content-Type: application/json
-
-{
-  "email": "user@example.com"
-}
-
-# Response
-{
-  "status": "pending",
-  "message": "¡Listo! Recibimos tu solicitud..."
-}
+src/
+├── controllers/
+│   ├── auth.controller.ts   # Access request, code validation, admin review
+│   └── user.controller.ts   # Registration and password recovery
+├── services/
+│   ├── auth.service.ts         # Access flow logic and code generation
+│   ├── user.service.ts         # Account creation in Firebase Auth
+│   └── notification.service.ts # Calls to the notification service
+├── middlewares/     # Gateway secret validation
+└── routes/          # Route definitions
 ```
-
-### Validate Access Code
-```http
-POST /access/validateCode
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "accessCode": 123456
-}
-
-# Response
-{
-  "isValid": true,
-  "message": ""
-}
-```
-
-### Admin Access Review
-```http
-GET /access/review?token={jwt_token}
-Authorization: Bearer {admin_token}
-
-# Auto-approves/rejects based on JWT payload
-```
-
-</details>
-
-<details>
-<summary><strong>👤 User Management Endpoints</strong></summary>
-
-### User Registration
-```http
-POST /user/signUp
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "securePassword123",
-  "displayName": "John Doe"
-}
-```
-
-### Password Reset
-```http
-POST /user/resetPassword
-Content-Type: application/json
-
-{
-  "email": "user@example.com"
-}
-```
-
-### Health Check
-```http
-GET /health
-
-# Response
-{
-  "endPoint": "/auth"
-}
-```
-
-</details>
-
----
-
-### 🔄 Access Control Flow
-
-1. **Request Submission** → User submits email for access
-2. **Real-time Storage** → Request stored in Firebase with timestamp
-3. **Admin Notification** → Automated email with approve/reject links
-4. **Token-based Review** → JWT-secured approval/rejection endpoints
-5. **Code Generation** → 6-digit access code for approved users
-6. **User Notification** → Email with access instructions
-7. **Code Validation** → Secure code verification system
-8. **User Registration** → Complete onboarding process
-
----
-
-## 🛡️ Security Implementation
-
-<details>
-<summary><strong>Security Measures Detail</strong></summary>
-
-### 🔒 Multi-layer Security Stack
-```typescript
-// Helmet - Security headers
-app.use(helmet());
-
-// Rate Limiting - DoS protection
-app.use(rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // requests per IP
-}));
-
-// JWT Validation - Token security
-const validateToken = (req, res, next) => {
-    const decoded = jwt.verify(token, process.env.JWT_TOKEN);
-    // Additional validation logic
-}
-
-// Proxy Validation - Internal service auth
-app.use(proxy_validate);
-```
-
-### 🔐 Access Control Features
-- **Manual Approval System** - Human-verified access requests
-- **Email-based Verification** - Multi-step validation process
-- **Time-limited Codes** - Secure access code expiration
-- **Request Status Tracking** - Prevent duplicate submissions
-- **Firebase Security Rules** - Database-level access control
-
-### 🛠️ Security Best Practices
-- Environment variable configuration
-- bcryptjs for password hashing
-- Structured error handling
-- Input validation and sanitization
-- CORS configuration for cross-origin protection
-
-</details>
-
----
-
-## 🐳 Docker & Deployment
-
-<details>
-<summary><strong>Production Deployment Configuration</strong></summary>
-
-### Multi-stage Dockerfile Optimization
-```dockerfile
-# Build Stage - Development dependencies
-FROM node:20-alpine AS builder
-WORKDIR /usr/src/elber
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-# Runtime Stage - Production only
-FROM node:20-alpine
-WORKDIR /usr/src/elber
-COPY package*.json ./
-RUN npm install --production
-COPY --from=builder /usr/src/elber/dist ./dist
-```
-
-### Environment Configuration
-```bash
-# Required Environment Variables
-JWT_TOKEN=                    # JWT signing secret
-FIREBASE_DB=                  # Firebase database URL
-GOOGLE_APPLICATION_CREDENTIALS= # Firebase service account
-API_GATEWAY=                  # Gateway service URL
-NOTIFICATION_SERVICE=         # Email service endpoint
-GATEWAY_SECRET=              # Internal service authentication
-```
-
-### Production Checklist
-- [ ] Environment secrets configured
-- [ ] Firebase project setup
-- [ ] SSL certificates installed
-- [ ] Rate limiting configured
-- [ ] Monitoring and logging enabled
-- [ ] Health check endpoints active
-
-</details>
-
----
-
-## 💻 Development Setup
-
-<details>
-<summary><strong>Local Development Environment</strong></summary>
-
-### Project Structure
-```
-auth-services/
-├── src/
-│   ├── controllers/     # Request handlers
-│   ├── services/        # Business logic
-│   ├── routes/          # API endpoints
-│   ├── middlewares/     # Security & validation
-│   ├── models/          # Type definitions
-│   ├── config/          # Environment setup
-│   └── utils/           # Helper functions
-├── creds/              # Firebase credentials
-├── Dockerfile          # Container configuration
-└── package.json        # Dependencies
-```
-
-### Development Commands
-```bash
-# Development with hot reload
-npm run dev
-
-# Production build
-npm run build
-
-# Start production server
-npm start
-
-# TypeScript compilation check
-npx tsc --noEmit
-```
-
-### Code Quality Standards
-- **TypeScript Strict Mode** - Enhanced type safety
-- **ESLint Configuration** - Code style enforcement  
-- **Error Handling** - Structured try-catch patterns
-- **Logging Standards** - Consistent request logging
-- **Interface Documentation** - Comprehensive type definitions
-
-</details>
-
----

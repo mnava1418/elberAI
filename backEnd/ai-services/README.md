@@ -1,309 +1,135 @@
-# 🤖 AI Services
+# AI Services
 
-[![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue)](https://www.typescriptlang.org/)
-[![OpenAI](https://img.shields.io/badge/OpenAI-Agents-orange)](https://openai.com/)
-[![Socket.io](https://img.shields.io/badge/Socket.io-4.8.1-black)](https://socket.io/)
-[![Firebase](https://img.shields.io/badge/Firebase-Admin-yellow)](https://firebase.google.com/)
-[![Docker](https://img.shields.io/badge/Docker-Multi--Stage-blue)](https://www.docker.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-336791)](https://www.postgresql.org/)
+The brain of Elber. This service handles the entire conversation with the AI assistant: it receives messages, processes them with memory context, generates streaming responses, and learns about the user over time.
 
-> **AI microservice** powering real-time conversational AI with advanced memory management, multi-agent architecture, and production-ready security features.
+## What does it do?
 
-## 📋 Table of Contents
+### Real-time chat with streaming
+Communication with this service is over WebSocket (Socket.io), not HTTP. When the user sends a message, the response arrives in progressive fragments (token by token), creating the sensation that Elber is typing live.
 
-- [🎯 Overview](#-overview)
-- [✨ Key Features](#-key-features)  
-- [🛠️ Tech Stack](#️-tech-stack)
-- [⚡ Quick Start](#-quick-start)
-- [📊 API Documentation](#-api-documentation)
-- [🏗️ Architecture](#️-architecture)
-- [🔒 Security](#-security)
-- [🐳 Docker Deployment](#-docker-deployment)
-- [💻 Development](#-development)
+The client emits the `elber:message` event and receives three possible response events:
+- `elber:stream` — partial response fragment (received multiple times)
+- `elber:response` — complete response, signals that generation has finished
+- `elber:error` — if an error occurred
 
-## 🎯 Overview
+### Three-level memory system
+Elber remembers the user through three types of memory that are combined before generating each response:
 
-Elber AI Services is a **sophisticated microservice** that demonstrates advanced software engineering principles in AI applications. Built with enterprise-grade patterns, it showcases expertise in:
+**Short-Term Memory (STM)** — The active conversation session with the AI. It is kept alive while the session is active (up to 24 hours). This allows Elber to remember what was discussed in recent exchanges without needing to resend the entire history.
 
-- **Multi-Agent AI Systems** with custom tool integration
-- **Real-time communication** optimized for production scale  
-- **Advanced memory management** (STM/MTM/LTM architecture)
-- **Microservice security** with multi-layer authentication
-- **Performance optimization** for concurrent AI operations
+**Mid-Term Memory (MTM)** — Stores the current conversation history as text. Every 8 conversation turns, a summary of the exchange is generated and the history is cleared. This prevents the context from growing indefinitely.
 
-**Perfect for:** Senior developers seeking to demonstrate AI/ML engineering expertise, real-time system design, and scalable microservice architecture.
+**Long-Term Memory (LTM)** — Persistent user memory stored in PostgreSQL with the pgvector extension. When a summary is generated (every 8 turns), the AI extracts relevant user information (goals, preferences, plans, constraints, personal profile) and stores it as vector embeddings. Before responding, this database is searched for the most relevant information to the current message using semantic search.
 
-## ✨ Key Features
+### AI agents
+The service uses OpenAI Agents with GPT-4o-mini. There are several specialized agents:
 
-🧠 **Multi-Agent AI Architecture** - OpenAI Agents with custom tools for web search and user data management  
-⚡ **Real-time Streaming** - WebSocket-based chat with optimized connection handling (60s timeout, 25s ping)  
-🧮 **Advanced Memory System** - Short/Mid/Long-term memory for contextual conversations  
-🔐 **Enterprise Security** - Firebase Auth + API Gateway validation + Rate limiting (100 req/15min)  
-🔍 **Intelligent Search** - Context-aware web search with Serper API integration  
-⚖️ **Production Ready** - Global error handlers, graceful shutdowns, and Docker optimization
+- **Chat agent** — The main agent. Responds to user messages with access to tools (web search and user data access).
+- **Title agent** — Automatically generates the title of each conversation after the first message.
+- **Summary agent** — Generates conversation summaries every 8 turns.
+- **LTM agent** — Extracts structured user information from the summary.
+- **Relevant info agent** — Evaluates whether a piece of text contains information worth saving to LTM.
 
-## 🛠️ Tech Stack
+### Agent tools
+The chat agent has access to two tools during a conversation:
 
-### **Core Technologies**
-- **Runtime:** Node.js 20.x (Alpine)
-- **Language:** TypeScript 5.9+ (Strict mode)
-- **Framework:** Express.js 5.x with Helmet security
+- **Web search** (Serper API) — Activated when the user asks about recent events or news. The search includes the user's timezone to localize results.
+- **User data management** — The agent can retrieve the user's saved memories (up to 10 most recent items) and can also delete them if the user requests it.
 
-### **AI & ML**
-- **OpenAI Agents:** 0.3.7 (Multi-agent architecture)
-- **OpenAI API:** 6.8.1 (GPT-4o-mini)
-- **Zod:** 4.3.5 (Runtime validation)
+### Chat management
+In addition to WebSocket, the service exposes HTTP endpoints to:
+- Retrieve all of a user's chats (with their messages)
+- Delete a specific chat
+- Delete all chats
 
-### **Real-time & Communication**
-- **Socket.io:** 4.8.1 (WebSocket optimization)
-- **Firebase Admin:** 13.5.0 (Authentication)
+Chats are stored in Firebase Realtime Database.
 
-### **Data & Storage**
-- **PostgreSQL:** 8.17.2 (Primary database)
-- **Firebase Realtime DB** (Chat persistence)
+## Port
 
-### **DevOps & Infrastructure**  
-- **Docker:** Multi-stage builds
-- **Rate Limiting:** Express-rate-limit
-- **Security:** Helmet + Custom middleware
+Runs on port `4042`.
 
-## ⚡ Quick Start
+## HTTP Endpoints
 
-```bash
-# Clone and install
-git clone <repo-url>
-cd backEnd/ai-services
-npm install
+| Method | Route | Description |
+|---|---|---|
+| GET | `/ai/health` | Health check |
+| GET | `/ai/chat` | Get all user chats |
+| DELETE | `/ai/chat` | Delete a chat (body: `{ chatId }`) |
+| DELETE | `/ai/chat/all` | Delete all user chats |
 
-# Environment setup
-cp .env.template .env
-# Configure your OpenAI, Firebase, and Serper API keys
+> All endpoints require the `x-user-uid` header (sent by the gateway) and the `x-api-gateway-secret` header.
 
-# Development mode
-npm run dev
+## WebSocket
 
-# Production build
-npm run build && npm start
-```
-
-**🚀 Ready in < 3 minutes!** The service runs on `http://localhost:4042`
-
-## 📊 API Documentation
-
-### **Core Endpoints**
-
-#### Health Check
-```http
-GET /ai/health
-```
-```json
-{
-  "endPoint": "/ai",
-  "status": "healthy"
-}
-```
-
-#### Chat Management
-```http
-GET /ai/chat
-Headers: x-user-uid: <firebase-uid>
-```
-```json
-{
-  "chats": {
-    "chatId": {
-      "title": "Conversation Title",
-      "messages": [...],
-      "createdAt": 1709500800000
-    }
-  }
-}
-```
-
-#### Delete Chat
-```http
-DELETE /ai/chat
-Headers: x-user-uid: <firebase-uid>
-Content-Type: application/json
-
-{
-  "chatId": "12345"
-}
-```
-
-### **WebSocket Events**
-
-#### Connection
+**Connection:**
 ```javascript
 const socket = io('ws://localhost:4042', {
   auth: { token: 'firebase-jwt-token' }
-});
-```
-
-#### Real-time Chat
-```javascript
-// Send message
-socket.emit('elber:message', {
-  text: "Hello AI!",
-  chatId: 12345,
-  title: "New Chat"
-});
-
-// Receive streaming response
-socket.on('elber:stream', (chunk) => {
-  console.log(chunk); // Partial response
-});
-
-socket.on('elber:response', (response) => {
-  console.log(response); // Complete response with memory
-});
-```
-
-## 🏗️ Architecture
-
-### **Multi-Agent System**
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Chat Agent    │    │  Memory Agent   │    │  Title Agent    │
-│                 │    │                 │    │                 │  
-│ • Main AI logic │    │ • STM/MTM/LTM   │    │ • Auto titles   │
-│ • Tool calling  │────│ • Context mgmt  │────│ • Conversation  │
-│ • Web search    │    │ • User profiling│    │   analysis      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-### **Memory Architecture**
-- **Short-term:** Current conversation context
-- **Mid-term:** Session-based user preferences  
-- **Long-term:** Persistent user personality and history
-
-### **Security Layers**
-```
-Client Request → Rate Limiter → Helmet → API Gateway → Firebase Auth → Controller
-```
-
-### **Data Flow**
-1. **WebSocket Connection** with Firebase JWT validation
-2. **Message Processing** through multi-agent pipeline
-3. **Memory Integration** with context enrichment  
-4. **Real-time Streaming** with error handling
-5. **Persistence** in Firebase + PostgreSQL
-
-## 🔒 Security
-
-### **Authentication**
-- **Firebase JWT** validation for all WebSocket connections
-- **API Gateway Secret** for inter-service communication
-- **Request Origin** validation with CORS policies
-
-### **Rate Limiting**
-```typescript
-// 100 requests per 15 minutes per IP
-rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
 })
 ```
 
-### **Security Headers**
-- Helmet.js integration for XSS, CSRF protection
-- Content Security Policy enforcement
-- HTTP Strict Transport Security
-
-### **Error Handling** 
-- Global exception handlers for AI stream cancellations
-- Graceful degradation for service failures
-- Sanitized error responses (no sensitive data leaks)
-
-## 🐳 Docker Deployment
-
-### **Multi-stage Dockerfile**
-```dockerfile
-# Build optimization with Alpine Linux
-FROM node:20-alpine AS builder
-# ... build process
-
-FROM node:20-alpine 
-# ... production runtime (30% smaller image)
+**Send a message:**
+```javascript
+socket.emit('elber:message', {
+  text: 'Hello Elber',
+  chatId: '12345',    // null for a new conversation
+  title: 'New chat'  // provisional title
+})
 ```
 
-### **Docker Compose** 
+**Receive a response:**
+```javascript
+socket.on('elber:stream', (chunk) => { /* partial fragment */ })
+socket.on('elber:response', (response) => { /* complete response */ })
+socket.on('elber:error', (error) => { /* error */ })
+socket.on('elber:title', (title) => { /* AI-generated title */ })
+```
+
+## Environment variables
+
+```
+AI_PORT=4042
+GOOGLE_APPLICATION_CREDENTIALS=  # Path to the Firebase Admin SDK JSON file
+FIREBASE_DB=        # Firebase Realtime Database URL
+OPENAI_API_KEY=     # OpenAI API key
+GATEWAY_SECRET=     # Shared secret with the API Gateway
+PG_DB=              # PostgreSQL connection string (with pgvector)
+SERPER_API_KEY=     # Serper API key for web search
+```
+
+## Commands
+
 ```bash
-# From project root
-cd backEnd
-docker-compose up ai-services
-```
-
-### **Environment Variables**
-```env
-# Core
-NODE_ENV=production  
-PORT=4042
-
-# AI Services
-OPENAI_API_KEY=sk-...
-SERPER_API_KEY=...
-
-# Firebase
-FIREBASE_PROJECT_ID=...
-FIREBASE_PRIVATE_KEY=...
-
-# Gateway
-API_GATEWAY_SECRET=...
-
-# Database
-DATABASE_URL=postgresql://...
-```
-
-## 💻 Development
-
-### **Prerequisites**
-- Node.js 20+
-- TypeScript 5.9+
-- Firebase project with Auth enabled
-- OpenAI API access
-- Serper API key (for web search)
-
-### **Development Workflow**
-```bash
-# Install dependencies  
 npm install
-
-# Type checking
-npm run build
-
-# Watch mode with hot reload
-npm run dev
-
-# Production testing
-npm run build && npm start
+cp .env.template .env
+npm run dev     # Development with hot reload
+npm run build   # Compile TypeScript
+npm start       # Production
 ```
 
-### **Code Structure**
+## Code structure
+
 ```
 src/
-├── agents/          # Multi-agent AI system
-├── controllers/     # HTTP request handlers  
-├── services/        # Business logic layer
-├── models/          # TypeScript interfaces
-├── middlewares/     # Authentication & validation
-├── tools/           # AI agent tools
-├── loaders/         # Service initialization  
-└── config/          # Environment configuration
+├── agents/
+│   ├── elber.agent.ts        # Chat agent and title agent
+│   └── memory.agent.ts       # Summary agent, LTM agent, relevant info agent
+├── models/
+│   ├── elber.model.ts        # Chat data types and structures
+│   ├── shortTermMemory.model.ts   # Active session management
+│   ├── midTermMemory.model.ts     # Conversation history (24h TTL)
+│   └── longTermMemory.model.ts   # Persistent memory in PostgreSQL/pgvector
+├── tools/
+│   ├── search.tools.ts       # Web search tool (Serper)
+│   └── user.tools.ts         # User data management tools
+├── services/
+│   ├── elber.service.ts      # Main chat orchestration
+│   ├── memory.service.ts     # Memory processing pipeline
+│   ├── chat.service.ts       # Firebase operations (save/read messages)
+│   ├── ai.service.ts         # Embedding generation (text-embedding-3-small)
+│   └── user.service.ts       # Delete all user data
+├── controllers/              # HTTP handlers
+├── listeners/                # WebSocket event handlers
+├── middlewares/              # Gateway validation
+└── routes/                   # HTTP routes
 ```
-
----
-**🎯 Built for Scale:** This microservice demonstrates production-ready patterns for AI applications, real-time systems, and enterprise security. Perfect showcase for senior AI/ML engineering roles.
-
-**👨‍💻 Author:** Martin Nava - *Demonstrating advanced TypeScript, AI agents, and microservice architecture*
-
-### **Key Technical Highlights:**
-
-✅ **Advanced AI Engineering** - Multi-agent architecture with OpenAI Agents  
-✅ **Real-time Systems** - WebSocket optimization for production scale  
-✅ **Security Expertise** - Multi-layer authentication and rate limiting  
-✅ **Database Design** - PostgreSQL + Firebase hybrid architecture  
-✅ **DevOps Skills** - Docker multi-stage builds and container optimization  
-✅ **Performance** - Memory management and graceful error handling  
-✅ **Code Quality** - TypeScript strict mode with comprehensive validation

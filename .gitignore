@@ -143,3 +143,6 @@ creds
 # Firebase configs
 google-services.json
 GoogleService-info.plist
+
+#Claude
+.claude

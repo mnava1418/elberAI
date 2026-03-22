@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "start": "react-native start --reset-cache",
     "start:ios": "npm run ios -- --simulator='iPhone 16 Pro (473740D5-4F39-45B7-8C9E-BDC5E1E64160)'",
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@react-native-clipboard/clipboard": "^1.16.3",
@@ -50,6 +51,7 @@
     "@react-native/eslint-config": "0.80.2",
     "@react-native/metro-config": "0.80.2",
     "@react-native/typescript-config": "0.80.2",
+    "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^29.5.13",
     "@types/react": "^19.1.9",
     "@types/react-native-vector-icons": "^6.4.18",

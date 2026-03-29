@@ -62,5 +62,16 @@ target 'Elber' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Fix: Apple Clang in Xcode 26 has consteval bugs - patch fmt/base.h
+    fmt_base_h = File.join(installer.sandbox.root, "fmt/include/fmt/base.h")
+    if File.exist?(fmt_base_h)
+      content = File.read(fmt_base_h)
+      unless content.include?("!defined(__apple_build_version__)")
+        system("chmod 644 '#{fmt_base_h}'")
+        system("sed -i '' 's/defined(__cpp_consteval)/defined(__cpp_consteval) \\&\\& !defined(__apple_build_version__)/g' '#{fmt_base_h}'")
+        system("sed -i '' 's/FMT_GCC_VERSION >= 1002 || FMT_CLANG_VERSION >= 1101/(FMT_GCC_VERSION >= 1002 || FMT_CLANG_VERSION >= 1101) \\&\\& !defined(__apple_build_version__)/g' '#{fmt_base_h}'")
+      end
+    end
   end
 end

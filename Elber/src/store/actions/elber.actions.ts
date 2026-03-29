@@ -22,3 +22,8 @@ import { AlertProps, ElberAction } from "../reducers/elber.reducer";
   export const hideAlert = (): ElberAction => ({
     type: 'HIDE_ALERT'
   })
+
+  export const setVoiceMode = (voiceMode: boolean): ElberAction => ({
+    type: 'SET_VOICE_MODE',
+    voiceMode
+  })

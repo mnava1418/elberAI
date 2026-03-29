@@ -8,13 +8,15 @@ export type AlertProps = {
 
 export type ElberState = {
     isWaiting: boolean,
-    isStreaming: boolean,    
+    isStreaming: boolean,
+    voiceMode: boolean,    
     alert: AlertProps
 }
 
 export const initialElberState: ElberState = {
     isWaiting: false,    
     isStreaming: false,
+    voiceMode: false,
     alert: {
         isVisible: false,
         title: '',
@@ -28,6 +30,7 @@ export type ElberAction =
 | { type: 'WAITING_FOR_ELBER', isWaiting: boolean }
 | { type: 'ELBER_IS_STREAMING', isStreaming: boolean }
 | { type: 'SHOW_ALERT', alert: AlertProps}
+| { type: 'SET_VOICE_MODE', voiceMode: boolean}
 | { type: 'HIDE_ALERT' }
 | { type: 'LOG_OUT' }
 
@@ -41,6 +44,8 @@ export const elberReducer = (state: ElberState, action: ElberAction): ElberState
             return {...state, isStreaming: action.isStreaming}
         case 'SHOW_ALERT':
             return {...state, alert: action.alert}
+        case 'SET_VOICE_MODE':
+            return {...state, voiceMode: action.voiceMode}
         case 'HIDE_ALERT':
             return {...state, alert: {...state.alert, isVisible: false}}
         default:

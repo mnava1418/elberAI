@@ -6,7 +6,7 @@ import ChatBtn from './ChatBtn';
 import chatStyles from '../../../styles/chat.style';
 import { GlobalContext } from '../../../store/GlobalProvider';
 import SocketModel from '../../../models/Socket.model';
-import { isWaitingForElber } from '../../../store/actions/elber.actions';
+import { isWaitingForElber, setVoiceMode } from '../../../store/actions/elber.actions';
 import useElberStatus from '../../../hooks/chat/useElberStatus';
 import useVoice from '../../../hooks/chat/useVoice';
 import { selectChatInfo } from '../../../store/selectors/chat.selector';
@@ -24,7 +24,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     const { state, dispatch } = useContext(GlobalContext);
     const chatInfo = selectChatInfo(state.chat)
     
-    const { isStreaming, isWaiting } = useElberStatus(state.elber)
+    const { isStreaming, isWaiting, voiceMode } = useElberStatus(state.elber)
     const { 
         isListening, 
         startListening, 
@@ -77,6 +77,10 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
         SocketModel.getInstance().cancelMessage(chatInfo.id, dispatch)
     }
 
+    const handleToggleVoiceMode = () => {
+        dispatch(setVoiceMode(!voiceMode))
+    }
+
     useEffect(() => {
         prepareSpeech()
             return () => {
@@ -99,9 +103,10 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                     editable={!isStreaming}
                 />  
                 {inputText.trim() === '' && !isListening && !isStreaming ? <ChatBtn type='secondary' icon='mic-outline' onPress={handleVoice} /> : <></>}
-                {isListening && !isStreaming ? <ChatBtn type='primary' icon='stop' onPress={handleVoice} /> : <></>}
+                {isListening && !isStreaming ? <ChatBtn type='primary' icon='mic-off-outline' onPress={handleVoice} /> : <></>}
                 {inputText.trim() !== '' && !isListening && !isStreaming ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
                 {isStreaming ? <ChatBtn type='primary' icon='stop' onPress={handleCancel} /> : <></>}
+                {!isStreaming ? <ChatBtn type={voiceMode ? 'primary' : 'secondary'} icon='radio-outline' onPress={handleToggleVoiceMode} /> : <></>}
             </View>
         </Animated.View>
     )

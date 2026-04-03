@@ -78,6 +78,10 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     }
 
     const handleToggleVoiceMode = () => {
+        if(isWaiting || isStreaming) {
+            return
+        }
+
         dispatch(setVoiceMode(!voiceMode))
     }
 

@@ -19,8 +19,10 @@ describe('elber.service - handleChatResponse', () => {
     it('should dispatch elberIsStreaming(false)', () => {
       handleChatResponse(dispatch, 'elber:response', chatResponse)
 
-      expect(dispatch).toHaveBeenCalledTimes(1)
+      expect(dispatch).toHaveBeenCalledTimes(3)
       expect(dispatch).toHaveBeenCalledWith({ type: 'ELBER_IS_STREAMING', isStreaming: false })
+      expect(dispatch).toHaveBeenCalledWith({ type: 'WAITING_FOR_ELBER', isWaiting: false })
+      expect(dispatch).toHaveBeenCalledWith({ type: 'PROCESS_STREAM', chunk: 'Hola, soy Elber.' })
     })
   })
 

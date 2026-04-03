@@ -71,7 +71,7 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
                 })            
 
             if(isVoiceMode) {
-                processVoiceResponse(result)
+                processVoiceResponse(result, request, midMemory, emitMessage)
             } else {
                 await processTextResponse(result, request, midMemory, emitMessage, abortController)
             }
@@ -165,8 +165,21 @@ const processTextResponse = async (result: any, request: ElberRequest, midMemory
     }
 }
 
-const processVoiceResponse = (result: any) => {
+const processVoiceResponse = (result: any, request: ElberRequest, midMemory: MemoryEntry, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+    const {user, chatId} = request
+    const conversationId = `${user.uid}_${chatId.toString()}`
+
     if(result.finalOutput) {
-        console.log(result.finalOutput)
+        const agentResponse = result.finalOutput
+        emitMessage('elber:response', chatId, agentResponse );
+                
+        const elberResponse: ElberResponse = {
+            agentResponse,
+            conversationId,
+            originalRequest: request,
+            memory: midMemory
+        }
+        
+        handleResponse(elberResponse, emitMessage)
     }
 }

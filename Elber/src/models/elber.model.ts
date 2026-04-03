@@ -19,6 +19,7 @@ export type ElberRequest = {
     title: string,
     timeStamp: string,
     timeZone: string
+    isVoiceMode: boolean
 }
 
 export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title' | 'elber:cancelled'

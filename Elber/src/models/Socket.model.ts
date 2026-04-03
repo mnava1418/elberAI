@@ -107,7 +107,7 @@ class SocketModel {
         }
     }
 
-    sendMessage(chatId: number, title: string, userMessage: ElberMessage, dispatch: (value: any) => void) {
+    sendMessage(chatId: number, title: string, userMessage: ElberMessage, voiceMode: boolean, dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
         
         if(this.socket && this.socket.connected && currentUser) {
@@ -133,7 +133,8 @@ class SocketModel {
                 },                
                 title,
                 timeStamp,
-                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                isVoiceMode: voiceMode
             }
             this.socket.emit('user:ask', elberRequest )
         } else {

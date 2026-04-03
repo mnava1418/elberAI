@@ -69,7 +69,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
         dispatch(isWaitingForElber(true))
         dispatch(addChatMessage(chatId, newMessage))
         
-        SocketModel.getInstance().sendMessage(chatId, chatInfo.name!, newMessage, dispatch)  
+        SocketModel.getInstance().sendMessage(chatId, chatInfo.name!, newMessage, voiceMode, dispatch)  
         setInputText('')
     }
 

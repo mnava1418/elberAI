@@ -15,7 +15,8 @@ export type ElberRequest = {
     chatId: number,
     title: string
     timeStamp: string,
-    timeZone: string
+    timeZone: string,
+    isVoiceMode: boolean
 }
 
 export type ElberResponse = {    

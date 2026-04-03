@@ -1,4 +1,4 @@
-import { ElberEvent, ElberRequest, ElberResponse, UserContext } from "../models/elber.model";
+import { ElberEvent, ElberRequest, ElberResponse, MemoryEntry, UserContext } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents';
 import agents from "../agents";
 import { saveChatMessage, updateTitle } from "./chat.service";
@@ -43,7 +43,7 @@ const formatMemories = async (uid: string, text: string): Promise<string> => {
 
 export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
     await withTrace('Elber workflow', async() => {
-        const {chatId, text, user, timeStamp, timeZone} = request
+        const {chatId, text, user, timeStamp, timeZone, isVoiceMode} = request
         try {            
             const conversationId = `${user.uid}_${chatId.toString()}`
             
@@ -56,60 +56,24 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
                 timeZone
             }            
 
-            const result = await run(agents.elber.chat(user.name, midMemory.summary, longMemory, timeStamp), text, {
-                session,
-                maxTurns: 3,
-                stream: true,
-                context: userContext
-            })            
+            const result = isVoiceMode
+                ? await run(agents.elber.chat(user.name, midMemory.summary, longMemory, timeStamp), text, {
+                    session,
+                    maxTurns: 3,
+                    stream: false,
+                    context: userContext
+                })
+                : await run(agents.elber.chat(user.name, midMemory.summary, longMemory, timeStamp), text, {
+                    session,
+                    maxTurns: 3,
+                    stream: true,
+                    context: userContext
+                })            
 
-            let agentResponse = ''
-            let responseCompleted = false
-            let wasCancelled = false
-
-            for await(const event of result) {
-                if(abortController?.signal.aborted) {
-                    wasCancelled = true
-                    break
-                }
-
-                if(event.type == 'raw_model_stream_event' && event.data.event) {
-                    if(event.data.event.type == 'response.output_text.delta') {
-                        agentResponse = `${agentResponse}${event.data.event?.delta}`.trim()
-                        emitMessage('elber:stream', chatId, event.data.event?.delta )
-                    }
-
-                    if(event.data.event.type == 'response.completed' && !responseCompleted && agentResponse.trim() != '') {
-                        responseCompleted = true
-                        emitMessage('elber:response', chatId, '' );
-                        
-                        const elberResponse: ElberResponse = {
-                            agentResponse,
-                            conversationId,
-                            originalRequest: request,
-                            memory: midMemory
-                        }
-                        
-                        handleResponse(elberResponse, emitMessage)
-                    }    
-
-                    if(event.data.event.type == 'response.error') {
-                        emitMessage('elber:error', chatId, 'Error en la respuesta de Elber agent');
-                    }                    
-                }
-            }
-
-            if(wasCancelled && agentResponse.trim() !== '' && !responseCompleted) {
-                emitMessage('elber:cancelled', chatId, '');
-                
-                const elberResponse: ElberResponse = {
-                    agentResponse,
-                    conversationId,
-                    originalRequest: request,
-                    memory: midMemory
-                }
-                
-                handleResponse(elberResponse, emitMessage)
+            if(isVoiceMode) {
+                processVoiceResponse(result)
+            } else {
+                await processTextResponse(result, request, midMemory, emitMessage, abortController)
             }
         } catch (error) {
             console.error(error)
@@ -144,5 +108,65 @@ const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage
     } catch (error) {
         console.error(error)
         throw  new Error('Error en generateChatTitle')   
+    }
+}
+
+const processTextResponse = async (result: any, request: ElberRequest, midMemory: MemoryEntry, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
+    let wasCancelled = false
+    let agentResponse = ''
+    let responseCompleted = false
+
+    const {user, chatId} = request
+    const conversationId = `${user.uid}_${chatId.toString()}`
+    
+    for await(const event of result) {
+        if(abortController?.signal.aborted) {
+            wasCancelled = true
+            break
+        }
+
+        if(event.type == 'raw_model_stream_event' && event.data.event) {
+            if(event.data.event.type == 'response.output_text.delta') {
+                agentResponse = `${agentResponse}${event.data.event?.delta}`.trim()
+                emitMessage('elber:stream', chatId, event.data.event?.delta )
+            }
+
+            if(event.data.event.type == 'response.completed' && !responseCompleted && agentResponse.trim() != '') {
+                responseCompleted = true
+                emitMessage('elber:response', chatId, '' );
+                
+                const elberResponse: ElberResponse = {
+                    agentResponse,
+                    conversationId,
+                    originalRequest: request,
+                    memory: midMemory
+                }
+                
+                handleResponse(elberResponse, emitMessage)
+            }    
+
+            if(event.data.event.type == 'response.error') {
+                emitMessage('elber:error', chatId, 'Error en la respuesta de Elber agent');
+            }                    
+        }
+    }
+
+    if(wasCancelled && agentResponse.trim() !== '' && !responseCompleted) {
+        emitMessage('elber:cancelled', chatId, '');
+        
+        const elberResponse: ElberResponse = {
+            agentResponse,
+            conversationId,
+            originalRequest: request,
+            memory: midMemory
+        }
+        
+        handleResponse(elberResponse, emitMessage)
+    }
+}
+
+const processVoiceResponse = (result: any) => {
+    if(result.finalOutput) {
+        console.log(result.finalOutput)
     }
 }

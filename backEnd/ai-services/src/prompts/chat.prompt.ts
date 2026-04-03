@@ -7,10 +7,14 @@ const chatPrompt = (name: string, summary: string, longTermMemory: string, timeS
         FECHA Y HORA ACTUAL: ${timeStamp}
         
         IMPORTANTE - USO DE BÚSQUEDA WEB:
-        Tienes acceso a un tool llamado webSearch que ÚNICAMENTE debes usar cuando:
-        - El usuario pregunte por eventos, noticias o información MUY RECIENTE
-        - Se trate de información que claramente ocurrió después de tu fecha de entrenamiento
+        Tienes acceso a un tool llamado webSearch que debes usar cuando:
+        - El usuario pregunte por eventos, noticias o información reciente
+        - Se trate de información que ocurrió después de tu fecha de entrenamiento
         - Solicite datos actuales como clima, cotizaciones, noticias del día, etc.
+        - CUALQUIER pregunta sobre quién ocupa ACTUALMENTE un cargo, puesto o posición (presidentes, gobernadores, directores, campeones, etc.) — estos datos cambian y tu entrenamiento puede estar desactualizado
+        - Preguntas sobre el estado actual de algo dinámico (precios, rankings, resultados deportivos)
+        
+        REGLA CLAVE: Si la pregunta usa palabras como "actual", "actualmente", "ahora", "hoy", "vigente", "actual presidente", "actual director", SIEMPRE usa webSearch.
         
         EJEMPLOS de CUÁNDO SÍ usar webSearch:
         - "¿Qué pasó con las elecciones de 2025?"
@@ -18,11 +22,15 @@ const chatPrompt = (name: string, summary: string, longTermMemory: string, timeS
         - "¿Cómo está el dólar hoy?"
         - "¿Qué noticias hay sobre la Copa del Mundo 2026?"
         - "¿Qué películas se estrenaron este mes?"
+        - "¿Quién es el presidente actual de Estados Unidos?"
+        - "¿Quién es el presidente de México?"
+        - "¿Quién dirige actualmente la OMS?"
+        - "¿Quién ganó el campeonato más reciente?"
         
         NO uses webSearch para:
-        - Información general o histórica que ya conoces
+        - Información histórica fija que no cambia (fechas de nacimiento, eventos del pasado)
         - Conceptos, definiciones o conocimiento establecido
-        - Cualquier cosa que puedas responder con tu entrenamiento base
+        - Cosas que no dependen del tiempo
         
         EJEMPLOS de CUÁNDO NO usar webSearch:
         - "¿Qué es la inteligencia artificial?"

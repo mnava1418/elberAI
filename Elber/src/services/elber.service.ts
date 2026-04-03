@@ -6,7 +6,7 @@ import { elberIsStreaming, isWaitingForElber } from "../store/actions/elber.acti
 const handleChatResponse = (dispatch: (value: any) => void, event: ElberEvent, chatResponse: ElberChatResponse) => {
     switch (event) {
         case 'elber:response':
-            handleResponseEvent(dispatch)
+            handleResponseEvent(dispatch, chatResponse)
             break;
         case 'elber:stream':
             handleStreamEvent(dispatch, chatResponse)
@@ -25,8 +25,13 @@ const handleChatResponse = (dispatch: (value: any) => void, event: ElberEvent, c
     }
 }
 
-const handleResponseEvent = (dispatch: (value: any) => void) => {
+const handleResponseEvent = (dispatch: (value: any) => void, chatResponse: ElberChatResponse) => {
     dispatch(elberIsStreaming(false))
+    dispatch(isWaitingForElber(false))
+
+    if(chatResponse.text.trim() !== '') {
+        dispatch(processStream(chatResponse.text))
+    }
 }
 
 const handleStreamEvent = (dispatch: (value: any) => void, chatResponse: ElberChatResponse) => {

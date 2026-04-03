@@ -62,6 +62,7 @@ const buildElberResponse = (turnsCount: number): ElberResponse => ({
     title: 'Chat Nuevo',
     timeStamp: '2026-01-01',
     timeZone: 'America/Mexico_City',
+    isVoiceMode: false
   },
   memory: { summary: 'current summary', turnsCount, turns: [] },
 })

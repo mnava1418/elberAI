@@ -225,7 +225,7 @@ describe('SocketModel', () => {
       await instance.connect(dispatch)
 
       const message = { id: 'm1', createdAt: 1000, role: 'user' as const, content: 'Hello' }
-      instance.sendMessage(1, 'My Chat', message, dispatch)
+      instance.sendMessage(1, 'My Chat', message, false, dispatch)
 
       expect(connectedSocket.emit).toHaveBeenCalledWith(
         'user:ask',
@@ -246,7 +246,7 @@ describe('SocketModel', () => {
       await instance.connect(dispatch)
 
       const message = { id: 'm1', createdAt: 1000, role: 'user' as const, content: 'Hello' }
-      instance.sendMessage(1, 'My Chat', message, dispatch)
+      instance.sendMessage(1, 'My Chat', message, false, dispatch)
 
       expect(handleChatResponse).toHaveBeenCalledWith(
         dispatch,

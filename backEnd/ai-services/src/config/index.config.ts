@@ -30,3 +30,8 @@ export const serper = {
     searchURL: 'https://google.serper.dev/search',
     secret: process.env.SERPER_API_KEY
 }
+
+export const aws = {
+    id: process.env.AWS_ACCESS_KEY_ID || '',
+    secret: process.env.AWS_SECRET_ACCESS_KEY || ''
+}

@@ -6,6 +6,7 @@ import ShortTermMemory from "../models/shortTermMemory.model";
 import MidTermMemory from "../models/midTermMemory.model";
 import LongTermMemory from "../models/longTermMemory.model";
 import { handleMemory } from "./memory.service";
+import { textToSpeech, splitIntoSentences } from "./polly.service";
 
 const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     const { originalRequest, agentResponse } = elberResponse
@@ -71,7 +72,7 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
                 })            
 
             if(isVoiceMode) {
-                processVoiceResponse(result, request, midMemory, emitMessage)
+                await processVoiceResponse(result, request, midMemory, emitMessage)
             } else {
                 await processTextResponse(result, request, midMemory, emitMessage, abortController)
             }
@@ -165,21 +166,35 @@ const processTextResponse = async (result: any, request: ElberRequest, midMemory
     }
 }
 
-const processVoiceResponse = (result: any, request: ElberRequest, midMemory: MemoryEntry, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+const processVoiceResponse = async (result: any, request: ElberRequest, midMemory: MemoryEntry, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     const {user, chatId} = request
     const conversationId = `${user.uid}_${chatId.toString()}`
 
     if(result.finalOutput) {
         const agentResponse = result.finalOutput
-        emitMessage('elber:response', chatId, agentResponse );
-                
+
+        emitMessage('elber:response', chatId, agentResponse)
+
         const elberResponse: ElberResponse = {
             agentResponse,
             conversationId,
             originalRequest: request,
             memory: midMemory
         }
-        
+
         handleResponse(elberResponse, emitMessage)
+
+        const sentences = splitIntoSentences(agentResponse)
+
+        for (const sentence of sentences) {
+            try {
+                const audioBuffer = await textToSpeech(sentence)
+                emitMessage('elber:audio_chunk', chatId, audioBuffer.toString('base64'))
+            } catch (error) {
+                console.error('Error sintetizando oración con Polly:', error)
+            }
+        }
+
+        emitMessage('elber:audio_end', chatId, '')
     }
 }

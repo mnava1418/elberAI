@@ -26,6 +26,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@aws-sdk/client-polly": "^3.1024.0",
     "@openai/agents": "^0.3.7",
     "axios": "^1.13.4",
     "dotenv": "^17.2.2",

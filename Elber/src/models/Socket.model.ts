@@ -4,6 +4,7 @@ import { getAuth, getIdToken } from '@react-native-firebase/auth';
 import { ElberRequest } from "./elber.model";
 import handleChatResponse from "../services/elber.service";
 import { ElberMessage } from "./chat.model";
+import AudioQueue from "./AudioQueue.model";
 
 class SocketModel {
     private socket: Socket | null
@@ -104,6 +105,14 @@ class SocketModel {
             this.socket.on('elber:cancelled', (chatId: number, text: string) => {
                 handleChatResponse(dispatch, 'elber:cancelled', {chatId, text})
             })
+
+            this.socket.on('elber:audio_chunk', (chatId: number, base64: string) => {
+                handleChatResponse(dispatch, 'elber:audio_chunk', {chatId, text: base64})
+            })
+
+            this.socket.on('elber:audio_end', (chatId: number, text: string) => {
+                handleChatResponse(dispatch, 'elber:audio_end', {chatId, text})
+            })
         }
     }
 
@@ -111,6 +120,8 @@ class SocketModel {
         const currentUser = getAuth().currentUser
         
         if(this.socket && this.socket.connected && currentUser) {
+
+            AudioQueue.getInstance().stop()
 
             const timeStamp = new Date().toLocaleString('es-MX', {
                 weekday: 'long',

@@ -22,4 +22,4 @@ export type ElberRequest = {
     isVoiceMode: boolean
 }
 
-export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title' | 'elber:cancelled'
+export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title' | 'elber:cancelled' | 'elber:audio_chunk' | 'elber:audio_end'

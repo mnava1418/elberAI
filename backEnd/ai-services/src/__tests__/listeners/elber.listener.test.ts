@@ -11,6 +11,7 @@ jest.mock('../../config/index.config', () => ({
   openaiCfg: { cred: 'test' },
   postgres: { db: 'postgresql://test' },
   serper: { searchURL: 'https://serper.dev', secret: 'test' },
+  aws: { id: 'test', secret: 'test' },
 }))
 
 jest.mock('firebase-admin', () => ({

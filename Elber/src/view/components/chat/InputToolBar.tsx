@@ -6,12 +6,13 @@ import ChatBtn from './ChatBtn';
 import chatStyles from '../../../styles/chat.style';
 import { GlobalContext } from '../../../store/GlobalProvider';
 import SocketModel from '../../../models/Socket.model';
-import { isWaitingForElber, setVoiceMode } from '../../../store/actions/elber.actions';
+import { elberIsTalking, isWaitingForElber, setVoiceMode } from '../../../store/actions/elber.actions';
 import useElberStatus from '../../../hooks/chat/useElberStatus';
 import useVoice from '../../../hooks/chat/useVoice';
 import { selectChatInfo } from '../../../store/selectors/chat.selector';
 import { ElberMessage } from '../../../models/chat.model';
 import { addChatMessage } from '../../../store/actions/chat.actions';
+import AudioQueue from '../../../models/AudioQueue.model';
 
 type InputToolBarProps = {
     inputText: string
@@ -24,7 +25,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     const { state, dispatch } = useContext(GlobalContext);
     const chatInfo = selectChatInfo(state.chat)
     
-    const { isStreaming, isWaiting, voiceMode } = useElberStatus(state.elber)
+    const { isStreaming, isWaiting, voiceMode, isTalking } = useElberStatus(state.elber)
     const { 
         isListening, 
         startListening, 
@@ -74,6 +75,11 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     }
 
     const handleCancel = () => {
+        if(voiceMode && isTalking) {
+            dispatch(elberIsTalking(false))
+            AudioQueue.getInstance().stop()
+        }
+        
         SocketModel.getInstance().cancelMessage(chatInfo.id, dispatch)
     }
 
@@ -109,7 +115,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                 {inputText.trim() === '' && !isListening && !isStreaming ? <ChatBtn type='secondary' icon='mic-outline' onPress={handleVoice} /> : <></>}
                 {isListening && !isStreaming ? <ChatBtn type='primary' icon='mic-off-outline' onPress={handleVoice} /> : <></>}
                 {inputText.trim() !== '' && !isListening && !isStreaming ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
-                {isStreaming ? <ChatBtn type='primary' icon='stop' onPress={handleCancel} /> : <></>}
+                {isStreaming || isTalking ? <ChatBtn type='primary' icon='stop' onPress={handleCancel} /> : <></>}
                 {!isStreaming ? <ChatBtn type={voiceMode ? 'primary' : 'secondary'} icon='radio-outline' onPress={handleToggleVoiceMode} /> : <></>}
             </View>
         </Animated.View>

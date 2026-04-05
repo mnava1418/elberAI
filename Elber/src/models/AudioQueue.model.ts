@@ -9,6 +9,7 @@ class AudioQueue {
     private queue: string[] = []
     private isPlaying = false
     private currentSound: Sound | null = null
+    private cancelled = false
 
     static getInstance(): AudioQueue {
         if (!AudioQueue.instance) {
@@ -18,13 +19,19 @@ class AudioQueue {
     }
 
     addChunk(base64: string, dispatch: (value: any) => void) {
+        if (this.cancelled) return
         this.queue.push(base64)
         if (!this.isPlaying) {
             this.playNext(dispatch)
         }
     }
 
+    resume() {
+        this.cancelled = false
+    }
+
     stop() {
+        this.cancelled = true
         this.queue = []
         this.isPlaying = false
         if (this.currentSound) {

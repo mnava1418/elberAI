@@ -71,6 +71,7 @@ const handleTitleEvent = (dispatch: (value: any) => void, chatResponse: ElberCha
 }
 
 const handleCancelledEvent = (dispatch: (value: any) => void) => {
+    dispatch(elberIsTalking(false))
     dispatch(elberIsStreaming(false))
     dispatch(isWaitingForElber(false))
 }

@@ -72,7 +72,7 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
                 })            
 
             if(isVoiceMode) {
-                await processVoiceResponse(result, request, midMemory, emitMessage)
+                await processVoiceResponse(result, request, midMemory, emitMessage, abortController)
             } else {
                 await processTextResponse(result, request, midMemory, emitMessage, abortController)
             }
@@ -166,14 +166,12 @@ const processTextResponse = async (result: any, request: ElberRequest, midMemory
     }
 }
 
-const processVoiceResponse = async (result: any, request: ElberRequest, midMemory: MemoryEntry, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
+const processVoiceResponse = async (result: any, request: ElberRequest, midMemory: MemoryEntry, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
     const {user, chatId} = request
     const conversationId = `${user.uid}_${chatId.toString()}`
 
     if(result.finalOutput) {
         const agentResponse = result.finalOutput
-
-        emitMessage('elber:response', chatId, agentResponse);
 
         const elberResponse: ElberResponse = {
             agentResponse,
@@ -188,6 +186,10 @@ const processVoiceResponse = async (result: any, request: ElberRequest, midMemor
 
         for (const sentence of sentences) {
             try {
+                if(abortController?.signal.aborted) {
+                    emitMessage('elber:cancelled', chatId, '');
+                    break
+                }
                 const audioBuffer = await textToSpeech(sentence)
                 emitMessage('elber:audio_chunk', chatId, audioBuffer.toString('base64'))
             } catch (error) {
@@ -195,6 +197,6 @@ const processVoiceResponse = async (result: any, request: ElberRequest, midMemor
             }
         }
 
-        emitMessage('elber:audio_end', chatId, '')
+        emitMessage('elber:audio_end', chatId, agentResponse)
     }
 }

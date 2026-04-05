@@ -122,6 +122,7 @@ class SocketModel {
         if(this.socket && this.socket.connected && currentUser) {
 
             AudioQueue.getInstance().stop()
+            AudioQueue.getInstance().resume()
 
             const timeStamp = new Date().toLocaleString('es-MX', {
                 weekday: 'long',

@@ -16,7 +16,7 @@ const stripMarkdown = (text: string): string => {
         .replace(/\*(.+?)\*/g, '$1')
         .replace(/`(.+?)`/g, '$1')
         .replace(/\[(.+?)\]\(.+?\)/g, '$1')
-        .replace(/\p{Emoji}/gu, '')
+        .replace(/\p{Extended_Pictographic}/gu, '')
         .trim()
 }
 

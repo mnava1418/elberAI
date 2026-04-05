@@ -111,3 +111,27 @@ jest.mock('react-native-permissions', () => ({
   PERMISSIONS: { IOS: {}, ANDROID: {} },
   RESULTS: { GRANTED: 'granted', DENIED: 'denied', BLOCKED: 'blocked' },
 }))
+
+jest.mock('react-native-sound', () => {
+  const SoundMock = jest.fn().mockImplementation((_path, _base, callback) => {
+    if (callback) callback(null)
+    return {
+      play: jest.fn((cb) => { if (cb) cb(true) }),
+      stop: jest.fn(),
+      release: jest.fn(),
+    }
+  })
+  SoundMock.setCategory = jest.fn()
+  return { __esModule: true, default: SoundMock }
+})
+
+jest.mock('react-native-blob-util', () => ({
+  __esModule: true,
+  default: {
+    fs: {
+      dirs: { CacheDir: '/tmp' },
+      writeFile: jest.fn().mockResolvedValue(undefined),
+      unlink: jest.fn().mockResolvedValue(undefined),
+    },
+  },
+}))

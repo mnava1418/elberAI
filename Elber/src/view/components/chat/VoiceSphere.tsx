@@ -5,17 +5,23 @@ import Animated, {
     useAnimatedStyle,
     withRepeat,
     withTiming,
+    cancelAnimation,
     Easing,
 } from 'react-native-reanimated'
 import LinearGradient from 'react-native-linear-gradient'
 
 const SPHERE_SIZE = 220
 
-const VoiceSphere = () => {
+interface VoiceSphereProps {
+    isWaiting: boolean
+}
+
+const VoiceSphere = ({ isWaiting }: VoiceSphereProps) => {
     const rotation1 = useSharedValue(0)
     const rotation2 = useSharedValue(0)
     const rotation3 = useSharedValue(0)
     const pulse = useSharedValue(1)
+    const thinkingRotation = useSharedValue(0)
 
     useEffect(() => {
         rotation1.value = withRepeat(
@@ -40,6 +46,19 @@ const VoiceSphere = () => {
         )
     }, [])
 
+    useEffect(() => {
+        if (isWaiting) {
+            thinkingRotation.value = withRepeat(
+                withTiming(360, { duration: 800, easing: Easing.linear }),
+                -1,
+                false
+            )
+        } else {
+            cancelAnimation(thinkingRotation)
+            thinkingRotation.value = withTiming(0, { duration: 400, easing: Easing.out(Easing.ease) })
+        }
+    }, [isWaiting])
+
     const animStyle1 = useAnimatedStyle(() => ({
         transform: [{ rotate: `${rotation1.value}deg` }],
     }))
@@ -52,10 +71,13 @@ const VoiceSphere = () => {
     const pulseStyle = useAnimatedStyle(() => ({
         transform: [{ scale: pulse.value }],
     }))
+    const thinkingStyle = useAnimatedStyle(() => ({
+        transform: [{ rotate: `${thinkingRotation.value}deg` }],
+    }))
 
     return (
         <View style={styles.overlay}>
-            <Animated.View style={[styles.sphere, pulseStyle]}>
+            <Animated.View style={[styles.sphere, pulseStyle, thinkingStyle]}>
                 {/* Base layer */}
                 <LinearGradient
                     colors={['#D16BA5', '#E080A8']}

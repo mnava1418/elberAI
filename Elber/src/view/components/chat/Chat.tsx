@@ -17,14 +17,14 @@ const Chat = () => {
     } = useChat()
 
     const { state } = useContext(GlobalContext)
-    const { voiceMode } = useElberStatus(state.elber)
+    const { voiceMode, isWaiting } = useElberStatus(state.elber)
     const flatListRef = useRef<FlatList>(null)
 
     return (
        <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-end'}}>
             <View style={{flex: 1}}>
                 <ChatGrid setShowActions={setShowActions} flatListRef={flatListRef} />
-                {voiceMode && <VoiceSphere />}
+                {voiceMode && <VoiceSphere isWaiting={isWaiting} />}
             </View>
             <InputToolBar inputText={inputText} setInputText={setInputText} animatedStyle={animatedStyle} flatListRef={flatListRef} />
             <ChatActions showActions={showActions} setShowActions={setShowActions} setInputText={setInputText} />

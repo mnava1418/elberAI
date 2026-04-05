@@ -173,6 +173,8 @@ const processVoiceResponse = async (result: any, request: ElberRequest, midMemor
     if(result.finalOutput) {
         const agentResponse = result.finalOutput
 
+        emitMessage('elber:response', chatId, agentResponse);
+
         const elberResponse: ElberResponse = {
             agentResponse,
             conversationId,
@@ -193,6 +195,6 @@ const processVoiceResponse = async (result: any, request: ElberRequest, midMemor
             }
         }
 
-        emitMessage('elber:audio_end', chatId, agentResponse)
+        emitMessage('elber:audio_end', chatId, '')
     }
 }

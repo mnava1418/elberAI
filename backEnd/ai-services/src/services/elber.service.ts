@@ -197,6 +197,6 @@ const processVoiceResponse = async (result: any, request: ElberRequest, midMemor
             }
         }
 
-        emitMessage('elber:audio_end', chatId, '')
+        emitMessage('elber:audio_end', chatId, agentResponse)
     }
 }

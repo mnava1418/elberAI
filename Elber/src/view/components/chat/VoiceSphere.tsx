@@ -5,6 +5,8 @@ import Animated, {
     useAnimatedStyle,
     withRepeat,
     withTiming,
+    withSequence,
+    withDelay,
     cancelAnimation,
     Easing,
 } from 'react-native-reanimated'
@@ -13,15 +15,20 @@ import LinearGradient from 'react-native-linear-gradient'
 const SPHERE_SIZE = 220
 
 interface VoiceSphereProps {
-    isWaiting: boolean
+    isWaiting: boolean,
+    isTalking: boolean
 }
 
-const VoiceSphere = ({ isWaiting }: VoiceSphereProps) => {
+const VoiceSphere = ({ isWaiting, isTalking }: VoiceSphereProps) => {
     const rotation1 = useSharedValue(0)
     const rotation2 = useSharedValue(0)
     const rotation3 = useSharedValue(0)
     const pulse = useSharedValue(1)
     const thinkingRotation = useSharedValue(0)
+    const ripple1Scale = useSharedValue(1)
+    const ripple1Opacity = useSharedValue(0)
+    const ripple2Scale = useSharedValue(1)
+    const ripple2Opacity = useSharedValue(0)
 
     useEffect(() => {
         rotation1.value = withRepeat(
@@ -59,6 +66,44 @@ const VoiceSphere = ({ isWaiting }: VoiceSphereProps) => {
         }
     }, [isWaiting])
 
+    useEffect(() => {
+        if (isTalking) {
+            const DURATION = 1400
+
+            ripple1Scale.value = withRepeat(
+                withSequence(
+                    withTiming(1, { duration: 0 }),
+                    withTiming(1.75, { duration: DURATION, easing: Easing.out(Easing.ease) })
+                ), -1, false
+            )
+            ripple1Opacity.value = withRepeat(
+                withSequence(
+                    withTiming(0.55, { duration: 0 }),
+                    withTiming(0, { duration: DURATION, easing: Easing.out(Easing.ease) })
+                ), -1, false
+            )
+            ripple2Scale.value = withDelay(DURATION / 2, withRepeat(
+                withSequence(
+                    withTiming(1, { duration: 0 }),
+                    withTiming(1.75, { duration: DURATION, easing: Easing.out(Easing.ease) })
+                ), -1, false
+            ))
+            ripple2Opacity.value = withDelay(DURATION / 2, withRepeat(
+                withSequence(
+                    withTiming(0.55, { duration: 0 }),
+                    withTiming(0, { duration: DURATION, easing: Easing.out(Easing.ease) })
+                ), -1, false
+            ))
+        } else {
+            cancelAnimation(ripple1Scale)
+            cancelAnimation(ripple1Opacity)
+            cancelAnimation(ripple2Scale)
+            cancelAnimation(ripple2Opacity)
+            ripple1Opacity.value = withTiming(0, { duration: 300 })
+            ripple2Opacity.value = withTiming(0, { duration: 300 })
+        }
+    }, [isTalking])
+
     const animStyle1 = useAnimatedStyle(() => ({
         transform: [{ rotate: `${rotation1.value}deg` }],
     }))
@@ -74,9 +119,19 @@ const VoiceSphere = ({ isWaiting }: VoiceSphereProps) => {
     const thinkingStyle = useAnimatedStyle(() => ({
         transform: [{ rotate: `${thinkingRotation.value}deg` }],
     }))
+    const ripple1Style = useAnimatedStyle(() => ({
+        transform: [{ scale: ripple1Scale.value }],
+        opacity: ripple1Opacity.value,
+    }))
+    const ripple2Style = useAnimatedStyle(() => ({
+        transform: [{ scale: ripple2Scale.value }],
+        opacity: ripple2Opacity.value,
+    }))
 
     return (
         <View style={styles.overlay}>
+            <Animated.View style={[styles.ring, ripple1Style]} />
+            <Animated.View style={[styles.ring, ripple2Style]} />
             <Animated.View style={[styles.sphere, pulseStyle, thinkingStyle]}>
                 {/* Base layer */}
                 <LinearGradient
@@ -158,6 +213,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 100,
+    },
+    ring: {
+        position: 'absolute',
+        width: SPHERE_SIZE,
+        height: SPHERE_SIZE,
+        borderRadius: SPHERE_SIZE / 2,
+        borderWidth: 2,
+        borderColor: '#D16BA5',
     },
     sphere: {
         width: SPHERE_SIZE,

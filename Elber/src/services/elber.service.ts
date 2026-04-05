@@ -2,7 +2,7 @@ import AudioQueue from "../models/AudioQueue.model";
 import { ElberMessage } from "../models/chat.model";
 import { ElberChatResponse, ElberEvent } from "../models/elber.model";
 import { addChatMessage, processStream, updateChatTitle } from "../store/actions/chat.actions";
-import { elberIsStreaming, isWaitingForElber } from "../store/actions/elber.actions";
+import { elberIsStreaming, elberIsTalking, isWaitingForElber } from "../store/actions/elber.actions";
 
 const handleChatResponse = (dispatch: (value: any) => void, event: ElberEvent, chatResponse: ElberChatResponse) => {
     switch (event) {
@@ -31,8 +31,9 @@ const handleChatResponse = (dispatch: (value: any) => void, event: ElberEvent, c
 
 const handleAudioChunkEvent = (dispatch: (value: any) => void, chatResponse: ElberChatResponse) => {
     dispatch(elberIsStreaming(true))
+    dispatch(elberIsTalking(true))
     dispatch(isWaitingForElber(false))
-    AudioQueue.getInstance().addChunk(chatResponse.text)
+    AudioQueue.getInstance().addChunk(chatResponse.text, dispatch)
 }
 
 const handleResponseEvent = (dispatch: (value: any) => void, chatResponse: ElberChatResponse) => {

@@ -27,3 +27,8 @@ import { AlertProps, ElberAction } from "../reducers/elber.reducer";
     type: 'SET_VOICE_MODE',
     voiceMode
   })
+
+  export const elberIsTalking = (isTalking: boolean): ElberAction => ({
+    type: 'ELBER_IS_TALKING',
+    isTalking
+  })

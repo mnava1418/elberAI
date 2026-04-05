@@ -1,5 +1,6 @@
 import Sound from 'react-native-sound'
 import ReactNativeBlobUtil from 'react-native-blob-util'
+import { elberIsTalking } from '../store/actions/elber.actions'
 
 Sound.setCategory('Playback')
 
@@ -16,10 +17,10 @@ class AudioQueue {
         return AudioQueue.instance
     }
 
-    addChunk(base64: string) {
+    addChunk(base64: string, dispatch: (value: any) => void) {
         this.queue.push(base64)
         if (!this.isPlaying) {
-            this.playNext()
+            this.playNext(dispatch)
         }
     }
 
@@ -33,9 +34,10 @@ class AudioQueue {
         }
     }
 
-    private playNext() {
+    private playNext(dispatch: (value: any) => void) {
         if (this.queue.length === 0) {
             this.isPlaying = false
+            dispatch(elberIsTalking(false))
             return
         }
 
@@ -49,7 +51,7 @@ class AudioQueue {
                     if (error) {
                         console.error('Error cargando audio:', error)
                         ReactNativeBlobUtil.fs.unlink(path).catch(() => {})
-                        this.playNext()
+                        this.playNext(dispatch)
                         return
                     }
 
@@ -58,13 +60,13 @@ class AudioQueue {
                         sound.release()
                         this.currentSound = null
                         ReactNativeBlobUtil.fs.unlink(path).catch(() => {})
-                        this.playNext()
+                        this.playNext(dispatch)
                     })
                 })
             })
             .catch((error) => {
                 console.error('Error escribiendo archivo de audio:', error)
-                this.playNext()
+                this.playNext(dispatch)
             })
     }
 }

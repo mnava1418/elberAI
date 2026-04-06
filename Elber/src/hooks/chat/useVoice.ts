@@ -7,9 +7,12 @@ import { ElberChatResponse } from "../../models/elber.model"
 import handleChatResponse from "../../services/elber.service"
 import { showAlert } from "../../store/actions/elber.actions"
 
+const SILENCE_TIMEOUT_MS = 2000
+
 const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.Dispatch<React.SetStateAction<string>>) => {
     const [isListening, setIsListening] = useState(false)
     const message = useRef('')
+    const silenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const ERROR_VOICE: ElberChatResponse = {
         chatId,
@@ -39,7 +42,20 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
         }
     }
 
+    const clearSilenceTimer = () => {
+        if (silenceTimer.current) {
+            clearTimeout(silenceTimer.current)
+            silenceTimer.current = null
+        }
+    }
+
+    const resetSilenceTimer = (onSilence: () => void) => {
+        clearSilenceTimer()
+        silenceTimer.current = setTimeout(onSilence, SILENCE_TIMEOUT_MS)
+    }
+
     const stopListening = async() => {
+        clearSilenceTimer()
         try {
             setIsListening(false)
             await Voice.stop()            
@@ -54,18 +70,24 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
         }
 
         Voice.onSpeechEnd = () => {
+            clearSilenceTimer()
             setIsListening(false)
             onEnd(message.current)
         }
 
         Voice.onSpeechResults = (event) => {
             if(event.value) {
-                onEnd(event.value[0])
                 message.current = event.value[0]
+                onEnd(event.value[0])
+                resetSilenceTimer(async () => {
+                    await stopListening()
+                    onEnd(message.current)
+                })
             }
         }
 
         Voice.onSpeechError = (error) => {            
+            clearSilenceTimer()
             setIsListening(false)
             handleChatResponse(dispatch, 'elber:error', ERROR_VOICE)
         };

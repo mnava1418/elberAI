@@ -88,6 +88,10 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
             return
         }
 
+        if(!voiceMode && !isListening) {
+            handleVoice()
+        }
+
         dispatch(setVoiceMode(!voiceMode))
     }
 

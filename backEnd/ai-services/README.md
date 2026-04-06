@@ -12,6 +12,17 @@ The client emits the `elber:message` event and receives three possible response 
 - `elber:response` — complete response, signals that generation has finished
 - `elber:error` — if an error occurred
 
+### Voice output (Amazon Polly)
+When a message is sent with `isVoiceMode: true`, the service switches from text streaming to audio synthesis. Instead of emitting token-by-token fragments, it:
+
+1. Waits for the full AI response.
+2. Strips markdown and splits the response into sentences.
+3. Converts each sentence to MP3 using **Amazon Polly** (voice: `Andrés`, language: `es-MX`, engine: `generative`).
+4. Emits each MP3 as a base64-encoded `elber:audio_chunk` event as soon as it is ready, so playback can begin on the client before all sentences are synthesized.
+5. Emits `elber:audio_end` with the full response text once all chunks have been sent.
+
+The user can send a `user:cancel` event at any time to abort synthesis and stop playback.
+
 ### Three-level memory system
 Elber remembers the user through three types of memory that are combined before generating each response:
 
@@ -72,15 +83,30 @@ const socket = io('ws://localhost:4042', {
 ```javascript
 socket.emit('elber:message', {
   text: 'Hello Elber',
-  chatId: '12345',    // null for a new conversation
-  title: 'New chat'  // provisional title
+  chatId: '12345',      // null for a new conversation
+  title: 'New chat',   // provisional title
+  isVoiceMode: false   // true to receive audio instead of streamed text
 })
 ```
 
-**Receive a response:**
+**Cancel ongoing response:**
 ```javascript
-socket.on('elber:stream', (chunk) => { /* partial fragment */ })
-socket.on('elber:response', (response) => { /* complete response */ })
+socket.emit('user:cancel', { chatId: '12345' })
+```
+
+**Receive a response (text mode — `isVoiceMode: false`):**
+```javascript
+socket.on('elber:stream', (chunk) => { /* partial text fragment */ })
+socket.on('elber:response', (response) => { /* complete response text */ })
+socket.on('elber:error', (error) => { /* error */ })
+socket.on('elber:title', (title) => { /* AI-generated title */ })
+```
+
+**Receive a response (voice mode — `isVoiceMode: true`):**
+```javascript
+socket.on('elber:audio_chunk', (base64Mp3) => { /* one synthesized sentence as MP3 */ })
+socket.on('elber:audio_end', (response) => { /* all chunks sent; full response text included */ })
+socket.on('elber:cancelled', () => { /* generation was cancelled */ })
 socket.on('elber:error', (error) => { /* error */ })
 socket.on('elber:title', (title) => { /* AI-generated title */ })
 ```
@@ -95,6 +121,9 @@ OPENAI_API_KEY=     # OpenAI API key
 GATEWAY_SECRET=     # Shared secret with the API Gateway
 PG_DB=              # PostgreSQL connection string (with pgvector)
 SERPER_API_KEY=     # Serper API key for web search
+AWS_ACCESS_KEY_ID=        # AWS credentials for Amazon Polly
+AWS_SECRET_ACCESS_KEY=    # AWS credentials for Amazon Polly
+AWS_REGION=us-east-1      # AWS region (defaults to us-east-1)
 ```
 
 ## Commands
@@ -123,7 +152,8 @@ src/
 │   ├── search.tools.ts       # Web search tool (Serper)
 │   └── user.tools.ts         # User data management tools
 ├── services/
-│   ├── elber.service.ts      # Main chat orchestration
+│   ├── elber.service.ts      # Main chat orchestration (text and voice modes)
+│   ├── polly.service.ts      # Amazon Polly TTS: sentence splitting, MP3 synthesis
 │   ├── memory.service.ts     # Memory processing pipeline
 │   ├── chat.service.ts       # Firebase operations (save/read messages)
 │   ├── ai.service.ts         # Embedding generation (text-embedding-3-small)

@@ -18,6 +18,8 @@ Access to Elber is intentionally controlled. New users must request access and b
 
 - **Understand your voice** — You can dictate messages instead of typing them using the device's native speech recognition.
 
+- **Speak back to you** — In voice mode, Elber responds with synthesized speech powered by Amazon Polly. The response is streamed sentence by sentence as audio, so playback begins immediately without waiting for the full answer to be generated.
+
 - **Send you a daily newsletter** — Every morning, a separate AI pipeline researches technology, sports, and geopolitics news, fact-checks the articles, and sends you a curated HTML newsletter by email.
 
 ## Architecture
@@ -39,10 +41,10 @@ News Services (cron job)     ← Daily newsletter pipeline, runs independently
 
 | Service | Description |
 |---|---|
-| [Mobile App](./Elber/README.md) | React Native app — chat interface, voice input, auth flow, settings |
+| [Mobile App](./Elber/README.md) | React Native app — chat interface, voice input/output, auth flow, settings |
 | [API Gateway](./backEnd/api-gateway/README.md) | Entry point for all requests. Validates Firebase tokens and routes traffic. |
 | [Auth Services](./backEnd/auth-services/README.md) | Manual approval workflow, access codes, user registration, password reset |
-| [AI Services](./backEnd/ai-services/README.md) | OpenAI Agents, 3-tier memory system, real-time streaming, web search |
+| [AI Services](./backEnd/ai-services/README.md) | OpenAI Agents, 3-tier memory system, real-time streaming, web search, Amazon Polly TTS |
 | [Notification Services](./backEnd/notification-services/README.md) | Sends all system emails via Nodemailer and Google OAuth2 |
 | [News Services](./backEnd/news_services/README.md) | 7-agent CrewAI pipeline that generates and distributes the daily newsletter |
 
@@ -53,6 +55,7 @@ News Services (cron job)     ← Daily newsletter pipeline, runs independently
 - Firebase Authentication
 - Socket.io (real-time streaming)
 - React Native Voice (speech recognition)
+- React Native Sound + React Native Blob Util (voice output / audio playback)
 
 **Backend (Node.js services)**
 - Express.js with TypeScript
@@ -61,6 +64,7 @@ News Services (cron job)     ← Daily newsletter pipeline, runs independently
 - PostgreSQL + pgvector (long-term memory with semantic search)
 - Socket.io (WebSocket server)
 - Nodemailer + Google OAuth2 (email)
+- Amazon Polly (text-to-speech for voice responses)
 - Docker + Docker Compose
 
 **News pipeline (Python)**

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { View, TextInput, FlatList } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { appColors } from '../../../styles/main.style';
@@ -26,20 +26,13 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     const chatInfo = selectChatInfo(state.chat)
     const { isStreaming, isWaiting, voiceMode, isTalking } = useElberStatus(state.elber)
     
-    const handleOnEnd = useCallback((text: string, isFinal: boolean) => {
-        setInputText(text)
-        if(voiceMode && isFinal) {
-            handleSend(text)
-        }
-    }, [voiceMode])
-
     const { 
         isListening, 
         startListening, 
         prepareSpeech, 
         removeSpeechListener, 
         stopListening 
-    } = useVoice(dispatch, chatInfo.id, handleOnEnd, inputText)
+    } = useVoice(dispatch, chatInfo.id, setInputText, inputText)
 
     const handleVoice = () => {
         if(isWaiting || isStreaming || isTalking) {
@@ -53,16 +46,16 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
         }
     }
 
-    const handleSend = (text: string) => {
+    const handleSend = () => {
         if(chatInfo.messages.length >0) {
             flatListRef.current?.scrollToIndex({index: 0, animated: true})
         }
         
-        if(text.trim() === '' || isWaiting || isStreaming || isTalking) {
+        if(inputText.trim() === '' || isWaiting || isStreaming || isTalking) {
             return
         }
 
-        const messageText = text.trim();        
+        const messageText = inputText.trim();        
         const timeStamp = Date.now()
         const newMessage: ElberMessage = {
             id: `user:${timeStamp}`,
@@ -106,8 +99,8 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
             return () => {
                 removeSpeechListener()
         }
-    }, [handleOnEnd])
-    
+    }, [])
+
     return (
         <Animated.View id='inputToolBar' style={[{backgroundColor: appColors.primary, marginTop: 10}, animatedStyle]}>
             <View style={chatStyles.toolBar}>
@@ -123,7 +116,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                     editable={!isStreaming && ! isTalking}
                 />  
                 {!isTalking && !isStreaming ? <ChatBtn type={isListening ? 'primary' : 'secondary'} icon={isListening ? 'mic-off-outline' : 'mic-outline'} onPress={handleVoice} /> : <></>}
-                {inputText.trim() !== '' && !isListening && !isStreaming && !isTalking ? <ChatBtn type='primary' icon='arrow-up' onPress={() => {handleSend(inputText)}} /> : <></>}
+                {inputText.trim() !== '' && !isListening && !isStreaming && !isTalking ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
                 {isStreaming || isTalking ? <ChatBtn type='primary' icon='stop' onPress={handleCancel} /> : <></>}
                 {!isStreaming && !isTalking && !isWaiting ? <ChatBtn type={voiceMode ? 'primary' : 'secondary'} icon='radio-outline' onPress={handleToggleVoiceMode} /> : <></>}
             </View>

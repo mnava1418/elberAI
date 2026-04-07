@@ -9,7 +9,7 @@ import { showAlert } from "../../store/actions/elber.actions"
 
 const SILENCE_TIMEOUT_MS = 2000
 
-const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.Dispatch<React.SetStateAction<string>>, inputText: string = '') => {
+const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: (text: string, isFinal: boolean) => void, inputText: string = '') => {
     const [isListening, setIsListening] = useState(false)
     const message = useRef('')
     const baseText = useRef('')
@@ -80,16 +80,16 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
         Voice.onSpeechEnd = () => {
             clearSilenceTimer()
             setIsListening(false)
-            onEnd(combineText(message.current))
+            onEnd(combineText(message.current), true)
         }
 
         Voice.onSpeechResults = (event) => {
             if(event.value) {
                 message.current = event.value[0]
-                onEnd(combineText(event.value[0]))
+                onEnd(combineText(event.value[0]), false)
                 resetSilenceTimer(async () => {
                     await stopListening()
-                    onEnd(combineText(message.current))
+                    onEnd(combineText(message.current), false)
                 })
             }
         }

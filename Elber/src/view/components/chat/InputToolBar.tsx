@@ -32,7 +32,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
         prepareSpeech, 
         removeSpeechListener, 
         stopListening 
-    } = useVoice(dispatch, chatInfo.id, setInputText)
+    } = useVoice(dispatch, chatInfo.id, setInputText, inputText)
 
     const handleVoice = () => {
         if(isWaiting || isStreaming || isTalking) {
@@ -42,7 +42,6 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
         if(isListening) {
             stopListening()                
         } else {
-            setInputText('')
             startListening()
         }
     }

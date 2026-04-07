@@ -9,9 +9,10 @@ import { showAlert } from "../../store/actions/elber.actions"
 
 const SILENCE_TIMEOUT_MS = 2000
 
-const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.Dispatch<React.SetStateAction<string>>) => {
+const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.Dispatch<React.SetStateAction<string>>, inputText: string = '') => {
     const [isListening, setIsListening] = useState(false)
     const message = useRef('')
+    const baseText = useRef('')
     const silenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const ERROR_VOICE: ElberChatResponse = {
@@ -25,6 +26,8 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
 
         if(hasVoicePermissions) {
             try {
+                baseText.current = inputText
+                message.current = ''
                 await Voice.start('es-MX')
             } catch (error) { 
                 handleChatResponse(dispatch, 'elber:error', ERROR_VOICE)
@@ -69,19 +72,24 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
             setIsListening(true)
         }
 
+        const combineText = (voiceText: string) => {
+            const base = baseText.current.trim()
+            return base ? `${base} ${voiceText[0].toLowerCase()}${voiceText.substring(1)}` : voiceText
+        }
+
         Voice.onSpeechEnd = () => {
             clearSilenceTimer()
             setIsListening(false)
-            onEnd(message.current)
+            onEnd(combineText(message.current))
         }
 
         Voice.onSpeechResults = (event) => {
             if(event.value) {
                 message.current = event.value[0]
-                onEnd(event.value[0])
+                onEnd(combineText(event.value[0]))
                 resetSilenceTimer(async () => {
                     await stopListening()
-                    onEnd(message.current)
+                    onEnd(combineText(message.current))
                 })
             }
         }

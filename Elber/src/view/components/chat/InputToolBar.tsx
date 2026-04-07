@@ -32,17 +32,16 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
         prepareSpeech, 
         removeSpeechListener, 
         stopListening 
-    } = useVoice(dispatch, chatInfo.id, setInputText)
+    } = useVoice(dispatch, chatInfo.id, setInputText, inputText)
 
     const handleVoice = () => {
-        if(isWaiting || isStreaming) {
+        if(isWaiting || isStreaming || isTalking) {
             return
         }
 
         if(isListening) {
             stopListening()                
         } else {
-            setInputText('')
             startListening()
         }
     }
@@ -52,7 +51,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
             flatListRef.current?.scrollToIndex({index: 0, animated: true})
         }
         
-        if(inputText.trim() === '' || isWaiting || isStreaming) {
+        if(inputText.trim() === '' || isWaiting || isStreaming || isTalking) {
             return
         }
 
@@ -84,8 +83,12 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     }
 
     const handleToggleVoiceMode = () => {
-        if(isWaiting || isStreaming) {
+        if(isWaiting || isStreaming || isTalking) {
             return
+        }
+
+        if(!voiceMode && !isListening) {
+            handleVoice()
         }
 
         dispatch(setVoiceMode(!voiceMode))
@@ -110,13 +113,12 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                     autoCapitalize='sentences'
                     placeholder={isListening ? 'Escuchando...' : 'Preguuuuntame caon...'}
                     placeholderTextColor={appColors.subtitle}
-                    editable={!isStreaming}
+                    editable={!isStreaming && ! isTalking}
                 />  
-                {inputText.trim() === '' && !isListening && !isStreaming ? <ChatBtn type='secondary' icon='mic-outline' onPress={handleVoice} /> : <></>}
-                {isListening && !isStreaming ? <ChatBtn type='primary' icon='mic-off-outline' onPress={handleVoice} /> : <></>}
-                {inputText.trim() !== '' && !isListening && !isStreaming ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
+                {!isTalking && !isStreaming ? <ChatBtn type={isListening ? 'primary' : 'secondary'} icon={isListening ? 'mic-off-outline' : 'mic-outline'} onPress={handleVoice} /> : <></>}
+                {inputText.trim() !== '' && !isListening && !isStreaming && !isTalking ? <ChatBtn type='primary' icon='arrow-up' onPress={handleSend} /> : <></>}
                 {isStreaming || isTalking ? <ChatBtn type='primary' icon='stop' onPress={handleCancel} /> : <></>}
-                {!isStreaming ? <ChatBtn type={voiceMode ? 'primary' : 'secondary'} icon='radio-outline' onPress={handleToggleVoiceMode} /> : <></>}
+                {!isStreaming && !isTalking && !isWaiting ? <ChatBtn type={voiceMode ? 'primary' : 'secondary'} icon='radio-outline' onPress={handleToggleVoiceMode} /> : <></>}
             </View>
         </Animated.View>
     )

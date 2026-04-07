@@ -24,8 +24,8 @@ type InputToolBarProps = {
 const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: InputToolBarProps) => {
     const { state, dispatch } = useContext(GlobalContext);
     const chatInfo = selectChatInfo(state.chat)
-    
     const { isStreaming, isWaiting, voiceMode, isTalking } = useElberStatus(state.elber)
+    
     const { 
         isListening, 
         startListening, 
@@ -45,7 +45,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
             startListening()
         }
     }
-    
+
     const handleSend = () => {
         if(chatInfo.messages.length >0) {
             flatListRef.current?.scrollToIndex({index: 0, animated: true})
@@ -100,7 +100,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                 removeSpeechListener()
         }
     }, [])
-    
+
     return (
         <Animated.View id='inputToolBar' style={[{backgroundColor: appColors.primary, marginTop: 10}, animatedStyle]}>
             <View style={chatStyles.toolBar}>

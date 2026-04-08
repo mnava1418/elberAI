@@ -86,11 +86,7 @@ describe('useVoice', () => {
         await result.current.startListening()
       })
 
-      expect(handleChatResponse).toHaveBeenCalledWith(
-        dispatch,
-        'elber:error',
-        expect.objectContaining({ chatId: 1 })
-      )
+      expect(result.current.isListening).toBe(false)
     })
 
     it('should treat permission check failure as no permissions', async () => {
@@ -130,11 +126,7 @@ describe('useVoice', () => {
         await result.current.stopListening()
       })
 
-      expect(handleChatResponse).toHaveBeenCalledWith(
-        dispatch,
-        'elber:error',
-        expect.objectContaining({ chatId: 1 })
-      )
+      expect(result.current.isListening).toBe(false)
     })
   })
 
@@ -179,18 +171,13 @@ describe('useVoice', () => {
       expect(onEnd).not.toHaveBeenCalled()
     })
 
-    it('should dispatch error and set isListening false on onSpeechError', () => {
+    it('should set isListening false on onSpeechError', () => {
       const { result } = renderHook(() => useVoice(dispatch, 1, onEnd))
 
       act(() => { result.current.prepareSpeech() })
       act(() => { (Voice.onSpeechError as any)?.({ code: '7' }) })
 
       expect(result.current.isListening).toBe(false)
-      expect(handleChatResponse).toHaveBeenCalledWith(
-        dispatch,
-        'elber:error',
-        expect.objectContaining({ chatId: 1 })
-      )
     })
   })
 

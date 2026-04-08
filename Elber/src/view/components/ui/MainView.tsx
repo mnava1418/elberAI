@@ -37,7 +37,7 @@ const MainView = ({
             <View
                 style={[
                     StyleSheet.absoluteFillObject,
-                    {backgroundColor: appColors.primary,zIndex: 1, opacity: 0.6}
+                    {backgroundColor: appColors.primary,zIndex: 1, opacity: 0.65}
                 ]}
                 pointerEvents="none"
             />

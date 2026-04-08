@@ -209,7 +209,7 @@ const VoiceSphere = ({ isWaiting, isTalking }: VoiceSphereProps) => {
 const styles = StyleSheet.create({
     overlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        backgroundColor: 'rgba(0, 0, 0, 1.0)',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 100,

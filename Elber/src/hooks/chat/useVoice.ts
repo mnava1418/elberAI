@@ -3,22 +3,16 @@ import { checkVoicePermissions } from "../../services/entitlements.service"
 import { Platform } from "react-native"
 import Voice from '@react-native-voice/voice'
 import { openSettings } from 'react-native-permissions'
-import { ElberChatResponse } from "../../models/elber.model"
-import handleChatResponse from "../../services/elber.service"
 import { showAlert } from "../../store/actions/elber.actions"
 
 const SILENCE_TIMEOUT_MS = 2000
 
 const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.Dispatch<React.SetStateAction<string>>, inputText: string = '') => {
     const [isListening, setIsListening] = useState(false)
+    const [readyToSend, setReadyToSend] = useState(false)
     const message = useRef('')
     const baseText = useRef('')
     const silenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-    const ERROR_VOICE: ElberChatResponse = {
-        chatId,
-        text: "Perdón, me distraje viendo unos memes... ¿puedes repetir lo que dijiste?"
-    } 
 
     const startListening = async () => {
         const hasVoicePermissions = await checkVoicePermissions(Platform.OS === 'ios' ? 'ios' : 'android')
@@ -28,9 +22,12 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
             try {
                 baseText.current = inputText
                 message.current = ''
+                setIsListening(true)
                 await Voice.start('es-MX')
             } catch (error) { 
-                handleChatResponse(dispatch, 'elber:error', ERROR_VOICE)
+                console.error(error)
+                setIsListening(false)
+                setReadyToSend(false)
             }
         } else {
             dispatch(showAlert({
@@ -58,18 +55,19 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
     }
 
     const stopListening = async() => {
-        clearSilenceTimer()
         try {
+            clearSilenceTimer()
             setIsListening(false)
             await Voice.stop()            
         } catch (error) {
-            handleChatResponse(dispatch, 'elber:error', ERROR_VOICE)
+            console.error(error)
         }
     }
 
     const prepareSpeech = () => {
         Voice.onSpeechStart = () => {
             setIsListening(true)
+            setReadyToSend(false)
         }
 
         const combineText = (voiceText: string) => {
@@ -81,6 +79,7 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
             clearSilenceTimer()
             setIsListening(false)
             onEnd(combineText(message.current))
+            setReadyToSend(true)
         }
 
         Voice.onSpeechResults = (event) => {
@@ -97,7 +96,7 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
         Voice.onSpeechError = (error) => {            
             clearSilenceTimer()
             setIsListening(false)
-            handleChatResponse(dispatch, 'elber:error', ERROR_VOICE)
+            setReadyToSend(false)
         };
     }
 
@@ -105,7 +104,7 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
         Voice.destroy().then(Voice.removeAllListeners)        
     }
     
-    return { isListening, startListening, prepareSpeech, removeSpeechListener, stopListening }
+    return { isListening, readyToSend, startListening, prepareSpeech, removeSpeechListener, stopListening }
 }
 
 export default useVoice

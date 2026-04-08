@@ -28,6 +28,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     
     const { 
         isListening, 
+        readyToSend,
         startListening, 
         prepareSpeech, 
         removeSpeechListener, 
@@ -87,7 +88,7 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
             return
         }
 
-        if(!voiceMode && !isListening) {
+        if((!voiceMode && !isListening) || (voiceMode && isListening)) {
             handleVoice()
         }
 
@@ -100,6 +101,19 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
                 removeSpeechListener()
         }
     }, [])
+
+    useEffect(() => {
+        if(voiceMode && readyToSend && inputText.trim() !== '') {
+            handleSend()
+        }
+
+    }, [readyToSend])
+
+    useEffect(() => {
+        if(voiceMode && !isTalking && !isListening) {
+            handleVoice()
+        }
+    }, [isTalking])
 
     return (
         <Animated.View id='inputToolBar' style={[{backgroundColor: appColors.primary, marginTop: 10}, animatedStyle]}>

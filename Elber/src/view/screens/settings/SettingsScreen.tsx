@@ -3,7 +3,7 @@ import MainView from '../../components/ui/MainView'
 import Button from '../../components/ui/Button'
 import { logOut } from '../../../services/auth.service'
 import { GlobalContext } from '../../../store/GlobalProvider'
-import { Image, View, ScrollView, Pressable } from 'react-native'
+import { Image, View, ScrollView, Pressable, Linking } from 'react-native'
 import CustomText from '../../components/ui/CustomText'
 import { selectUserProfile } from '../../../store/selectors/user.selector'
 import settingsStyle from '../../../styles/settings.style'
@@ -24,6 +24,16 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
 
     const showMenu = () => {
         menuNav.dispatch(DrawerActions.toggleDrawer)
+    }
+
+    const sendEmail = async () => {
+        const url = 'mailto:martin@namart.tech?subject=Soporte%20Elber'
+        const supported = await Linking.canOpenURL(url)
+        if (supported) {
+            await Linking.openURL(url)
+        } else {
+            handleAlert('Continuar', 'Error', 'No se pudo abrir la aplicación de correo. Contacta a: martin@namart.tech')
+        }
     }
 
     const handleAlert = (btnText: string, title: string, text: string, action?: () => void) => {
@@ -111,7 +121,7 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
                         'help-circle-outline',
                         'Ayuda y Soporte',
                         'Obtén ayuda y contacto',
-                        () => handleAlert('Continuar', 'Ayuda', 'Contacta con soporte: martin@namart.tech'),
+                        () => handleAlert('Contactar', 'Ayuda', 'Contacta con soporte: martin@namart.tech', sendEmail),
                         undefined,
                         true
                     )}

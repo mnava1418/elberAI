@@ -52,7 +52,7 @@ jest.mock('../../services/ltm/vectoreStore.service')
 jest.mock('../../services/ltm/ltmReader.service')
 jest.mock('../../services/ltm/ltmWriter.service')
 
-const buildElberResponse = (turnsCount: number): ElberResponse => ({
+const buildElberResponse = (): ElberResponse => ({
   conversationId: 'user1_1',
   agentResponse: 'Elber response',
   originalRequest: {
@@ -64,13 +64,16 @@ const buildElberResponse = (turnsCount: number): ElberResponse => ({
     timeZone: 'America/Mexico_City',
     isVoiceMode: false
   },
-  memory: { summary: 'current summary', turnsCount, turns: [] },
 })
 
 describe('memory.service', () => {
-  const mockAddTurn = jest.fn()
-  const mockFormatTurns = jest.fn()
-  const mockUpdateSummary = jest.fn()
+  const mockAddTurn = jest.fn().mockResolvedValue(undefined)
+  const mockFormatTurns = jest.fn().mockReturnValue('Turn 1\n User: hello\n Elber: hi')
+  const mockUpdateSummary = jest.fn().mockResolvedValue(undefined)
+  const mockShouldSummarize = jest.fn()
+  const mockStartSummarizing = jest.fn()
+  const mockResetToCollecting = jest.fn()
+  const mockGetSummary = jest.fn().mockReturnValue('current summary')
   const mockDeleteSession = jest.fn()
   const mockIngestLTM = jest.fn()
 
@@ -79,8 +82,12 @@ describe('memory.service', () => {
 
     ;(MidTermMemory.getInstance as jest.Mock).mockReturnValue({
       addTurn: mockAddTurn,
-      formatTurns: mockFormatTurns.mockReturnValue('Turn 1\n User: hello\n Elber: hi'),
+      formatTurns: mockFormatTurns,
       updateSummary: mockUpdateSummary,
+      shouldSummarize: mockShouldSummarize,
+      startSummarizing: mockStartSummarizing,
+      resetToCollecting: mockResetToCollecting,
+      getSummary: mockGetSummary,
     })
 
     ;(ShortTermMemory.getInstance as jest.Mock).mockReturnValue({
@@ -96,33 +103,62 @@ describe('memory.service', () => {
   })
 
   describe('handleMemory', () => {
-    it('should always call addTurn with conversationId, text, and agent response', () => {
+    it('should always persist the turn via addTurn', async () => {
+      mockShouldSummarize.mockReturnValue(false)
       ;(run as jest.Mock).mockResolvedValue({ finalOutput: null })
-      handleMemory(buildElberResponse(3))
 
-      expect(mockAddTurn).toHaveBeenCalledWith('user1_1', 'user message', 'Elber response')
+      await handleMemory(buildElberResponse())
+
+      expect(mockAddTurn).toHaveBeenCalledWith(
+        'user1_1', 'user1', 1, 'user message', 'Elber response'
+      )
     })
 
-    it('should fire handleUserRelevantInformation when turnsCount < 8', async () => {
+    it('should always fire LTM extraction regardless of summary cycle', async () => {
+      mockShouldSummarize.mockReturnValue(false)
       ;(run as jest.Mock).mockResolvedValue({ finalOutput: { isRelevant: false } })
-      handleMemory(buildElberResponse(3))
 
+      await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
+
       expect(run).toHaveBeenCalledWith('relevantInfo-agent', 'user message')
     })
 
-    it('should fire generateSummary when turnsCount >= 8', async () => {
-      ;(run as jest.Mock).mockResolvedValue({ finalOutput: 'new summary' })
-      handleMemory(buildElberResponse(8))
+    it('should not trigger summary when shouldSummarize is false', async () => {
+      mockShouldSummarize.mockReturnValue(false)
+      ;(run as jest.Mock).mockResolvedValue({ finalOutput: { isRelevant: false } })
 
+      await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
-      expect(run).toHaveBeenCalledWith('summary-agent', expect.any(String), expect.objectContaining({ maxTurns: 3 }))
+
+      const summaryCalls = (run as jest.Mock).mock.calls.filter(
+        (call) => call[0] === 'summary-agent'
+      )
+      expect(summaryCalls).toHaveLength(0)
     })
 
-    it('should update MTM summary and delete STM session after generateSummary', async () => {
-      ;(run as jest.Mock).mockResolvedValue({ finalOutput: 'new summary text' })
-      handleMemory(buildElberResponse(8))
+    it('should trigger summary when shouldSummarize is true', async () => {
+      mockShouldSummarize.mockReturnValue(true)
+      ;(run as jest.Mock).mockResolvedValue({ finalOutput: 'new summary' })
 
+      await handleMemory(buildElberResponse())
+      await new Promise((r) => setImmediate(r))
+
+      expect(mockStartSummarizing).toHaveBeenCalledWith('user1_1')
+      expect(run).toHaveBeenCalledWith(
+        'summary-agent',
+        expect.any(String),
+        expect.objectContaining({ maxTurns: 3 })
+      )
+    })
+
+    it('should update MTM, clear STM session, and persist to Firebase after summary', async () => {
+      mockShouldSummarize.mockReturnValue(true)
+      ;(run as jest.Mock)
+        .mockResolvedValueOnce({ finalOutput: { isRelevant: false } }) // relevantInfo
+        .mockResolvedValueOnce({ finalOutput: 'new summary text' })    // summary
+
+      await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
 
       expect(mockUpdateSummary).toHaveBeenCalledWith('user1_1', 'new summary text')
@@ -130,7 +166,20 @@ describe('memory.service', () => {
       expect(chatService.updateChatSummary).toHaveBeenCalledWith('user1', 1, 'new summary text')
     })
 
+    it('should reset state to COLLECTING if summary generation fails', async () => {
+      mockShouldSummarize.mockReturnValue(true)
+      ;(run as jest.Mock)
+        .mockResolvedValueOnce({ finalOutput: { isRelevant: false } })
+        .mockRejectedValueOnce(new Error('LLM failure'))
+
+      await handleMemory(buildElberResponse())
+      await new Promise((r) => setImmediate(r))
+
+      expect(mockResetToCollecting).toHaveBeenCalledWith('user1_1')
+    })
+
     it('should extract LTM when relevantInfo isRelevant is true', async () => {
+      mockShouldSummarize.mockReturnValue(false)
       ;(run as jest.Mock)
         .mockResolvedValueOnce({
           finalOutput: { isRelevant: true, reasoning: 'User likes tacos' },
@@ -139,7 +188,7 @@ describe('memory.service', () => {
           finalOutput: { memories: [{ text: 'likes tacos', type: 'preference', importance: 4 }] },
         })
 
-      handleMemory(buildElberResponse(3))
+      await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
 
       expect(mockIngestLTM).toHaveBeenCalled()

@@ -19,10 +19,9 @@ export type ElberRequest = {
     isVoiceMode: boolean
 }
 
-export type ElberResponse = {    
+export type ElberResponse = {
     originalRequest: ElberRequest,
     agentResponse: string,
-    memory: MemoryEntry,
     conversationId: string
 }
 
@@ -46,10 +45,13 @@ export type TurnChat = {
     assistantMessage: string, 
 }
 
+export type MemoryState = 'COLLECTING' | 'SUMMARIZING'
+
 export type MemoryEntry = {
     summary: string
-    turnsCount: number
     turns: TurnChat[]
+    tokenCount: number
+    state: MemoryState
 }
 
 /***Long Term Memory Types***/

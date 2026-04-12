@@ -1,4 +1,4 @@
-import { ElberEvent, ElberRequest, ElberResponse, MemoryEntry, UserContext } from "../models/elber.model";
+import { ElberEvent, ElberRequest, ElberResponse, UserContext } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents';
 import agents from "../agents";
 import { saveChatMessage, updateTitle } from "./chat.service";
@@ -26,6 +26,7 @@ const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: Elber
 
     /***Manejamos la memoria medio y largo plazo***/
     handleMemory(elberResponse)
+        .catch(error => console.error('Error en handleMemory:', error))
 }
 
 const formatMemories = async (uid: string, text: string): Promise<string> => {
@@ -45,12 +46,14 @@ const formatMemories = async (uid: string, text: string): Promise<string> => {
 export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
     await withTrace('Elber workflow', async() => {
         const {chatId, text, user, timeStamp, timeZone, isVoiceMode} = request
-        try {            
+        try {
             const conversationId = `${user.uid}_${chatId.toString()}`
-            
+
             const session = ShortTermMemory.getInstance().getSession(conversationId)
-            const midMemory = await MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId)            
-            const longMemory = await formatMemories(user.uid, text)
+            const [midMemory, longMemory] = await Promise.all([
+                MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId),
+                formatMemories(user.uid, text)
+            ])
             
             const userContext: UserContext = {
                 userId: user.uid,
@@ -72,9 +75,9 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
                 })            
 
             if(isVoiceMode) {
-                await processVoiceResponse(result, request, midMemory, emitMessage, abortController)
+                await processVoiceResponse(result, request, emitMessage, abortController)
             } else {
-                await processTextResponse(result, request, midMemory, emitMessage, abortController)
+                await processTextResponse(result, request, emitMessage, abortController)
             }
         } catch (error) {
             console.error(error)
@@ -112,7 +115,7 @@ const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage
     }
 }
 
-const processTextResponse = async (result: any, request: ElberRequest, midMemory: MemoryEntry, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
+const processTextResponse = async (result: any, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
     let wasCancelled = false
     let agentResponse = ''
     let responseCompleted = false
@@ -139,8 +142,7 @@ const processTextResponse = async (result: any, request: ElberRequest, midMemory
                 const elberResponse: ElberResponse = {
                     agentResponse,
                     conversationId,
-                    originalRequest: request,
-                    memory: midMemory
+                    originalRequest: request
                 }
                 
                 handleResponse(elberResponse, emitMessage)
@@ -154,19 +156,18 @@ const processTextResponse = async (result: any, request: ElberRequest, midMemory
 
     if(wasCancelled && agentResponse.trim() !== '' && !responseCompleted) {
         emitMessage('elber:cancelled', chatId, '');
-        
+
         const elberResponse: ElberResponse = {
             agentResponse,
             conversationId,
-            originalRequest: request,
-            memory: midMemory
+            originalRequest: request
         }
-        
+
         handleResponse(elberResponse, emitMessage)
     }
 }
 
-const processVoiceResponse = async (result: any, request: ElberRequest, midMemory: MemoryEntry, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
+const processVoiceResponse = async (result: any, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
     const {user, chatId} = request
     const conversationId = `${user.uid}_${chatId.toString()}`
 
@@ -176,8 +177,7 @@ const processVoiceResponse = async (result: any, request: ElberRequest, midMemor
         const elberResponse: ElberResponse = {
             agentResponse,
             conversationId,
-            originalRequest: request,
-            memory: midMemory
+            originalRequest: request
         }
 
         handleResponse(elberResponse, emitMessage)

@@ -1,7 +1,14 @@
 import MidTermMemory from '../../models/midTermMemory.model'
 import * as chatService from '../../services/chat.service'
+import { pgPool } from '../../services/ltm/ltmDB.service'
 
 jest.mock('../../services/chat.service')
+
+jest.mock('../../services/ltm/ltmDB.service', () => ({
+  pgPool: { query: jest.fn() },
+}))
+
+const mockQuery = pgPool.query as jest.Mock
 
 jest.mock('../../config/index.config', () => ({
   gateway: { secret: 'test-secret' },
@@ -29,6 +36,8 @@ describe('MidTermMemory', () => {
     jest.clearAllMocks()
     ;(MidTermMemory as any).instance = undefined
     ;(chatService.getChatSummary as jest.Mock).mockResolvedValue('stored summary')
+    // loadTurns query returns empty by default
+    mockQuery.mockResolvedValue({ rows: [] })
   })
 
   it('getInstance should return the same instance', () => {
@@ -44,8 +53,9 @@ describe('MidTermMemory', () => {
 
       expect(chatService.getChatSummary).toHaveBeenCalledWith('user1', 1)
       expect(entry.summary).toBe('stored summary')
-      expect(entry.turnsCount).toBe(0)
       expect(entry.turns).toEqual([])
+      expect(entry.tokenCount).toBe(0)
+      expect(entry.state).toBe('COLLECTING')
     })
 
     it('should return cached entry without calling Firebase again', async () => {
@@ -63,38 +73,105 @@ describe('MidTermMemory', () => {
 
       expect(entry.summary).toBe('')
     })
+
+    it('should rehydrate turns from DB on cold start', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          { user_message: 'hola', assistant_message: 'hola a ti' },
+        ],
+      })
+      const mtm = MidTermMemory.getInstance()
+      const entry = await mtm.getMemory('user1_chat1', 'user1', 1)
+
+      expect(entry.turns).toHaveLength(1)
+      expect(entry.turns[0]).toEqual({ userMessage: 'hola', assistantMessage: 'hola a ti' })
+      expect(entry.tokenCount).toBeGreaterThan(0)
+    })
   })
 
   describe('addTurn', () => {
-    it('should increment turnsCount and add a turn', async () => {
+    it('should persist turn to DB and update cache', async () => {
       const mtm = MidTermMemory.getInstance()
       await mtm.getMemory('user1_chat1', 'user1', 1)
-      mtm.addTurn('user1_chat1', 'user said this', 'elber replied')
+      await mtm.addTurn('user1_chat1', 'user1', 1, 'user said this', 'elber replied')
 
-      const memories = (mtm as any).memories as Map<string, any>
-      const entry = memories.get('user1_chat1')
-      expect(entry.turnsCount).toBe(1)
+      const cache = (mtm as any).cache as Map<string, any>
+      const entry = cache.get('user1_chat1')
+      expect(entry.turns).toHaveLength(1)
       expect(entry.turns[0]).toEqual({ userMessage: 'user said this', assistantMessage: 'elber replied' })
+      expect(entry.tokenCount).toBeGreaterThan(0)
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO conversation_turns'),
+        ['user1_chat1', 'user1', 1, 'user said this', 'elber replied', expect.any(Number)]
+      )
     })
 
-    it('should be a no-op when conversationId does not exist', () => {
+    it('should be a no-op when conversationId does not exist', async () => {
       const mtm = MidTermMemory.getInstance()
-      expect(() => mtm.addTurn('nonexistent', 'msg', 'reply')).not.toThrow()
+      await expect(mtm.addTurn('nonexistent', 'u', 1, 'msg', 'reply')).resolves.not.toThrow()
+    })
+  })
+
+  describe('shouldSummarize / state machine', () => {
+    it('should return false when tokenCount is below budget', async () => {
+      const mtm = MidTermMemory.getInstance()
+      await mtm.getMemory('user1_chat1', 'user1', 1)
+
+      expect(mtm.shouldSummarize('user1_chat1')).toBe(false)
+    })
+
+    it('should return true when tokenCount exceeds budget and state is COLLECTING', async () => {
+      const mtm = MidTermMemory.getInstance()
+      await mtm.getMemory('user1_chat1', 'user1', 1)
+
+      // Forzamos tokenCount alto directamente en el cache
+      const cache = (mtm as any).cache as Map<string, any>
+      cache.get('user1_chat1').tokenCount = 9999
+
+      expect(mtm.shouldSummarize('user1_chat1')).toBe(true)
+    })
+
+    it('should return false when state is SUMMARIZING', async () => {
+      const mtm = MidTermMemory.getInstance()
+      await mtm.getMemory('user1_chat1', 'user1', 1)
+
+      const cache = (mtm as any).cache as Map<string, any>
+      cache.get('user1_chat1').tokenCount = 9999
+      mtm.startSummarizing('user1_chat1')
+
+      expect(mtm.shouldSummarize('user1_chat1')).toBe(false)
+    })
+
+    it('resetToCollecting should allow summarizing again', async () => {
+      const mtm = MidTermMemory.getInstance()
+      await mtm.getMemory('user1_chat1', 'user1', 1)
+
+      const cache = (mtm as any).cache as Map<string, any>
+      cache.get('user1_chat1').tokenCount = 9999
+      mtm.startSummarizing('user1_chat1')
+      mtm.resetToCollecting('user1_chat1')
+
+      expect(mtm.shouldSummarize('user1_chat1')).toBe(true)
     })
   })
 
   describe('updateSummary', () => {
-    it('should update summary and reset turns and turnsCount', async () => {
+    it('should update summary, clear turns/tokenCount, reset state, and delete DB turns', async () => {
       const mtm = MidTermMemory.getInstance()
       await mtm.getMemory('user1_chat1', 'user1', 1)
-      mtm.addTurn('user1_chat1', 'hello', 'hi')
-      mtm.updateSummary('user1_chat1', 'new summary')
+      await mtm.addTurn('user1_chat1', 'user1', 1, 'hello', 'hi')
+      await mtm.updateSummary('user1_chat1', 'new summary')
 
-      const memories = (mtm as any).memories as Map<string, any>
-      const entry = memories.get('user1_chat1')
+      const cache = (mtm as any).cache as Map<string, any>
+      const entry = cache.get('user1_chat1')
       expect(entry.summary).toBe('new summary')
-      expect(entry.turnsCount).toBe(0)
       expect(entry.turns).toEqual([])
+      expect(entry.tokenCount).toBe(0)
+      expect(entry.state).toBe('COLLECTING')
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('DELETE FROM conversation_turns'),
+        ['user1_chat1']
+      )
     })
   })
 
@@ -102,8 +179,8 @@ describe('MidTermMemory', () => {
     it('should format turns with numbered labels', async () => {
       const mtm = MidTermMemory.getInstance()
       await mtm.getMemory('user1_chat1', 'user1', 1)
-      mtm.addTurn('user1_chat1', 'Hello', 'Hi there')
-      mtm.addTurn('user1_chat1', 'How are you?', 'Great!')
+      await mtm.addTurn('user1_chat1', 'user1', 1, 'Hello', 'Hi there')
+      await mtm.addTurn('user1_chat1', 'user1', 1, 'How are you?', 'Great!')
 
       const result = mtm.formatTurns('user1_chat1')
       expect(result).toContain('Turno 1')
@@ -119,29 +196,33 @@ describe('MidTermMemory', () => {
   })
 
   describe('deleteMemory', () => {
-    it('should delete a specific memory entry', async () => {
+    it('should delete a specific memory entry from cache', async () => {
       const mtm = MidTermMemory.getInstance()
       await mtm.getMemory('user1_chat1', 'user1', 1)
       mtm.deleteMemory('user1_chat1')
 
-      const memories = (mtm as any).memories as Map<string, any>
-      expect(memories.has('user1_chat1')).toBe(false)
+      const cache = (mtm as any).cache as Map<string, any>
+      expect(cache.has('user1_chat1')).toBe(false)
     })
   })
 
   describe('deleteUserMemory', () => {
-    it('should delete all memories for a given uid', async () => {
+    it('should delete all cache entries for a uid and clean DB', async () => {
       const mtm = MidTermMemory.getInstance()
       await mtm.getMemory('user1_chat1', 'user1', 1)
       await mtm.getMemory('user1_chat2', 'user1', 2)
       await mtm.getMemory('user2_chat1', 'user2', 1)
 
-      mtm.deleteUserMemory('user1')
+      await mtm.deleteUserMemory('user1')
 
-      const memories = (mtm as any).memories as Map<string, any>
-      expect(memories.has('user1_chat1')).toBe(false)
-      expect(memories.has('user1_chat2')).toBe(false)
-      expect(memories.has('user2_chat1')).toBe(true)
+      const cache = (mtm as any).cache as Map<string, any>
+      expect(cache.has('user1_chat1')).toBe(false)
+      expect(cache.has('user1_chat2')).toBe(false)
+      expect(cache.has('user2_chat1')).toBe(true)
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('DELETE FROM conversation_turns'),
+        ['user1']
+      )
     })
   })
 })

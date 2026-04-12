@@ -37,5 +37,5 @@ export const aws = {
 }
 
 export const models = {
-    gpt: 'gpt-5-mini'
+    gpt: 'gpt-4o-mini'
 }

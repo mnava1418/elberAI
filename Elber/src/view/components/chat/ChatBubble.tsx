@@ -17,7 +17,6 @@ type ChatBubbleProps = {
 const ChatBubble = ({message, align, setShowActions, style = {}, isStatic = false}: ChatBubbleProps) => {
     const messageRef = useRef<View>(null)
     const { dispatch } = useContext(GlobalContext);
-
     const handleLongPress = () => {
         if (messageRef.current && setShowActions) {
             messageRef.current.measure((fx, fy, width, height, px, py) => {

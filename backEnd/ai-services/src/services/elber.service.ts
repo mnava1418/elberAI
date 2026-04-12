@@ -19,7 +19,7 @@ const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: Elber
     })
     
     /***Guardamos respuesta de Elber en firbase para mantener el historial***/
-    saveChatMessage(user.uid, originalRequest.chatId, 'assistant', agentResponse)
+    saveChatMessage(user.uid, originalRequest.chatId, 'assistant', agentResponse.trim())
     .catch(error => {
         console.error('Error guardando respuesta', error)
     })    
@@ -128,7 +128,7 @@ const processTextResponse = async (result: any, request: ElberRequest, midMemory
 
         if(event.type == 'raw_model_stream_event' && event.data.event) {
             if(event.data.event.type == 'response.output_text.delta') {
-                agentResponse = `${agentResponse}${event.data.event?.delta}`.trim()
+                agentResponse = `${agentResponse}${event.data.event?.delta}`
                 emitMessage('elber:stream', chatId, event.data.event?.delta )
             }
 

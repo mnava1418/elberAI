@@ -19,13 +19,14 @@ const ChatGrid = ({setShowActions, flatListRef}: ChatGridProps) => {
     return (
         <>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-end', paddingHorizontal: 10}}>
-                <FlatList 
+                <FlatList
                     inverted
                     ref={flatListRef}
                     data={chatInfo.messages}
-                    renderItem={({item, index}) => (
-                        <ChatBubble key={index} align={item.role == 'assistant' ? 'left' : 'right'} message={item} setShowActions={setShowActions} />
-                    )}                
+                    keyExtractor={(item) => item.id}
+                    renderItem={({item}) => (
+                        <ChatBubble align={item.role == 'assistant' ? 'left' : 'right'} message={item} setShowActions={setShowActions} />
+                    )}
                     showsVerticalScrollIndicator={false}
                 />           
                 {isWaiting ? <IsWaiting /> : <></>}

@@ -1,11 +1,12 @@
 import { Agent } from "@openai/agents";
 import prompts from '../prompts'
 import { z } from "zod";
+import { models } from '../config/index.config';
 
 export const summaryAgent = (currentSummary: string) => {
     const agent = Agent.create({
         name: 'Summary Generator',
-        model: 'gpt-4o-mini',
+        model: models.gpt,
         instructions: prompts.memory.summary(currentSummary),        
     })
 
@@ -27,7 +28,7 @@ export const ltmAgent = () => {
 
     const agent = Agent.create({
         name: 'Long Term Memory Extractor',
-        model: 'gpt-4o-mini',
+        model: models.gpt,
         instructions: prompts.memory.ltm,
         outputType: LTMList
     })
@@ -43,7 +44,7 @@ export const relevantInfoAgent = () => {
 
     const agent = Agent.create({
         name: 'Relevant User Information Detector',
-        model: 'gpt-4o-mini',
+        model: models.gpt,
         instructions: prompts.memory.relevantInfo,
         outputType: IsRelevantType
     })

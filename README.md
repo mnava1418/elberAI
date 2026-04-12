@@ -60,7 +60,7 @@ News Services (cron job)     ← Daily newsletter pipeline, runs independently
 **Backend (Node.js services)**
 - Express.js with TypeScript
 - Firebase Admin SDK (auth validation + Realtime Database for chat history)
-- OpenAI Agents SDK with GPT-4o-mini
+- OpenAI Agents SDK
 - PostgreSQL + pgvector (long-term memory with semantic search)
 - Socket.io (WebSocket server)
 - Nodemailer + Google OAuth2 (email)

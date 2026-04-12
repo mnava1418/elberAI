@@ -3,6 +3,7 @@ import prompts from '../prompts'
 import { z } from "zod";
 import { deleteAllUserData, deleteUserData, getUserData } from "../tools/user.tools";
 import { webSearch } from "../tools/search.tools";
+import { models } from '../config/index.config';
 
 export const chatAgent = (name: string, summary: string, longTermMemory: string, timeStamp: string) => {
     const userTools = [getUserData, deleteAllUserData, deleteUserData]
@@ -11,7 +12,7 @@ export const chatAgent = (name: string, summary: string, longTermMemory: string,
 
     const agent = Agent.create({
         name: 'Elber',
-        model: 'gpt-4o-mini',
+        model: models.gpt,
         instructions: prompts.elber.chat(name, summary, longTermMemory, timeStamp), 
         tools: tools as any       
     })
@@ -28,7 +29,7 @@ export const chatTitleAgent = (title: string, lastMessage: string, conversationC
 
     const agent = Agent.create({
         name: 'Title Generator',
-        model: 'gpt-4o-mini',
+        model: models.gpt,
         instructions: prompts.elber.chatTitle(title, lastMessage, conversationContext),
         outputType: TitleEvent
     })

@@ -35,3 +35,7 @@ export const aws = {
     id: process.env.AWS_ACCESS_KEY_ID || '',
     secret: process.env.AWS_SECRET_ACCESS_KEY || ''
 }
+
+export const models = {
+    gpt: 'gpt-5-mini'
+}

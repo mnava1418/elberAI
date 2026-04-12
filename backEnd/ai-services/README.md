@@ -33,7 +33,7 @@ Elber remembers the user through three types of memory that are combined before 
 **Long-Term Memory (LTM)** — Persistent user memory stored in PostgreSQL with the pgvector extension. When a summary is generated (every 8 turns), the AI extracts relevant user information (goals, preferences, plans, constraints, personal profile) and stores it as vector embeddings. Before responding, this database is searched for the most relevant information to the current message using semantic search.
 
 ### AI agents
-The service uses OpenAI Agents with GPT-4o-mini. There are several specialized agents:
+The service uses OpenAI Agents. There are several specialized agents:
 
 - **Chat agent** — The main agent. Responds to user messages with access to tools (web search and user data access).
 - **Title agent** — Automatically generates the title of each conversation after the first message.

@@ -81,10 +81,10 @@ Elber maintains three layers of memory that are combined before every response:
 | Layer | What it stores | How long |
 |---|---|---|
 | **Short-Term (STM)** | The active conversation session | Up to 24 hours |
-| **Mid-Term (MTM)** | Current conversation history as text | Cleared every 8 turns after a summary is generated |
+| **Mid-Term (MTM)** | Current conversation history as text, persisted in PostgreSQL | Summarized when accumulated turns exceed a token budget |
 | **Long-Term (LTM)** | User profile: goals, preferences, plans, constraints | Persistent — stored as vector embeddings in PostgreSQL |
 
-Every 8 conversation turns, the mid-term history is summarized and the summary is analyzed to extract user information, which is embedded and stored in the long-term memory database. On every new message, a semantic search retrieves the most relevant memories and injects them as context for the AI.
+When the accumulated conversation turns exceed a token budget, the mid-term history is compressed into a rolling summary. On every turn, the AI also evaluates the user's message directly for relevant personal information to store in long-term memory. On every new message, a semantic search retrieves the most relevant memories and injects them as context for the AI.
 
 ## Running the backend
 

@@ -28,9 +28,9 @@ Elber remembers the user through three types of memory that are combined before 
 
 **Short-Term Memory (STM)** — The active conversation session with the AI. It is kept alive while the session is active (up to 24 hours). This allows Elber to remember what was discussed in recent exchanges without needing to resend the entire history.
 
-**Mid-Term Memory (MTM)** — Stores the current conversation history as text. Every 8 conversation turns, a summary of the exchange is generated and the history is cleared. This prevents the context from growing indefinitely.
+**Mid-Term Memory (MTM)** — Stores the current conversation history as text, persisted turn-by-turn in PostgreSQL. When the accumulated turns exceed a token budget, a rolling summary is generated and the turns are cleared. This prevents context from growing indefinitely and survives service restarts. A state machine (`COLLECTING → SUMMARIZING → COLLECTING`) prevents concurrent summary generation.
 
-**Long-Term Memory (LTM)** — Persistent user memory stored in PostgreSQL with the pgvector extension. When a summary is generated (every 8 turns), the AI extracts relevant user information (goals, preferences, plans, constraints, personal profile) and stores it as vector embeddings. Before responding, this database is searched for the most relevant information to the current message using semantic search.
+**Long-Term Memory (LTM)** — Persistent user memory stored in PostgreSQL with the pgvector extension. LTM extraction runs on two independent paths: on every turn (evaluating the user's message directly for relevant information) and after each summary is generated. Extracted facts are stored as vector embeddings. Before responding, this database is searched for the most relevant information to the current message using semantic search.
 
 ### AI agents
 The service uses OpenAI Agents. There are several specialized agents:
@@ -146,7 +146,7 @@ src/
 ├── models/
 │   ├── elber.model.ts        # Chat data types and structures
 │   ├── shortTermMemory.model.ts   # Active session management
-│   ├── midTermMemory.model.ts     # Conversation history (24h TTL)
+│   ├── midTermMemory.model.ts     # Conversation history (write-through cache + PostgreSQL)
 │   └── longTermMemory.model.ts   # Persistent memory in PostgreSQL/pgvector
 ├── tools/
 │   ├── search.tools.ts       # Web search tool (Serper)

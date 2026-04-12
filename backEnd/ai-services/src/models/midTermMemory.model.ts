@@ -5,9 +5,7 @@ import * as db from "../db/queries/memory.queries";
 
 // Presupuesto de tokens para los turnos en cache antes de disparar un summary.
 // ~4 chars por token (aprox). 2500 tokens ≈ 10000 chars ≈ 8-10 turnos moderados.
-// const TOKEN_BUDGET = 2500
-
-const TOKEN_BUDGET = 500
+const TOKEN_BUDGET = 2500
 
 const estimateTokens = (text: string): number => Math.ceil(text.length / 4)
 

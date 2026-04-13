@@ -18,6 +18,7 @@ describe('LongTermMemoryWriter', () => {
   const mockFindNearDuplicate = jest.fn()
   const mockUpdate = jest.fn()
   const mockInsert = jest.fn()
+  const mockUpsertBySubject = jest.fn()
   const mockDeleteAll = jest.fn()
   const mockDeleteMemories = jest.fn()
   let store: PgVectorMemoryStore
@@ -28,6 +29,7 @@ describe('LongTermMemoryWriter', () => {
       findNearDuplicate: mockFindNearDuplicate,
       update: mockUpdate,
       insert: mockInsert,
+      upsertBySubject: mockUpsertBySubject,
       deleteAll: mockDeleteAll,
       deleteMemories: mockDeleteMemories,
     }))
@@ -36,6 +38,7 @@ describe('LongTermMemoryWriter', () => {
     mockFindNearDuplicate.mockResolvedValue(null)
     mockInsert.mockResolvedValue({ id: 'new-id' })
     mockUpdate.mockResolvedValue(undefined)
+    mockUpsertBySubject.mockResolvedValue({ id: 'upserted-id' })
     mockDeleteAll.mockResolvedValue(undefined)
     mockDeleteMemories.mockResolvedValue(undefined)
   })
@@ -51,9 +54,39 @@ describe('LongTermMemoryWriter', () => {
 
       expect(aiService.embedText).not.toHaveBeenCalled()
       expect(mockInsert).not.toHaveBeenCalled()
+      expect(mockUpsertBySubject).not.toHaveBeenCalled()
     })
 
-    it('should insert a new memory when no duplicate exists', async () => {
+    it('should use upsertBySubject when subject is provided', async () => {
+      const writer = new LongTermMemoryWriter(store)
+      await writer.upsertMany({
+        userId: 'user1',
+        extracted: [{ text: 'Mi cumpleaños es el 30 de abril', type: 'profile', importance: 5, subject: 'birthday' }],
+      })
+
+      expect(mockUpsertBySubject).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'user1', subject: 'birthday', text: 'Mi cumpleaños es el 30 de abril' })
+      )
+      expect(mockFindNearDuplicate).not.toHaveBeenCalled()
+      expect(mockInsert).not.toHaveBeenCalled()
+    })
+
+    it('should overwrite correctly when same subject is upserted twice', async () => {
+      const writer = new LongTermMemoryWriter(store)
+      await writer.upsertMany({
+        userId: 'user1',
+        extracted: [{ text: 'Mi cumpleaños es el 2 de mayo', type: 'profile', importance: 5, subject: 'birthday' }],
+      })
+      await writer.upsertMany({
+        userId: 'user1',
+        extracted: [{ text: 'Mi cumpleaños es el 30 de abril', type: 'profile', importance: 5, subject: 'birthday' }],
+      })
+
+      expect(mockUpsertBySubject).toHaveBeenCalledTimes(2)
+      expect(mockUpsertBySubject.mock.calls[1][0].text).toBe('Mi cumpleaños es el 30 de abril')
+    })
+
+    it('should insert a new memory when no subject and no duplicate exists', async () => {
       const writer = new LongTermMemoryWriter(store)
       await writer.upsertMany({
         userId: 'user1',
@@ -64,11 +97,11 @@ describe('LongTermMemoryWriter', () => {
       expect(aiService.embedText).toHaveBeenCalledWith('likes tacos')
       expect(mockFindNearDuplicate).toHaveBeenCalled()
       expect(mockInsert).toHaveBeenCalledWith(
-        expect.objectContaining({ userId: 'user1', roomId: 'room1', text: 'likes tacos' })
+        expect.objectContaining({ userId: 'user1', roomId: 'room1', text: 'likes tacos', subject: null })
       )
     })
 
-    it('should update an existing memory when a near duplicate is found', async () => {
+    it('should update when no subject but a near duplicate is found', async () => {
       mockFindNearDuplicate.mockResolvedValue({ id: 'existing-id', score: 0.95 })
       const writer = new LongTermMemoryWriter(store)
       await writer.upsertMany({
@@ -82,18 +115,18 @@ describe('LongTermMemoryWriter', () => {
       expect(mockInsert).not.toHaveBeenCalled()
     })
 
-    it('should process multiple memories in sequence', async () => {
+    it('should process multiple memories: subject path and similarity path', async () => {
       const writer = new LongTermMemoryWriter(store)
       await writer.upsertMany({
         userId: 'user1',
         extracted: [
-          { text: 'memory 1', type: 'profile', importance: 3 },
-          { text: 'memory 2', type: 'goal', importance: 4 },
+          { text: 'Trabajo en Google', type: 'profile', importance: 4, subject: 'workplace' },
+          { text: 'Quiero aprender Rust', type: 'goal', importance: 3 },
         ],
       })
 
-      expect(aiService.embedText).toHaveBeenCalledTimes(2)
-      expect(mockInsert).toHaveBeenCalledTimes(2)
+      expect(mockUpsertBySubject).toHaveBeenCalledTimes(1)
+      expect(mockInsert).toHaveBeenCalledTimes(1)
     })
   })
 

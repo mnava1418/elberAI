@@ -29,6 +29,7 @@ type PgVectorInsert = {
     type: string;
     importance: number;
     text: string;
+    subject?: string | null;
     embedding: number[];
 }
 
@@ -36,8 +37,20 @@ const toPgVector = (embedding: number[]): string => {
   return `[${embedding.join(",")}]`;
 }
 
+const mapRow = (row: any): MemoryRecord => ({
+    id: row.id,
+    userId: row.user_id,
+    roomId: row.room_id,
+    subject: row.subject ?? null,
+    type: row.type,
+    importance: row.importance,
+    text: row.text,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+})
+
 class PgVectorMemoryStore {
-    async search(params: PgVectorSearch ): Promise<MemoryHit[]> {
+    async search(params: PgVectorSearch): Promise<MemoryHit[]> {
         const { userId, queryEmbedding, topK, minImportance = 1 } = params;
 
         const result = await pgPool.query(
@@ -46,14 +59,7 @@ class PgVectorMemoryStore {
         );
 
         return result.rows.map((row: any) => ({
-            id: row.id,
-            userId: row.user_id,
-            roomId: row.room_id,
-            type: row.type,
-            importance: row.importance,
-            text: row.text,
-            createdAt: row.created_at,
-            updatedAt: row.updated_at,
+            ...mapRow(row),
             score: Number(row.score),
         }));
     }
@@ -84,13 +90,13 @@ class PgVectorMemoryStore {
 
         const best = result.rows[0];
         const score = Number(best.score);
-        
+
         if (score >= threshold) return { id: best.id, score };
 
         return null;
     }
 
-    async update(params: PgVectorUpdate ): Promise<void> {
+    async update(params: PgVectorUpdate): Promise<void> {
         const { id, type, importance, text, embedding } = params;
 
         const sets: string[] = [];
@@ -101,55 +107,51 @@ class PgVectorMemoryStore {
             sets.push(`type = $${i++}`);
             values.push(type);
         }
-        
+
         if (typeof importance === "number") {
             sets.push(`importance = $${i++}`);
             values.push(importance);
         }
-        
+
         if (text) {
             sets.push(`text = $${i++}`);
             values.push(text);
         }
-        
+
         if (embedding) {
             sets.push(`embedding = $${i++}::vector`);
             values.push(toPgVector(embedding));
         }
 
         sets.push(`updated_at = now()`);
-
         values.push(id);
 
         await pgPool.query(
-            `
-            UPDATE user_memories
-            SET ${sets.join(", ")}
-            WHERE id = $${i}
-            `,
+            `UPDATE user_memories SET ${sets.join(", ")} WHERE id = $${i}`,
             values
         );
     }
 
     async insert(params: PgVectorInsert): Promise<MemoryRecord> {
-        const { userId, roomId = null, type, importance, text, embedding } = params;
+        const { userId, roomId = null, type, importance, text, subject = null, embedding } = params;
 
         const result = await pgPool.query(
             db.insertMemory,
-            [userId, roomId, type, importance, text, toPgVector(embedding)]
+            [userId, roomId, type, importance, text, subject, toPgVector(embedding)]
         );
 
-        const row = result.rows[0];
-        return {
-            id: row.id,
-            userId: row.user_id,
-            roomId: row.room_id,
-            type: row.type,
-            importance: row.importance,
-            text: row.text,
-            createdAt: row.created_at,
-            updatedAt: row.updated_at,
-        };
+        return mapRow(result.rows[0]);
+    }
+
+    async upsertBySubject(params: PgVectorInsert): Promise<MemoryRecord> {
+        const { userId, roomId = null, type, importance, text, subject, embedding } = params;
+
+        const result = await pgPool.query(
+            db.upsertMemoryBySubject,
+            [userId, roomId, type, importance, text, subject, toPgVector(embedding)]
+        );
+
+        return mapRow(result.rows[0]);
     }
 
     async deleteAll(userId: string) {

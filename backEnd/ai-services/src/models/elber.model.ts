@@ -62,12 +62,15 @@ export type MemoryType =
   | "preference"
   | "constraint"
   | "profile"
+  | "project"
+  | "event"
   | "other";
 
 export type MemoryRecord = {
   id: string;
   userId: string;
   roomId: string | null;
+  subject: string | null;
   type: MemoryType;
   importance: number; // 1-5
   text: string;

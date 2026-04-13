@@ -16,23 +16,23 @@ describe('PgVectorMemoryStore', () => {
     jest.clearAllMocks()
   })
 
+  const makeRow = (overrides = {}) => ({
+    id: 'mem-1',
+    user_id: 'user1',
+    room_id: 'room1',
+    type: 'profile',
+    importance: 4,
+    text: 'likes tacos',
+    subject: null,
+    created_at: '2026-01-01',
+    updated_at: '2026-01-01',
+    score: '0.92',
+    ...overrides,
+  })
+
   describe('search', () => {
     it('should query pgPool and map rows to MemoryHit objects', async () => {
-      mockQuery.mockResolvedValue({
-        rows: [
-          {
-            id: 'mem-1',
-            user_id: 'user1',
-            room_id: 'room1',
-            type: 'profile',
-            importance: 4,
-            text: 'likes tacos',
-            created_at: '2026-01-01',
-            updated_at: '2026-01-01',
-            score: '0.92',
-          },
-        ],
-      })
+      mockQuery.mockResolvedValue({ rows: [makeRow()] })
 
       const store = new PgVectorMemoryStore()
       const result = await store.search({
@@ -46,15 +46,23 @@ describe('PgVectorMemoryStore', () => {
       expect(result[0].id).toBe('mem-1')
       expect(result[0].score).toBe(0.92)
       expect(typeof result[0].score).toBe('number')
+      expect(result[0].subject).toBeNull()
+    })
+
+    it('should include subject in the mapped result', async () => {
+      mockQuery.mockResolvedValue({ rows: [makeRow({ subject: 'birthday' })] })
+
+      const store = new PgVectorMemoryStore()
+      const result = await store.search({ userId: 'user1', queryEmbedding: [0.1], topK: 5 })
+
+      expect(result[0].subject).toBe('birthday')
     })
   })
 
   describe('getUserInfo', () => {
     it('should query pgPool and map rows to UserData objects', async () => {
       mockQuery.mockResolvedValue({
-        rows: [
-          { importance: 4, text: 'likes tacos', type: 'preference', updated_at: '2026-01-01' },
-        ],
+        rows: [{ importance: 4, text: 'likes tacos', type: 'preference', updated_at: '2026-01-01' }],
       })
 
       const store = new PgVectorMemoryStore()
@@ -71,9 +79,7 @@ describe('PgVectorMemoryStore', () => {
       mockQuery.mockResolvedValue({ rows: [] })
       const store = new PgVectorMemoryStore()
       const result = await store.findNearDuplicate({
-        userId: 'user1',
-        candidateEmbedding: [0.1, 0.2],
-        threshold: 0.7,
+        userId: 'user1', candidateEmbedding: [0.1, 0.2], threshold: 0.7,
       })
       expect(result).toBeNull()
     })
@@ -82,9 +88,7 @@ describe('PgVectorMemoryStore', () => {
       mockQuery.mockResolvedValue({ rows: [{ id: 'mem-1', score: '0.5' }] })
       const store = new PgVectorMemoryStore()
       const result = await store.findNearDuplicate({
-        userId: 'user1',
-        candidateEmbedding: [0.1, 0.2],
-        threshold: 0.7,
+        userId: 'user1', candidateEmbedding: [0.1, 0.2], threshold: 0.7,
       })
       expect(result).toBeNull()
     })
@@ -93,9 +97,7 @@ describe('PgVectorMemoryStore', () => {
       mockQuery.mockResolvedValue({ rows: [{ id: 'mem-1', score: '0.9' }] })
       const store = new PgVectorMemoryStore()
       const result = await store.findNearDuplicate({
-        userId: 'user1',
-        candidateEmbedding: [0.1, 0.2],
-        threshold: 0.7,
+        userId: 'user1', candidateEmbedding: [0.1, 0.2], threshold: 0.7,
       })
       expect(result).toEqual({ id: 'mem-1', score: 0.9 })
     })
@@ -126,21 +128,8 @@ describe('PgVectorMemoryStore', () => {
   })
 
   describe('insert', () => {
-    it('should call pgPool.query and map the result row', async () => {
-      mockQuery.mockResolvedValue({
-        rows: [
-          {
-            id: 'new-id',
-            user_id: 'user1',
-            room_id: null,
-            type: 'profile',
-            importance: 4,
-            text: 'my text',
-            created_at: '2026-01-01',
-            updated_at: '2026-01-01',
-          },
-        ],
-      })
+    it('should call pgPool.query with subject and map the result row', async () => {
+      mockQuery.mockResolvedValue({ rows: [makeRow({ subject: null })] })
 
       const store = new PgVectorMemoryStore()
       const result = await store.insert({
@@ -148,11 +137,36 @@ describe('PgVectorMemoryStore', () => {
         type: 'profile',
         importance: 4,
         text: 'my text',
+        subject: null,
         embedding: [0.1, 0.2],
       })
 
-      expect(result.id).toBe('new-id')
-      expect(result.text).toBe('my text')
+      expect(result.id).toBe('mem-1')
+      expect(result.text).toBe('likes tacos')
+      // subject is included in params
+      const [, params] = mockQuery.mock.calls[0]
+      expect(params).toContain(null) // subject = null
+    })
+  })
+
+  describe('upsertBySubject', () => {
+    it('should call pgPool.query with the upsert query and return mapped row', async () => {
+      mockQuery.mockResolvedValue({ rows: [makeRow({ subject: 'birthday' })] })
+
+      const store = new PgVectorMemoryStore()
+      const result = await store.upsertBySubject({
+        userId: 'user1',
+        type: 'profile',
+        importance: 5,
+        text: 'Mi cumpleaños es el 30 de abril',
+        subject: 'birthday',
+        embedding: [0.1, 0.2],
+      })
+
+      expect(result.subject).toBe('birthday')
+      const [sql, params] = mockQuery.mock.calls[0]
+      expect(sql).toContain('ON CONFLICT')
+      expect(params).toContain('birthday')
     })
   })
 
@@ -161,7 +175,6 @@ describe('PgVectorMemoryStore', () => {
       mockQuery.mockResolvedValue({ rows: [] })
       const store = new PgVectorMemoryStore()
       await store.deleteAll('user1')
-
       expect(mockQuery).toHaveBeenCalledWith(expect.any(String), ['user1'])
     })
   })
@@ -171,7 +184,6 @@ describe('PgVectorMemoryStore', () => {
       mockQuery.mockResolvedValue({ rows: [] })
       const store = new PgVectorMemoryStore()
       await store.deleteMemories('user1', ['id-1', 'id-2'])
-
       expect(mockQuery).toHaveBeenCalledWith(expect.any(String), ['user1', ['id-1', 'id-2']])
     })
   })

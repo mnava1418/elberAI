@@ -22,6 +22,7 @@ const makeHit = (score: number, type = 'profile'): MemoryHit => ({
   id: `id-${score}`,
   userId: 'u1',
   roomId: null,
+  subject: null,
   type: type as any,
   importance: 3,
   text: `memory with score ${score}`,

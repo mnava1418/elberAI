@@ -13,6 +13,7 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
     const message = useRef('')
     const baseText = useRef('')
     const silenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const stoppedByTimer = useRef(false)
 
     const startListening = async () => {
         const hasVoicePermissions = await checkVoicePermissions(Platform.OS === 'ios' ? 'ios' : 'android')
@@ -22,6 +23,8 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
             try {
                 baseText.current = inputText
                 message.current = ''
+                stoppedByTimer.current = false
+                setReadyToSend(false)
                 setIsListening(true)
                 await Voice.start('es-MX')
             } catch (error) { 
@@ -79,7 +82,10 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
             clearSilenceTimer()
             setIsListening(false)
             onEnd(combineText(message.current))
-            setReadyToSend(true)
+            if(stoppedByTimer.current) {
+                setReadyToSend(true)
+            }
+            stoppedByTimer.current = false
         }
 
         Voice.onSpeechResults = (event) => {
@@ -87,6 +93,7 @@ const useVoice = (dispatch: (value: any) => void, chatId: number, onEnd: React.D
                 message.current = event.value[0]
                 onEnd(combineText(event.value[0]))
                 resetSilenceTimer(async () => {
+                    stoppedByTimer.current = true
                     await stopListening()
                     onEnd(combineText(message.current))
                 })

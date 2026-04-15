@@ -110,10 +110,10 @@ const InputToolBar = ({inputText, setInputText, animatedStyle, flatListRef}: Inp
     }, [readyToSend])
 
     useEffect(() => {
-        if(voiceMode && !isTalking && !isListening) {
+        if(voiceMode && !isTalking && !isListening && !isWaiting && !isStreaming) {
             handleVoice()
         }
-    }, [isTalking])
+    }, [isTalking, isWaiting, isStreaming])
 
     return (
         <Animated.View id='inputToolBar' style={[{backgroundColor: appColors.primary, marginTop: 10}, animatedStyle]}>

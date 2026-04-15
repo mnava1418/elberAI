@@ -63,13 +63,13 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
             const result = isVoiceMode
                 ? await run(agents.elber.chat(user.name, midMemory.summary, longMemory, timeStamp), text, {
                     session,
-                    maxTurns: 3,
+                    maxTurns: 10,
                     stream: false,
                     context: userContext
                 })
                 : await run(agents.elber.chat(user.name, midMemory.summary, longMemory, timeStamp), text, {
                     session,
-                    maxTurns: 3,
+                    maxTurns: 10,
                     stream: true,
                     context: userContext
                 })            

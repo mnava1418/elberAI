@@ -7,23 +7,11 @@ import { UserContext } from '../models/elber.model';
 export const webSearch = tool({
     name: 'webSearch',
     description: `
-        Tool para hacer busquedas en internet. Debes usar cuando:
-        - El usuario pregunte por eventos, noticias o información reciente
-        - Se trate de información que claramente ocurrió después de tu fecha de entrenamiento
-        - Solicite datos actuales como clima, cotizaciones, noticias del día, etc.
-        - El usuario pregunte QUIÉN ocupa actualmente un cargo, posición o puesto (presidente, CEO, director, campeón, etc.)
-        - El usuario pregunte por el ESTADO ACTUAL de algo que puede cambiar (precios, rankings, resultados)
-        
-        EJEMPLOS de CUÁNDO SÍ usar webSearch:
-        - "¿Qué pasó con las elecciones de 2025?"
-        - "¿Cuál está el clima hoy?"
-        - "¿Cómo está el dólar hoy?"
-        - "¿Qué noticias hay sobre la Copa del Mundo 2026?"
-        - "¿Qué películas se estrenaron este mes?"
-        - "¿Quién es el presidente actual de Estados Unidos?"
-        - "¿Quién es el presidente de México?"
-        - "¿Quién es el director de la OMS?"
-        - "¿Quién ganó el campeonato más reciente?"
+        Tool para buscar y verificar información en internet. Debe usarse para TODAS las preguntas factuales:
+        cualquier número, nombre, fecha, estadística, resultado o dato concreto — sin excepción.
+        El conocimiento de entrenamiento puede estar desactualizado o ser incorrecto; verificar siempre es obligatorio.
+
+        Solo se omite la búsqueda para: definiciones/conceptos, matemáticas, consejos generales, o datos del propio usuario.
     `,
     parameters: z.object({ query: z.string().describe('Consulta del usuario que debe ser buscada en internet')}),
     async execute({ query }, runContext?: RunContext<UserContext>) {

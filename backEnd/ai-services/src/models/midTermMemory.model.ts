@@ -55,6 +55,16 @@ class MidTermMemory {
             .join('\n\n')
     }
 
+    formatLastTurns(conversationId: string, n: number): string {
+        const memory = this.cache.get(conversationId)
+        if (!memory) return ''
+
+        const lastTurns = memory.turns.slice(-n)
+        return lastTurns
+            .map((t, i) => `Usuario: ${t.userMessage}\n Elber: ${t.assistantMessage}`)
+            .join('\n\n')
+    }
+
     // ── Escritura ──────────────────────────────────────────────────────────
 
     async addTurn(

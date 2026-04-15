@@ -22,7 +22,10 @@ export const handleMemory = async (elberResponse: ElberResponse): Promise<void> 
     )
 
     // 2. Extracción LTM en cada turno (pipeline independiente del ciclo de summary)
-    handleUserRelevantInformation(originalRequest.text, user.uid, originalRequest.chatId)
+    // Pasamos los últimos 3 turnos para que el agente tenga contexto conversacional
+    // (ej: si el usuario responde "El 30 de abril" a "¿Cuándo es tu cumpleaños?")
+    const recentContext = MidTermMemory.getInstance().formatLastTurns(conversationId, 3)
+    handleUserRelevantInformation(recentContext, user.uid, originalRequest.chatId)
         .catch(error => console.error('Error extrayendo LTM por turno:', error))
 
     // 3. Verificar si corresponde generar un nuevo summary (state machine)
@@ -68,12 +71,12 @@ const generateSummary = async (conversationId: string, uid: string, chatId: numb
 
 // ── LTM pipelines ──────────────────────────────────────────────────────────────
 
-const handleUserRelevantInformation = async (userText: string, uid: string, chatId: number): Promise<void> => {
-    const result = await run(agents.memory.relevantInfo(), userText)
+const handleUserRelevantInformation = async (conversationContext: string, uid: string, chatId: number): Promise<void> => {
+    const result = await run(agents.memory.relevantInfo(), conversationContext)
     console.info(result.finalOutput)
 
     if (result.finalOutput?.isRelevant) {
-        await extractLongTermMemory(`${result.finalOutput.reasoning}. ${userText}`, uid, chatId)
+        await extractLongTermMemory(`${result.finalOutput.reasoning}. ${conversationContext}`, uid, chatId)
     }
 }
 

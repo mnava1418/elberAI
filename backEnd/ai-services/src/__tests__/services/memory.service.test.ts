@@ -69,6 +69,7 @@ const buildElberResponse = (): ElberResponse => ({
 describe('memory.service', () => {
   const mockAddTurn = jest.fn().mockResolvedValue(undefined)
   const mockFormatTurns = jest.fn().mockReturnValue('Turn 1\n User: hello\n Elber: hi')
+  const mockFormatLastTurns = jest.fn().mockReturnValue('Usuario: user message\n Elber: Elber response')
   const mockUpdateSummary = jest.fn().mockResolvedValue(undefined)
   const mockShouldSummarize = jest.fn()
   const mockStartSummarizing = jest.fn()
@@ -83,6 +84,7 @@ describe('memory.service', () => {
     ;(MidTermMemory.getInstance as jest.Mock).mockReturnValue({
       addTurn: mockAddTurn,
       formatTurns: mockFormatTurns,
+      formatLastTurns: mockFormatLastTurns,
       updateSummary: mockUpdateSummary,
       shouldSummarize: mockShouldSummarize,
       startSummarizing: mockStartSummarizing,
@@ -121,7 +123,7 @@ describe('memory.service', () => {
       await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
 
-      expect(run).toHaveBeenCalledWith('relevantInfo-agent', 'user message')
+      expect(run).toHaveBeenCalledWith('relevantInfo-agent', 'Usuario: user message\n Elber: Elber response')
     })
 
     it('should not trigger summary when shouldSummarize is false', async () => {

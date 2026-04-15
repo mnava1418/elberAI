@@ -51,7 +51,7 @@ News Services (cron job)     ← Daily newsletter pipeline, runs independently
 ## Tech stack
 
 **Mobile**
-- React Native 0.80.2 with TypeScript
+- React Native with TypeScript
 - Firebase Authentication
 - Socket.io (real-time streaming)
 - React Native Voice (speech recognition)
@@ -68,7 +68,7 @@ News Services (cron job)     ← Daily newsletter pipeline, runs independently
 - Docker + Docker Compose
 
 **News pipeline (Python)**
-- CrewAI 1.10.1 (multi-agent orchestration)
+- CrewAI (multi-agent orchestration)
 - OpenAI GPT-4o
 - Serper API (real-time web search)
 - Pydantic (data validation between pipeline stages)
@@ -86,40 +86,3 @@ Elber maintains three layers of memory that are combined before every response:
 
 When the accumulated conversation turns exceed a token budget, the mid-term history is compressed into a rolling summary. On every turn, the AI also evaluates the user's message directly for relevant personal information to store in long-term memory. On every new message, a semantic search retrieves the most relevant memories and injects them as context for the AI.
 
-## Running the backend
-
-The backend runs with Docker Compose. From the `backEnd/` directory:
-
-```bash
-# Copy and configure environment variables for each service
-cp api-gateway/.env.template api-gateway/.env
-cp auth-services/.env.template auth-services/.env
-cp ai-services/.env.template ai-services/.env
-cp notification-services/.env.template notification-services/.env
-
-# Build and start all services
-docker compose build --no-cache
-docker compose up -d
-
-# View logs
-docker compose logs -f
-docker compose logs -f <service-name>
-
-# Stop all services
-docker compose down
-```
-
-## Running the mobile app
-
-From the `Elber/` directory:
-
-```bash
-npm install
-cd ios && pod install && cd ..  # iOS only
-
-npm start           # Metro bundler
-npm run ios         # iOS simulator
-npm run android     # Android emulator
-```
-
-Configure `Elber/.env` with the gateway and WebSocket URLs before running.

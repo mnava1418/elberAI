@@ -1,12 +1,14 @@
 import { ElberEvent, ElberRequest, ElberResponse, UserContext } from "../models/elber.model";
 import { run, withTrace } from '@openai/agents';
-import agents from "../agents";
 import { saveChatMessage, updateTitle } from "./chat.service";
 import ShortTermMemory from "../models/shortTermMemory.model";
 import MidTermMemory from "../models/midTermMemory.model";
 import LongTermMemory from "../models/longTermMemory.model";
 import { handleMemory } from "./memory.service";
 import { textToSpeech, splitIntoSentences } from "./polly.service";
+import chatAgent from "../agents/builders/chat.agent";
+import { ChatPromptContext } from "../models/prompt.model";
+import { getAgents } from "../loaders/agents.loader";
 
 const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     const { originalRequest, agentResponse } = elberResponse
@@ -58,16 +60,25 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
             const userContext: UserContext = {
                 userId: user.uid,
                 timeZone
-            }            
+            }
+            
+            const context: ChatPromptContext = {
+                name: user.name,
+                longTermMemory: longMemory,
+                summary: midMemory.summary,
+                timeStamp
+            }
+            
+            const chat_agent = chatAgent(context)
 
             const result = isVoiceMode
-                ? await run(agents.elber.chat(user.name, midMemory.summary, longMemory, timeStamp), text, {
+                ? await run(chat_agent, text, {
                     session,
                     maxTurns: 10,
                     stream: false,
                     context: userContext
                 })
-                : await run(agents.elber.chat(user.name, midMemory.summary, longMemory, timeStamp), text, {
+                : await run(chat_agent, text, {
                     session,
                     maxTurns: 10,
                     stream: true,
@@ -94,10 +105,21 @@ const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage
             return
         }
 
+        const context = `
+            CONTEXTO:
+            - Título actual: "${title}"
+            - Último mensaje del usuario: "${text}"
+        `
+    
         const conversationId = `${uid}_${chatId.toString()}`
         const session = ShortTermMemory.getInstance().getSession(conversationId)
+        const title_agent = getAgents('title_generator')
 
-        const result = await run(agents.elber.chatTitle(title, text), text, {
+        if(!title_agent) {
+            throw new Error('Agent not enables')
+        }
+
+        const result = await run(title_agent, context, {
             session,
             maxTurns: 3
         })           

@@ -1,0 +1,8 @@
+{
+    "id": "title_generator",
+    "name": "title-agent",
+    "model": "gpt-4o-mini",
+    "description": "Especialista en generar titulos para chats",    
+    "prompt": "titleGeneratorPrompt",
+    "outputType": "TitleOutputType"
+}

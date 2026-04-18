@@ -1,8 +1,8 @@
 import { RunContext, tool } from '@openai/agents';
 import { z } from 'zod';
 import axios, { AxiosRequestConfig } from 'axios';
-import { serper } from '../config/index.config';
-import { UserContext } from '../models/elber.model';
+import { serper } from '../../config/index.config';
+import { UserContext } from '../../models/elber.model';
 
 export const webSearch = tool({
     name: 'webSearch',

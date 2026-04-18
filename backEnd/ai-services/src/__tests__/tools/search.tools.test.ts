@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { webSearch as webSearchTool } from '../../tools/search.tools'
+import { webSearch as webSearchTool } from '../../agents/tools/search.tools'
 
 // The mock makes `tool()` return the config object directly, which has `execute`.
 // Cast to any since FunctionTool's TS types don't expose execute publicly.

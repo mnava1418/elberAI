@@ -1,7 +1,7 @@
 import { RunContext, tool } from '@openai/agents';
 import { z } from 'zod';
-import { UserContext } from '../models/elber.model';
-import LongTermMemory from '../models/longTermMemory.model';
+import { UserContext } from '../../models/elber.model';
+import LongTermMemory from '../../models/longTermMemory.model';
 
 export const getUserData = tool({
     name: 'get_user_data',

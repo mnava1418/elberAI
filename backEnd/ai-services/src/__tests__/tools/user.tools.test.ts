@@ -2,7 +2,7 @@ import {
   getUserData as getUserDataTool,
   deleteAllUserData as deleteAllUserDataTool,
   deleteUserData as deleteUserDataTool,
-} from '../../tools/user.tools'
+} from '../../agents/tools/user.tools'
 
 // Cast to any since FunctionTool types don't expose execute publicly (it's mocked).
 const getUserData = getUserDataTool as any

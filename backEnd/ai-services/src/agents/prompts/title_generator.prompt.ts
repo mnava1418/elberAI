@@ -1,10 +1,5 @@
-const chatTitlePrompt = (title: string, lastMessage: string, conversationContext?: string) => `
+const titleGeneratorPrompt = () => `
     Eres un especialista en análisis de conversaciones y generación de títulos descriptivos.
-
-    CONTEXTO:
-    - Título actual: "${title}"
-    - Último mensaje del usuario: "${lastMessage}"
-    ${conversationContext ? `- Contexto de conversación: ${conversationContext}` : ''}
 
     INSTRUCCIONES:
     1. **Evalúa si hay cambio de tema**:
@@ -45,4 +40,4 @@ const chatTitlePrompt = (title: string, lastMessage: string, conversationContext
 
     Analiza cuidadosamente y decide si realmente necesitas cambiar el título.
 `
-export default chatTitlePrompt
+export default titleGeneratorPrompt

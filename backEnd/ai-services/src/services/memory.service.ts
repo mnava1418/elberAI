@@ -5,6 +5,7 @@ import { updateChatSummary } from "./chat.service";
 import { run } from '@openai/agents';
 import agents from "../agents";
 import LongTermMemory from "../models/longTermMemory.model";
+import { getAgents } from "../loaders/agents.loader";
 
 // ── Entry point ────────────────────────────────────────────────────────────────
 
@@ -49,7 +50,21 @@ const generateSummary = async (conversationId: string, uid: string, chatId: numb
     const formattedTurns = mtm.formatTurns(conversationId)
     const currentSummary = mtm.getSummary(conversationId)
 
-    const result = await run(agents.memory.summary(currentSummary), formattedTurns, { maxTurns: 3 })
+    const context = `
+        CONTEXTO ACTUAL:
+        - Resumen previo: "${currentSummary || 'Sin resumen previo'}"
+
+        TURNOS:
+            ${formattedTurns}
+    `
+    
+    const chat_summary_agent = getAgents('chat_summary')
+
+    if(!chat_summary_agent) {
+        throw new Error(' Chat Summary agent not available.')
+    }
+
+    const result = await run(chat_summary_agent, context, { maxTurns: 3 })
 
     if (!result.finalOutput) {
         mtm.resetToCollecting(conversationId)

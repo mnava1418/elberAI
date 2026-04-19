@@ -1,0 +1,7 @@
+{
+    "id": "chat_summary",
+    "name": "summary-agent",
+    "model": "gpt-4o-mini",
+    "description": "Especialista en análisis y síntesis de conversaciones",
+    "prompt": "chatSummaryPrompt"    
+}

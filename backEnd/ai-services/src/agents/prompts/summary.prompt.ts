@@ -1,8 +1,5 @@
-const summaryPrompt = (currentSummary: string) => `
+const chatSummaryPrompt = () => `
     Eres un especialista en análisis y síntesis de conversaciones. Tu tarea es generar un resumen conciso pero completo de una conversación entre el usuario y el asistente Elber.
-
-    CONTEXTO ACTUAL:
-    - Resumen previo: "${currentSummary || 'Sin resumen previo'}"
 
     OBJETIVO:
     Genera un resumen que capture la información más importante de esta conversación específica tomando en cuenta todos los turnos que acabas de recibir como input.
@@ -31,4 +28,4 @@ const summaryPrompt = (currentSummary: string) => `
     Genera SOLO el resumen de esta conversación, sin explicaciones adicionales.
 `
 
-export default summaryPrompt
+export default chatSummaryPrompt

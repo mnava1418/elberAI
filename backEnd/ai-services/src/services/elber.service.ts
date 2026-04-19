@@ -85,10 +85,12 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
                     context: userContext
                 })            
 
-            if(isVoiceMode) {
-                await processVoiceResponse(result, request, emitMessage, abortController)
-            } else {
-                await processTextResponse(result, request, emitMessage, abortController)
+            const elberResponse = isVoiceMode
+                ? await processVoiceResponse(result, request, emitMessage, abortController)
+                : await processTextResponse(result, request, emitMessage, abortController)
+
+            if(elberResponse) {
+                handleResponse(elberResponse, emitMessage)
             }
         } catch (error) {
             console.error(error)
@@ -134,14 +136,14 @@ const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage
     }
 }
 
-const processTextResponse = async (result: any, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
+const processTextResponse = async (result: any, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController): Promise<ElberResponse | null> => {
     let wasCancelled = false
     let agentResponse = ''
     let responseCompleted = false
 
     const {user, chatId} = request
     const conversationId = `${user.uid}_${chatId.toString()}`
-    
+
     for await(const event of result) {
         if(abortController?.signal.aborted) {
             wasCancelled = true
@@ -157,49 +159,31 @@ const processTextResponse = async (result: any, request: ElberRequest, emitMessa
             if(event.data.event.type == 'response.completed' && !responseCompleted && agentResponse.trim() != '') {
                 responseCompleted = true
                 emitMessage('elber:response', chatId, '' );
-                
-                const elberResponse: ElberResponse = {
-                    agentResponse,
-                    conversationId,
-                    originalRequest: request
-                }
-                
-                handleResponse(elberResponse, emitMessage)
-            }    
+            }
 
             if(event.data.event.type == 'response.error') {
                 emitMessage('elber:error', chatId, 'Error en la respuesta de Elber agent');
-            }                    
+            }
         }
     }
 
     if(wasCancelled && agentResponse.trim() !== '' && !responseCompleted) {
         emitMessage('elber:cancelled', chatId, '');
-
-        const elberResponse: ElberResponse = {
-            agentResponse,
-            conversationId,
-            originalRequest: request
-        }
-
-        handleResponse(elberResponse, emitMessage)
     }
+
+    if(responseCompleted || (wasCancelled && agentResponse.trim() !== '' && !responseCompleted)) {
+        return { agentResponse, conversationId, originalRequest: request }
+    }
+
+    return null
 }
 
-const processVoiceResponse = async (result: any, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
+const processVoiceResponse = async (result: any, request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController): Promise<ElberResponse | null> => {
     const {user, chatId} = request
     const conversationId = `${user.uid}_${chatId.toString()}`
 
     if(result.finalOutput) {
         const agentResponse = result.finalOutput
-
-        const elberResponse: ElberResponse = {
-            agentResponse,
-            conversationId,
-            originalRequest: request
-        }
-
-        handleResponse(elberResponse, emitMessage)
 
         const sentences = splitIntoSentences(agentResponse)
 
@@ -217,5 +201,9 @@ const processVoiceResponse = async (result: any, request: ElberRequest, emitMess
         }
 
         emitMessage('elber:audio_end', chatId, agentResponse)
+
+        return { agentResponse, conversationId, originalRequest: request }
     }
+
+    return null
 }

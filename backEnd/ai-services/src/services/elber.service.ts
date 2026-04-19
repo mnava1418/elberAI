@@ -111,8 +111,6 @@ const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage
             - Último mensaje del usuario: "${text}"
         `
     
-        const conversationId = `${uid}_${chatId.toString()}`
-        const session = ShortTermMemory.getInstance().getSession(conversationId)
         const title_agent = getAgents('title_generator')
 
         if(!title_agent) {
@@ -120,9 +118,8 @@ const generateChatTitle = async (uid: string, request: ElberRequest, emitMessage
         }
 
         const result = await run(title_agent, context, {
-            session,
             maxTurns: 3
-        })           
+        })
         
         if(result.finalOutput && result.finalOutput.changeTitle) {
             updateTitle(uid, chatId, result.finalOutput.chatTitle)

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Agent } from '@openai/agents';
-import { AgentConfig } from '../models/agent.model';
+import { AgentConfig, AgentId } from '../models/agent.model';
 import outputTypesRegistry from '../agents/outputTypes';
 import toolRegistry from '../agents/tools';
 import promptsRegistry from '../agents/prompts';
@@ -70,6 +70,6 @@ const loadAgents = (): void => {
     console.info(`[agents.loader] ${Object.keys(agents).length} agent(s) loaded`);
 };
 
-export const getAgents = (id: string): Agent<unknown, any> | undefined => agents[id]
+export const getAgents = (id: AgentId): Agent<unknown, any> | undefined => agents[id]
 
 export default loadAgents;

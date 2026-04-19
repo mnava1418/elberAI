@@ -87,7 +87,13 @@ const generateSummary = async (conversationId: string, uid: string, chatId: numb
 // ── LTM pipelines ──────────────────────────────────────────────────────────────
 
 const handleUserRelevantInformation = async (conversationContext: string, uid: string, chatId: number): Promise<void> => {
-    const result = await run(agents.memory.relevantInfo(), conversationContext)
+    const user_info_agent = getAgents('user_info')
+
+    if(!user_info_agent) {
+        return
+    }
+
+    const result = await run(user_info_agent, conversationContext)
     console.info(result.finalOutput)
 
     if (result.finalOutput?.isRelevant) {

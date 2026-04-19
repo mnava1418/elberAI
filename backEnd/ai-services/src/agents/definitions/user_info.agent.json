@@ -1,0 +1,8 @@
+{
+    "id": "user_info",
+    "name": "user-info-agent",
+    "model": "gpt-4o-mini",
+    "description": "Especialista en detectar información relevante del usuario.",    
+    "prompt": "relevantInfoPrompt",
+    "outputType": "IsRelevantType"
+}

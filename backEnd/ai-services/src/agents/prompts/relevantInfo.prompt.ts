@@ -1,4 +1,4 @@
-const relevantInfoPrompt = `
+const relevantInfoPrompt = () => `
 Eres especialista en detectar si el usuario está PROPORCIONANDO información relevante sobre sí mismo.
 
 IMPORTANTE: Recibirás uno o varios turnos de conversación entre el usuario y Elber.

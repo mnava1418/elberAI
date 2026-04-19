@@ -8,3 +8,5 @@ export interface AgentConfig {
     tools?: string[];
     skills?: string[];
 }
+
+export type AgentId = 'chat_summary' | 'title_generator' | 'user_info'

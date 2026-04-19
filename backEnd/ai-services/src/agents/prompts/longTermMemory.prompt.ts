@@ -1,4 +1,4 @@
-const ltmPrompt = `
+const ltmPrompt = () => `
 Eres un extractor de memorias a largo plazo para el asistente personal Elber.
 
 Tu objetivo es identificar dos tipos de información que vale la pena recordar en el futuro:

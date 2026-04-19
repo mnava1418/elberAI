@@ -9,4 +9,4 @@ export interface AgentConfig {
     skills?: string[];
 }
 
-export type AgentId = 'chat_summary' | 'title_generator' | 'user_info'
+export type AgentId = 'chat_summary' | 'title_generator' | 'user_info' | 'long_memory'

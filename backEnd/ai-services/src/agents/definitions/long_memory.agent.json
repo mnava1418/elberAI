@@ -1,0 +1,8 @@
+{
+    "id": "long_memory",
+    "name": "ltm-agent",
+    "model": "gpt-4o-mini",
+    "description": "Extractor de memorias a largo plazo",
+    "prompt": "ltmPrompt",
+    "outputType": "LTMList"
+}

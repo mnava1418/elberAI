@@ -1,11 +1,8 @@
 import { OpenAIConversationsSession } from "@openai/agents"
 
 type SessionEntry = {
-    session: OpenAIConversationsSession,
-    expiresAt: number
+    session: OpenAIConversationsSession
 }
-
-const SESSION_TTL_MS = 24 * 60 * 60 * 1000; //24 hours
 
 class ShortTermMemory {
     private sessions = new Map<string, SessionEntry>()
@@ -18,23 +15,16 @@ class ShortTermMemory {
 
         return ShortTermMemory.instance
     }
-    
-    getSession(conversationId: string): OpenAIConversationsSession {
-        const now = Date.now()
 
+    getSession(conversationId: string): OpenAIConversationsSession {
         const currentSession = this.sessions.get(conversationId)
 
-        if(currentSession && currentSession.expiresAt > now) {
-            currentSession.expiresAt = now + SESSION_TTL_MS
+        if(currentSession) {
             return currentSession.session
         }
 
         const newSession = new OpenAIConversationsSession()
-
-        this.sessions.set(conversationId, {
-            session: newSession,
-            expiresAt: now + SESSION_TTL_MS
-        })
+        this.sessions.set(conversationId, { session: newSession })
 
         return newSession
     }
@@ -43,16 +33,6 @@ class ShortTermMemory {
         if(this.sessions.has(conversationId)) {
             this.sessions.delete(conversationId)
         }
-    }
-
-    deleteOldSessions() {
-        const now = Date.now()
-
-        this.sessions.forEach((entry, conversationId) => {
-            if(entry.expiresAt <= now) {
-                this.sessions.delete(conversationId)
-            }
-        })
     }
 
     deleteUserSessions(uid: string) {

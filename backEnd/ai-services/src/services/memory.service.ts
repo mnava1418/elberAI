@@ -3,7 +3,6 @@ import MidTermMemory from "../models/midTermMemory.model";
 import ShortTermMemory from "../models/shortTermMemory.model";
 import { updateChatSummary } from "./chat.service";
 import { run } from '@openai/agents';
-import agents from "../agents";
 import LongTermMemory from "../models/longTermMemory.model";
 import { getAgents } from "../loaders/agents.loader";
 
@@ -102,7 +101,13 @@ const handleUserRelevantInformation = async (conversationContext: string, uid: s
 }
 
 const extractLongTermMemory = async (text: string, uid: string, chatId: number): Promise<void> => {
-    const result = await run(agents.memory.ltm(), text)
+    const long_memory_agent = getAgents('long_memory')
+
+    if(!long_memory_agent) {
+        return
+    }
+
+    const result = await run(long_memory_agent, text)
     console.info(result.finalOutput)
 
     if (result.finalOutput?.memories?.length > 0) {

@@ -5,6 +5,7 @@ import ShortTermMemory from '../../models/shortTermMemory.model'
 import LongTermMemory from '../../models/longTermMemory.model'
 import * as chatService from '../../services/chat.service'
 import { ElberResponse } from '../../models/elber.model'
+import { getAgents } from '../../loaders/agents.loader'
 
 jest.mock('@openai/agents', () => ({
   __esModule: true,
@@ -28,15 +29,10 @@ jest.mock('../../models/longTermMemory.model')
 
 jest.mock('../../services/chat.service')
 
-jest.mock('../../agents', () => ({
+jest.mock('../../loaders/agents.loader', () => ({
   __esModule: true,
-  default: {
-    memory: {
-      summary: jest.fn().mockReturnValue('summary-agent'),
-      relevantInfo: jest.fn().mockReturnValue('relevantInfo-agent'),
-      ltm: jest.fn().mockReturnValue('ltm-agent'),
-    },
-  },
+  getAgents: jest.fn(),
+  default: jest.fn(),
 }))
 
 jest.mock('../../config/index.config', () => ({
@@ -66,6 +62,10 @@ const buildElberResponse = (): ElberResponse => ({
   },
 })
 
+const mockSummaryAgent = { name: 'chat_summary' }
+const mockUserInfoAgent = { name: 'user_info' }
+const mockLongMemoryAgent = { name: 'long_memory' }
+
 describe('memory.service', () => {
   const mockAddTurn = jest.fn().mockResolvedValue(undefined)
   const mockFormatTurns = jest.fn().mockReturnValue('Turn 1\n User: hello\n Elber: hi')
@@ -80,6 +80,13 @@ describe('memory.service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    ;(getAgents as jest.Mock).mockImplementation((id: string) => {
+      if (id === 'chat_summary') return mockSummaryAgent
+      if (id === 'user_info') return mockUserInfoAgent
+      if (id === 'long_memory') return mockLongMemoryAgent
+      return undefined
+    })
 
     ;(MidTermMemory.getInstance as jest.Mock).mockReturnValue({
       addTurn: mockAddTurn,
@@ -123,7 +130,7 @@ describe('memory.service', () => {
       await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
 
-      expect(run).toHaveBeenCalledWith('relevantInfo-agent', 'Usuario: user message\n Elber: Elber response')
+      expect(run).toHaveBeenCalledWith(mockUserInfoAgent, 'Usuario: user message\n Elber: Elber response')
     })
 
     it('should not trigger summary when shouldSummarize is false', async () => {
@@ -134,7 +141,7 @@ describe('memory.service', () => {
       await new Promise((r) => setImmediate(r))
 
       const summaryCalls = (run as jest.Mock).mock.calls.filter(
-        (call) => call[0] === 'summary-agent'
+        (call) => call[0] === mockSummaryAgent
       )
       expect(summaryCalls).toHaveLength(0)
     })
@@ -148,7 +155,7 @@ describe('memory.service', () => {
 
       expect(mockStartSummarizing).toHaveBeenCalledWith('user1_1')
       expect(run).toHaveBeenCalledWith(
-        'summary-agent',
+        mockSummaryAgent,
         expect.any(String),
         expect.objectContaining({ maxTurns: 3 })
       )

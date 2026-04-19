@@ -4,7 +4,7 @@
   "main": "dist/bin/www.js",
   "scripts": {
     "dev": "nodemon src/bin/www.ts",
-    "build": "tsc",
+    "build": "tsc && cp -r src/agents/definitions dist/agents/definitions",
     "start": "node dist/bin/www.js",
     "test": "jest",
     "test:coverage": "jest --coverage"

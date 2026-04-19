@@ -33,19 +33,29 @@ Elber remembers the user through three types of memory that are combined before 
 **Long-Term Memory (LTM)** — Persistent user memory stored in PostgreSQL with the pgvector extension. LTM extraction runs on two independent paths: on every turn (evaluating the user's message directly for relevant information) and after each summary is generated. Extracted facts are stored as vector embeddings. Before responding, this database is searched for the most relevant information to the current message using semantic search.
 
 ### AI agents
-The service uses OpenAI Agents. There are several specialized agents:
+The service uses OpenAI Agents. Agents are split into two categories based on how they are instantiated:
 
-- **Chat agent** — The main agent. Responds to user messages with access to tools (web search and user data access).
-- **Title agent** — Automatically generates the title of each conversation after the first message.
-- **Summary agent** — Generates conversation summaries every 8 turns.
-- **LTM agent** — Extracts structured user information from the summary.
-- **Relevant info agent** — Evaluates whether a piece of text contains information worth saving to LTM.
+**Pre-loaded agents** — Defined as JSON files in `src/agents/definitions/` and loaded once at server startup via `src/loaders/agents.loader.ts`. Each JSON file declares the agent's model, prompt key, output type, and tools. The loader resolves these references against the prompt, outputType, and tool registries and calls `Agent.create` once. At runtime, `getAgents(id)` returns the already-instantiated agent.
+
+- **Summary agent** (`chat_summary`) — Generates rolling conversation summaries when the MTM token budget is exceeded.
+- **Relevant info agent** (`user_info`) — Evaluates the last 3 conversation turns to detect whether the user shared personal information worth persisting to LTM.
+- **LTM agent** (`long_memory`) — Extracts structured memory items from conversation text and summaries; returns a typed list of facts.
+- **Title agent** (`title_generator`) — Automatically generates the title of a new conversation after the first message.
+
+**Per-request agent** — Built dynamically on each chat session in `src/agents/builders/chat.agent.ts` because it requires user-specific context (timezone, user ID) to personalize its prompt and tool behavior.
+
+- **Chat agent** — The main Elber agent. Responds to user messages with access to web search and user data tools. Its instructions are composed from the chat prompt plus injected skills.
+
+### Agent skills
+Skills are reusable instruction blocks injected into agent prompts at build time. Currently:
+
+- **Web search skill** (`src/agents/skills/web_search.skill.ts`) — Defines the absolute rule for when the chat agent must call `webSearch`: any factual claim (numbers, names, dates, statistics) requires a search; only definitions, math, general advice, and user-specific questions are exempt.
 
 ### Agent tools
 The chat agent has access to two tools during a conversation:
 
-- **Web search** (Serper API) — Activated when the user asks about recent events or news. The search includes the user's timezone to localize results.
-- **User data management** — The agent can retrieve the user's saved memories (up to 10 most recent items) and can also delete them if the user requests it.
+- **Web search** (Serper API) — Used for any factual query. The search includes the user's timezone to localize results (e.g., local times, country-specific data).
+- **User data management** — The agent can retrieve the user's saved memories (up to 10 most recent items) and can delete specific entries or the entire profile if the user requests it.
 
 ### Chat management
 In addition to WebSocket, the service exposes HTTP endpoints to:
@@ -141,25 +151,49 @@ npm start       # Production
 ```
 src/
 ├── agents/
-│   ├── elber.agent.ts        # Chat agent and title agent
-│   └── memory.agent.ts       # Summary agent, LTM agent, relevant info agent
+│   ├── builders/
+│   │   └── chat.agent.ts         # Elber chat agent — built per session with user context
+│   ├── definitions/              # JSON config files — one per pre-loaded agent
+│   │   ├── chat_summary.agent.json
+│   │   ├── user_info.agent.json
+│   │   ├── long_memory.agent.json
+│   │   └── title_generator.agent.json
+│   ├── outputTypes/              # Zod schemas for structured agent outputs
+│   │   ├── user_info.output.ts   # IsRelevantType
+│   │   ├── long_memory.output.ts # LTMList
+│   │   ├── title_generator.output.ts
+│   │   └── index.ts              # outputType registry
+│   ├── prompts/                  # Prompt functions for all agents
+│   │   ├── chat.prompt.ts
+│   │   ├── summary.prompt.ts
+│   │   ├── relevantInfo.prompt.ts
+│   │   ├── longTermMemory.prompt.ts
+│   │   ├── title_generator.prompt.ts
+│   │   └── index.ts              # prompt registry
+│   ├── skills/
+│   │   └── web_search.skill.ts   # Web search instruction block (injected into chat agent)
+│   └── tools/                    # Tool implementations
+│       ├── search.tools.ts       # Web search (Serper)
+│       ├── user.tools.ts         # User data management
+│       └── index.ts              # tool registry
+├── loaders/
+│   └── agents.loader.ts          # Reads definitions/, resolves registries, pre-loads agents at startup
 ├── models/
-│   ├── elber.model.ts        # Chat data types and structures
-│   ├── shortTermMemory.model.ts   # Active session management
-│   ├── midTermMemory.model.ts     # Conversation history (write-through cache + PostgreSQL)
+│   ├── agent.model.ts            # AgentConfig interface and AgentId type
+│   ├── elber.model.ts            # Chat data types and structures
+│   ├── prompt.model.ts           # ChatPromptContext type
+│   ├── shortTermMemory.model.ts  # Active session management
+│   ├── midTermMemory.model.ts    # Conversation history (write-through cache + PostgreSQL)
 │   └── longTermMemory.model.ts   # Persistent memory in PostgreSQL/pgvector
-├── tools/
-│   ├── search.tools.ts       # Web search tool (Serper)
-│   └── user.tools.ts         # User data management tools
 ├── services/
-│   ├── elber.service.ts      # Main chat orchestration (text and voice modes)
-│   ├── polly.service.ts      # Amazon Polly TTS: sentence splitting, MP3 synthesis
-│   ├── memory.service.ts     # Memory processing pipeline
-│   ├── chat.service.ts       # Firebase operations (save/read messages)
-│   ├── ai.service.ts         # Embedding generation (text-embedding-3-small)
-│   └── user.service.ts       # Delete all user data
-├── controllers/              # HTTP handlers
-├── listeners/                # WebSocket event handlers
-├── middlewares/              # Gateway validation
-└── routes/                   # HTTP routes
+│   ├── elber.service.ts          # Main chat orchestration (text and voice modes)
+│   ├── polly.service.ts          # Amazon Polly TTS: sentence splitting, MP3 synthesis
+│   ├── memory.service.ts         # Memory processing pipeline
+│   ├── chat.service.ts           # Firebase operations (save/read messages)
+│   ├── ai.service.ts             # Embedding generation (text-embedding-3-small)
+│   └── user.service.ts           # Delete all user data
+├── controllers/                  # HTTP handlers
+├── listeners/                    # WebSocket event handlers
+├── middlewares/                  # Gateway validation
+└── routes/                       # HTTP routes
 ```

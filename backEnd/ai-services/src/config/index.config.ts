@@ -39,3 +39,7 @@ export const aws = {
 export const models = {
     gpt: 'gpt-4o-mini'
 }
+
+export const weather = {
+    api_key: process.env.OPENWEATHER_API_KEY
+}

@@ -20,7 +20,7 @@ export type ElberRequest = {
     timeStamp: string,
     timeZone: string
     isVoiceMode: boolean,
-    location: { lat: number, lon: number }
+    location: { lat: number, lon: number } | null
 }
 
 export type ElberEvent = 'elber:stream' | 'elber:response' | 'elber:error' | 'elber:title' | 'elber:cancelled' | 'elber:audio_chunk' | 'elber:audio_end'

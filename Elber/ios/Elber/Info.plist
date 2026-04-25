@@ -46,7 +46,7 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Elber necesita tu ubicación para darte información de tu zona.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Elber necesita acceso al micrófono para comunicarse contigo.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

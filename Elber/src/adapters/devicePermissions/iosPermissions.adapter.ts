@@ -15,6 +15,13 @@ class IosPermissions extends DevicePermissions {
 
         return speechRecognitionPermission
     }
+
+    async checkLocationPermission(): Promise<boolean> {
+        const locationPermission = await this.requestPermission(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE)
+        .catch(() => false)
+
+        return locationPermission
+    }
 }
 
 export default IosPermissions

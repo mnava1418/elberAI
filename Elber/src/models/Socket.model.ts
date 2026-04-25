@@ -5,6 +5,7 @@ import { ElberRequest } from "./elber.model";
 import handleChatResponse from "../services/elber.service";
 import { ElberMessage } from "./chat.model";
 import AudioQueue from "./AudioQueue.model";
+import getCurrentLocation from "../services/location.service";
 
 class SocketModel {
     private socket: Socket | null
@@ -116,9 +117,9 @@ class SocketModel {
         }
     }
 
-    sendMessage(chatId: number, title: string, userMessage: ElberMessage, voiceMode: boolean, dispatch: (value: any) => void) {
+    async sendMessage(chatId: number, title: string, userMessage: ElberMessage, voiceMode: boolean, dispatch: (value: any) => void) {
         const currentUser = getAuth().currentUser
-        
+
         if(this.socket && this.socket.connected && currentUser) {
 
             AudioQueue.getInstance().stop()
@@ -136,21 +137,20 @@ class SocketModel {
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
             });
 
+            const location = await getCurrentLocation()
+
             const elberRequest: ElberRequest = {
                 chatId,
                 text: userMessage.content,
                 user: {
                     name: currentUser.displayName || '',
                     uid: currentUser.uid || '',
-                },                
+                },
                 title,
                 timeStamp,
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 isVoiceMode: voiceMode,
-                location: {
-                    lat: 33.44,
-                    lon: -94.04
-                }
+                location
             }
             this.socket.emit('user:ask', elberRequest )
         } else {

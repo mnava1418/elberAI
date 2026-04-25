@@ -47,7 +47,7 @@ const formatMemories = async (uid: string, text: string): Promise<string> => {
 
 export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
     await withTrace('Elber workflow', async() => {
-        const {chatId, text, user, timeStamp, timeZone, isVoiceMode} = request
+        const {chatId, text, user, timeStamp, timeZone, isVoiceMode, location} = request
         try {
             const conversationId = `${user.uid}_${chatId.toString()}`
 
@@ -59,7 +59,8 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
             
             const userContext: UserContext = {
                 userId: user.uid,
-                timeZone
+                timeZone,
+                location
             }
             
             const context: ChatPromptContext = {

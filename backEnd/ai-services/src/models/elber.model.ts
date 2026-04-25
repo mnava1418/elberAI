@@ -16,7 +16,8 @@ export type ElberRequest = {
     title: string
     timeStamp: string,
     timeZone: string,
-    isVoiceMode: boolean
+    isVoiceMode: boolean,
+    location: { lat: number, lon: number }
 }
 
 export type ElberResponse = {
@@ -84,7 +85,8 @@ export type MemoryHit = MemoryRecord & {
 
 export type UserContext = {
     userId: string,
-    timeZone: string
+    timeZone: string,
+    location: { lat: number, lon: number }
 }
 
 export type UserData = {

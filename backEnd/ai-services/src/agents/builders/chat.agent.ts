@@ -1,6 +1,7 @@
 import { Agent } from "@openai/agents";
 import { deleteAllUserData, deleteUserData, getUserData } from "../tools/user.tools";
 import { webSearch } from "../tools/search.tools";
+import { getWeather, geocodeLocation } from "../tools/weather.tools";
 import chatPrompt from "../prompts/chat.prompt";
 import { ChatPromptContext } from "../../models/prompt.model";
 import webSearchSkill from "../skills/web_search.skill";
@@ -8,7 +9,8 @@ import webSearchSkill from "../skills/web_search.skill";
 const chatAgent = (context: ChatPromptContext) => {
     const userTools = [getUserData, deleteAllUserData, deleteUserData]
     const searchTools = [webSearch]
-    const tools = [...userTools, ...searchTools]
+    const weatherTools = [getWeather, geocodeLocation]
+    const tools = [...userTools, ...searchTools, ...weatherTools]
 
     const prompt = chatPrompt(context)
     const skill = webSearchSkill()

@@ -162,11 +162,20 @@ describe('normalizeWeatherResponse', () => {
       const raw = makeOneCallResponse()
       const { current } = normalizeWeatherResponse(raw)
 
-      expect(current.temp).toBe(22.5)
-      expect(current.feels_like).toBe(21.0)
+      expect(current.temp).toBe(23)
+      expect(current.feels_like).toBe(21)
       expect(current.humidity).toBe(60)
       expect(current.uvi).toBe(3.5)
       expect(current.wind_speed).toBe(3.5)
+    })
+
+    it('rounds temp and feels_like to integers', () => {
+      const raw = makeOneCallResponse()
+      raw.current.temp = 22.4
+      raw.current.feels_like = 21.6
+      const { current } = normalizeWeatherResponse(raw)
+      expect(current.temp).toBe(22)
+      expect(current.feels_like).toBe(22)
     })
 
     it('converts visibility from meters to km', () => {
@@ -279,12 +288,19 @@ describe('normalizeWeatherResponse', () => {
       expect(hourly[0].pop_percent).toBe(46)
     })
 
+    it('rounds temp and feels_like to integers', () => {
+      const raw = makeOneCallResponse()
+      raw.hourly![0].temp = 18.7
+      raw.hourly![0].feels_like = 17.3
+      const { hourly } = normalizeWeatherResponse(raw)
+      expect(hourly[0].temp).toBe(19)
+      expect(hourly[0].feels_like).toBe(17)
+    })
+
     it('maps numeric fields correctly', () => {
       const raw = makeOneCallResponse()
-      raw.hourly![0].temp = 18.5
       raw.hourly![0].humidity = 75
       const { hourly } = normalizeWeatherResponse(raw)
-      expect(hourly[0].temp).toBe(18.5)
       expect(hourly[0].humidity).toBe(75)
     })
 
@@ -320,6 +336,19 @@ describe('normalizeWeatherResponse', () => {
       expect(daily[0].temp_max).toBe(28)
       expect(daily[0].temp_day).toBe(25)
       expect(daily[0].feels_like_day).toBe(24)
+    })
+
+    it('rounds temp fields to integers', () => {
+      const raw = makeOneCallResponse()
+      raw.daily[0].temp.min = 14.6
+      raw.daily[0].temp.max = 27.3
+      raw.daily[0].temp.day = 24.5
+      raw.daily[0].feels_like.day = 23.1
+      const { daily } = normalizeWeatherResponse(raw)
+      expect(daily[0].temp_min).toBe(15)
+      expect(daily[0].temp_max).toBe(27)
+      expect(daily[0].temp_day).toBe(25)
+      expect(daily[0].feels_like_day).toBe(23)
     })
 
     it('converts pop to percent', () => {

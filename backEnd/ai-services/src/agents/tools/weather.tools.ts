@@ -9,12 +9,14 @@ export const getWeather = tool({
         Obtiene el clima actual, pronóstico por hora (12h) y pronóstico diario (7 días).
 
         **Cuándo llamarlo:**
-        - Si el usuario pregunta por su clima actual sin mencionar ciudad → llama sin parámetros
-        - Si el usuario menciona una ciudad específica → primero llama geocodeLocation, luego pasa lat/lon aquí
+        - Si el usuario NO menciona ninguna ciudad → llama con lat: null, lon: null (usa ubicación del usuario)
+        - Si el usuario menciona cualquier nombre de ciudad o lugar → OBLIGATORIO llamar geocodeLocation primero, luego pasar el lat/lon retornado aquí. Esto aplica incluso si la ciudad mencionada es la misma que la ubicación actual del usuario.
 
         Ejemplos:
-        - "¿Cómo está el clima?" → getWeather({})
+        - "¿Cómo está el clima?" → getWeather({ lat: null, lon: null })
         - "¿Cómo está el clima en Madrid?" → geocodeLocation("Madrid") → getWeather({ lat, lon })
+        - "¿Cuál será el día más frío en Ciudad de México?" → geocodeLocation("Ciudad de México") → getWeather({ lat, lon })
+        - "Pronóstico para Monterrey" → geocodeLocation("Monterrey") → getWeather({ lat, lon })
     `,
     parameters: z.object({
         lat: z.number().nullable().describe('Latitud. Null para usar la ubicación actual del usuario'),

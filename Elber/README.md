@@ -38,6 +38,8 @@ From the settings screen the user can check the status of all backend services (
 | React Native Voice | Speech recognition (voice input) |
 | React Native Sound | Audio playback (voice output) |
 | React Native Blob Util | File I/O for caching MP3 chunks |
+| @react-native-community/geolocation | Device location (sent to backend for weather queries) |
+| react-native-permissions | Runtime permission requests (microphone, speech recognition, location) |
 
 ## Internal architecture
 
@@ -47,6 +49,7 @@ The app follows a layered architecture:
   - `auth.service.ts` — Access request, code validation, registration, login, logout
   - `chat.service.ts` — Fetch and delete chats
   - `elber.service.ts` — Socket event handling (streaming, complete response, audio chunks, error, title update)
+  - `location.service.ts` — Requests location permission and returns `{ lat, lon }` from device GPS; returns `null` if denied or unavailable
   - `network.service.ts` — HTTP client (Axios) with header and error handling
   - `validation.service.ts` — Form validation (email, password, required fields)
   - `status.service.ts` — Backend service health checks

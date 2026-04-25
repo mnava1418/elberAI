@@ -52,10 +52,12 @@ Skills are reusable instruction blocks injected into agent prompts at build time
 - **Web search skill** (`src/agents/skills/web_search.skill.ts`) — Defines the absolute rule for when the chat agent must call `webSearch`: any factual claim (numbers, names, dates, statistics) requires a search; only definitions, math, general advice, and user-specific questions are exempt.
 
 ### Agent tools
-The chat agent has access to two tools during a conversation:
+The chat agent has access to the following tools during a conversation:
 
 - **Web search** (Serper API) — Used for any factual query. The search includes the user's timezone to localize results (e.g., local times, country-specific data).
 - **User data management** — The agent can retrieve the user's saved memories (up to 10 most recent items) and can delete specific entries or the entire profile if the user requests it.
+- **getWeather** — Fetches current conditions, 12-hour hourly forecast, and 7-day daily forecast from the OpenWeather One Call API 3.0. If the user does not specify a city, the tool uses the `location` coordinates sent with the request (device GPS). All dates and times are formatted in the user's timezone.
+- **geocodeLocation** — Converts a city or place name to coordinates using the OpenWeather Geocoding API. The agent must call this before `getWeather` whenever the user mentions a specific location by name.
 
 ### Chat management
 In addition to WebSocket, the service exposes HTTP endpoints to:
@@ -91,11 +93,15 @@ const socket = io('ws://localhost:4042', {
 
 **Send a message:**
 ```javascript
-socket.emit('elber:message', {
+socket.emit('user:ask', {
   text: 'Hello Elber',
-  chatId: '12345',      // null for a new conversation
-  title: 'New chat',   // provisional title
-  isVoiceMode: false   // true to receive audio instead of streamed text
+  chatId: 12345,                   // Date.now() for a new conversation
+  title: 'New chat',              // provisional title
+  timeStamp: '...',               // formatted local timestamp
+  timeZone: 'America/Monterrey',  // IANA timezone
+  isVoiceMode: false,             // true to receive audio instead of streamed text
+  user: { uid: '...', name: '...' },
+  location: { lat: 25.67, lon: -100.31 }  // device GPS coords; null if permission denied
 })
 ```
 
@@ -134,6 +140,7 @@ SERPER_API_KEY=     # Serper API key for web search
 AWS_ACCESS_KEY_ID=        # AWS credentials for Amazon Polly
 AWS_SECRET_ACCESS_KEY=    # AWS credentials for Amazon Polly
 AWS_REGION=us-east-1      # AWS region (defaults to us-east-1)
+OPENWEATHER_API_KEY=      # OpenWeather One Call API 3.0 key (weather + geocoding)
 ```
 
 ## Commands
@@ -175,18 +182,21 @@ src/
 │   └── tools/                    # Tool implementations
 │       ├── search.tools.ts       # Web search (Serper)
 │       ├── user.tools.ts         # User data management
+│       ├── weather.tools.ts      # getWeather + geocodeLocation (OpenWeather)
 │       └── index.ts              # tool registry
 ├── loaders/
 │   └── agents.loader.ts          # Reads definitions/, resolves registries, pre-loads agents at startup
 ├── models/
 │   ├── agent.model.ts            # AgentConfig interface and AgentId type
-│   ├── elber.model.ts            # Chat data types and structures
+│   ├── elber.model.ts            # Chat data types and structures (includes location field)
+│   ├── weather.model.ts          # Types for OpenWeather API response and normalized output
 │   ├── prompt.model.ts           # ChatPromptContext type
 │   ├── shortTermMemory.model.ts  # Active session management
 │   ├── midTermMemory.model.ts    # Conversation history (write-through cache + PostgreSQL)
 │   └── longTermMemory.model.ts   # Persistent memory in PostgreSQL/pgvector
 ├── services/
 │   ├── elber.service.ts          # Main chat orchestration (text and voice modes)
+│   ├── weather.service.ts        # OpenWeather One Call API 3.0: fetch, normalize, geocode
 │   ├── polly.service.ts          # Amazon Polly TTS: sentence splitting, MP3 synthesis
 │   ├── memory.service.ts         # Memory processing pipeline
 │   ├── chat.service.ts           # Firebase operations (save/read messages)

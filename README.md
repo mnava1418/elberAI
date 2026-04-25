@@ -14,6 +14,8 @@ Access to Elber is intentionally controlled. New users must request access and b
 
 - **Search the web** — When you ask about recent events or news, Elber searches the internet in real time and incorporates the results into its response.
 
+- **Check the weather** — Elber can report current conditions, hourly forecasts (12 hours), and daily forecasts (7 days) for any location. When you ask without specifying a place, it uses your device's GPS coordinates automatically. When you name a city, it resolves the coordinates and queries the weather for that location.
+
 - **Stream responses** — Responses arrive progressively as Elber generates them, word by word, via WebSocket.
 
 - **Understand your voice** — You can dictate messages instead of typing them using the device's native speech recognition.
@@ -65,6 +67,7 @@ News Services (cron job)     ← Daily newsletter pipeline, runs independently
 - Socket.io (WebSocket server)
 - Nodemailer + Google OAuth2 (email)
 - Amazon Polly (text-to-speech for voice responses)
+- OpenWeather One Call API 3.0 (weather forecasts)
 - Docker + Docker Compose
 
 **News pipeline (Python)**

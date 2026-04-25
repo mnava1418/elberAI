@@ -93,7 +93,7 @@ In `useVoice.ts`, auto-send only triggers when the silence timer expires (not on
 #### Socket.io Event Payloads
 
 **Client → Server:**
-- `user:ask` — `{ text, chatId, title, timeStamp, timeZone, isVoiceMode, user: { uid, name } }`
+- `user:ask` — `{ text, chatId, title, timeStamp, timeZone, isVoiceMode, user: { uid, name }, location: { lat, lon } | null }`
 - `user:cancel` — `chatId` (triggers AbortController)
 
 **Server → Client (text mode):** `elber:stream` (token fragment) → `elber:response` (done signal) → `elber:title`
@@ -137,7 +137,9 @@ Each JSON definition references named entries in three registries resolved at lo
 - `toolRegistry` — maps tool name → tool (`src/agents/tools/`)
 - `outputTypesRegistry` — maps type name → Zod schema (`src/agents/outputTypes/`)
 
-**Per-request agent** (`chat`): built dynamically in `agents/builders/chat.agent.ts` with injected user context (name, timezone, MTM summary, LTM results) and web search skill. Tools: `webSearch`, `getUserData`, `deleteAllUserData`, `deleteUserData`.
+**Per-request agent** (`chat`): built dynamically in `agents/builders/chat.agent.ts` with injected user context (name, timezone, MTM summary, LTM results) and web search skill. Tools: `webSearch`, `getUserData`, `deleteAllUserData`, `deleteUserData`, `getWeather`, `geocodeLocation`.
+
+`getWeather` — fetches current conditions + 12h hourly + 7-day daily from OpenWeather One Call API 3.0. Uses `location` from the request when the user doesn't name a city. `geocodeLocation` — resolves a city name to coordinates; must be called before `getWeather` whenever the user mentions a specific place.
 
 Prompts live in `src/agents/prompts/`. Key rule in `chat.prompt.ts`: default to web search for any specific factual claim; skip only for definitions, math, and general advice.
 
@@ -154,6 +156,7 @@ src/
 │   ├── chat.service.ts         # Firebase chat operations
 │   ├── ai.service.ts           # OpenAI embeddings
 │   ├── polly.service.ts        # AWS Polly TTS synthesis
+│   ├── weather.service.ts      # OpenWeather fetch, normalize, geocode
 │   └── ltm/
 │       ├── ltmWriter.service.ts
 │       ├── ltmReader.service.ts
@@ -161,12 +164,13 @@ src/
 ├── models/
 │   ├── shortTermMemory.model.ts
 │   ├── midTermMemory.model.ts
-│   └── longTermMemory.model.ts
+│   ├── longTermMemory.model.ts
+│   └── weather.model.ts        # OneCallApiResponse + normalized output types
 ├── agents/
 │   ├── builders/chat.agent.ts  # per-request chat agent
 │   ├── definitions/*.agent.json
 │   ├── prompts/                # all prompt functions
-│   ├── tools/                  # webSearch, getUserData, etc.
+│   ├── tools/                  # webSearch, getUserData, getWeather, geocodeLocation
 │   ├── outputTypes/            # Zod schemas for structured outputs
 │   └── skills/web_search.skill.ts
 ├── loaders/
@@ -203,5 +207,6 @@ Each service has a `.env.template`. Key variables:
 - `PG_DB` — PostgreSQL connection string (ai-services)
 - `JWT_TOKEN` / `JWT_SECRET` — token signing
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION` — AWS Polly (TTS for voice mode)
+- `OPENWEATHER_API_KEY` — OpenWeather One Call API 3.0 (weather + geocoding, ai-services)
 
 Frontend uses `BACK_URL` (API gateway) and `SOCKET_URL` (WebSocket server) in `Elber/.env`.

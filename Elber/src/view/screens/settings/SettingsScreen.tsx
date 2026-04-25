@@ -113,7 +113,7 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
                         'information-circle-outline',
                         'Acerca de',
                         'Información de la aplicación',
-                        () => handleAlert('Continuar', 'Acerca de Elber', 'Elber v3.0.1'),
+                        () => handleAlert('Continuar', 'Acerca de Elber', 'Elber v4.0.0'),
                         undefined,
                         true
                     )}

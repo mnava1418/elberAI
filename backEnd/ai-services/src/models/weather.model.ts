@@ -99,3 +99,70 @@ export interface OneCallApiResponse {
     daily: DailyWeather[];
     alerts?: WeatherAlert[];
 }
+
+export interface NormalizedCurrentWeather {
+    time: string;
+    sunrise: string;
+    sunset: string;
+    temp: number;
+    feels_like: number;
+    humidity: number;
+    uvi: number;
+    visibility_km: number;
+    wind_speed: number;
+    wind_direction: string;
+    wind_gust?: number;
+    condition: string;
+    description: string;
+    rain_1h?: number;
+    snow_1h?: number;
+}
+
+export interface NormalizedHourlyWeather {
+    time: string;
+    temp: number;
+    feels_like: number;
+    humidity: number;
+    pop_percent: number;
+    wind_speed: number;
+    wind_direction: string;
+    condition: string;
+    description: string;
+    rain_1h?: number;
+    snow_1h?: number;
+}
+
+export interface NormalizedDailyWeather {
+    date: string;
+    summary: string;
+    temp_min: number;
+    temp_max: number;
+    temp_day: number;
+    feels_like_day: number;
+    humidity: number;
+    pop_percent: number;
+    wind_speed: number;
+    wind_direction: string;
+    condition: string;
+    description: string;
+    sunrise: string;
+    sunset: string;
+    uvi: number;
+    rain?: number;
+    snow?: number;
+}
+
+export interface NormalizedWeatherResponse {
+    timezone: string;
+    current: NormalizedCurrentWeather;
+    hourly: NormalizedHourlyWeather[];
+    daily: NormalizedDailyWeather[];
+}
+
+export interface GeocodingResult {
+    name: string;
+    lat: number;
+    lon: number;
+    country: string;
+    state?: string;
+}

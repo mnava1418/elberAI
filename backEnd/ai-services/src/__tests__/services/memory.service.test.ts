@@ -58,7 +58,8 @@ const buildElberResponse = (): ElberResponse => ({
     title: 'Chat Nuevo',
     timeStamp: '2026-01-01',
     timeZone: 'America/Mexico_City',
-    isVoiceMode: false
+    isVoiceMode: false,
+    location: { lat: 19.4326, lon: -99.1332 }
   },
 })
 

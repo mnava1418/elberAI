@@ -146,7 +146,11 @@ class SocketModel {
                 title,
                 timeStamp,
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                isVoiceMode: voiceMode
+                isVoiceMode: voiceMode,
+                location: {
+                    lat: 33.44,
+                    lon: -94.04
+                }
             }
             this.socket.emit('user:ask', elberRequest )
         } else {

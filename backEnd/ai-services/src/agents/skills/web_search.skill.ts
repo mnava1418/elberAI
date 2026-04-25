@@ -10,6 +10,7 @@ const webSearchSkill = () => {
         - Operaciones matemáticas o lógicas puras
         - Consejos, opiniones o recomendaciones generales
         - Preguntas sobre el propio usuario (sus datos, su historial de conversación)
+        - Preguntas sobre el clima, temperatura, pronóstico o condiciones atmosféricas → usa SIEMPRE getWeather (y geocodeLocation si se menciona una ciudad). NUNCA uses webSearch para clima.
 
         En CUALQUIER otro caso que involucre un dato concreto — un número, un nombre, una fecha, una estadística, un resultado — USA webSearch antes de responder.
     `

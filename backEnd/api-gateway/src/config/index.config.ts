@@ -24,3 +24,7 @@ export const firebase = {
 export const gateway = {
     secret: process.env.GATEWAY_SECRET
 }
+
+export const web = {
+    origin: process.env.WEB_ORIGIN,
+}

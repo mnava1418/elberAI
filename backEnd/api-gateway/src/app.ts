@@ -4,6 +4,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 
 import indexRoutes from './routes/index.routes';
+import { web } from './config/index.config'
 
 const app = express();
 
@@ -11,7 +12,7 @@ const setMiddlewares = () => {
     // Seguridad
     app.use(helmet());
     app.use(cors({
-        origin: process.env.WEB_ORIGIN,
+        origin: web.origin,
         methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization']
     }));

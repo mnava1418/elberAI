@@ -1,14 +1,21 @@
 import express from 'express';
 import helmet from 'helmet';
+import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 
 import indexRoutes from './routes/index.routes';
+import { web } from './config/index.config'
 
 const app = express();
 
 const setMiddlewares = () => {
     // Seguridad
     app.use(helmet());
+    app.use(cors({
+        origin: web.origin,
+        methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization']
+    }));
     app.use(express.json()); // Para parsear JSON bodies
     app.use(express.urlencoded({ extended: true }));
     app.use(rateLimit({

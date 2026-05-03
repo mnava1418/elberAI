@@ -26,24 +26,26 @@ Access to Elber is intentionally controlled. New users must request access and b
 
 ## Architecture
 
-ElberAI is composed of a mobile app and five backend services:
+ElberAI is composed of two client apps and five backend services:
 
 ```
-Mobile App (React Native)
-        │
-        ▼
-  API Gateway :4040          ← Single entry point. Validates Firebase JWT tokens.
-        │
-        ├──▶  Auth Services :4041       ← Access requests, manual approval, registration
-        ├──▶  AI Services :4042         ← Chat, streaming, memory, web search
-        └──▶  Notification Services :4043  ← All outgoing emails (OAuth2 / Gmail)
+Mobile App (React Native)          Web App (Next.js)
+        │                                 │
+        └──────────────┬──────────────────┘
+                       ▼
+              API Gateway :4040     ← Single entry point. Validates Firebase JWT tokens.
+                       │
+                       ├──▶  Auth Services :4041       ← Access requests, manual approval, registration
+                       ├──▶  AI Services :4042         ← Chat, streaming, memory, web search
+                       └──▶  Notification Services :4043  ← All outgoing emails (OAuth2 / Gmail)
 
-News Services (cron job)     ← Daily newsletter pipeline, runs independently
+News Services (cron job)            ← Daily newsletter pipeline, runs independently
 ```
 
 | Service | Description |
 |---|---|
 | [Mobile App](./Elber/README.md) | React Native app — chat interface, voice input/output, auth flow, settings |
+| [Web App](./web/README.md) | Next.js web client — landing page, login, real-time chat with streaming |
 | [API Gateway](./backEnd/api-gateway/README.md) | Entry point for all requests. Validates Firebase tokens and routes traffic. |
 | [Auth Services](./backEnd/auth-services/README.md) | Manual approval workflow, access codes, user registration, password reset |
 | [AI Services](./backEnd/ai-services/README.md) | OpenAI Agents, 3-tier memory system, real-time streaming, web search, Amazon Polly TTS |
@@ -58,6 +60,13 @@ News Services (cron job)     ← Daily newsletter pipeline, runs independently
 - Socket.io (real-time streaming)
 - React Native Voice (speech recognition)
 - React Native Sound + React Native Blob Util (voice output / audio playback)
+
+**Web**
+- Next.js 16 (App Router) with TypeScript
+- Firebase Authentication
+- Socket.io client (real-time streaming)
+- Zustand (state management)
+- Tailwind CSS 4
 
 **Backend (Node.js services)**
 - Express.js with TypeScript

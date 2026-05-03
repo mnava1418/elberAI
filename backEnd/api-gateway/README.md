@@ -1,6 +1,6 @@
 # API Gateway
 
-The API Gateway is the only entry point to the backend. Every request coming from the mobile app passes through here before reaching any other service.
+The API Gateway is the only entry point to the backend. Every request from the mobile app or the web app passes through here before reaching any other service.
 
 ## What does it do?
 
@@ -28,7 +28,7 @@ This allows internal services to trust that the user has already been authentica
 ### Additional protections
 - **Rate limiting**: maximum 100 requests per IP every 15 minutes.
 - **Helmet**: HTTP security headers (protection against XSS, clickjacking, etc.).
-- **CORS**: configured to accept requests from the client.
+- **CORS**: configured to accept requests from both the mobile app and the web app.
 
 ## Port
 

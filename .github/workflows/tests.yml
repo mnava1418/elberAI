@@ -1,0 +1,104 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api-gateway:
+    name: api-gateway
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backEnd/api-gateway
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backEnd/api-gateway/package-lock.json
+      - run: npm ci
+      - run: npm test -- --ci
+
+  auth-services:
+    name: auth-services
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backEnd/auth-services
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backEnd/auth-services/package-lock.json
+      - run: npm ci
+      - run: npm test -- --ci
+
+  ai-services:
+    name: ai-services
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backEnd/ai-services
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backEnd/ai-services/package-lock.json
+      - run: npm ci
+      - run: npm test -- --ci
+
+  notification-services:
+    name: notification-services
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backEnd/notification-services
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backEnd/notification-services/package-lock.json
+      - run: npm ci
+      - run: npm test -- --ci
+
+  elber:
+    name: elber (React Native)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Elber
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Elber/package-lock.json
+      - run: npm ci
+      - run: npm test -- --ci --passWithNoTests
+
+  web:
+    name: web (Next.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm test

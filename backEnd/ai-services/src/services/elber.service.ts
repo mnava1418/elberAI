@@ -3,12 +3,12 @@ import { run, withTrace } from '@openai/agents';
 import { saveChatMessage, updateTitle } from "./chat.service";
 import ShortTermMemory from "../models/shortTermMemory.model";
 import MidTermMemory from "../models/midTermMemory.model";
-import LongTermMemory from "../models/longTermMemory.model";
 import { handleMemory } from "./memory.service";
 import { textToSpeech, splitIntoSentences } from "./polly.service";
 import chatAgent from "../agents/builders/chat.agent";
 import { ChatPromptContext } from "../models/prompt.model";
 import { getAgents } from "../loaders/agents.loader";
+import { loadProfile } from "./profile.service";
 
 const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     const { originalRequest, agentResponse } = elberResponse
@@ -31,20 +31,6 @@ const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: Elber
         .catch(error => console.error('Error en handleMemory:', error))
 }
 
-const formatMemories = async (uid: string, text: string): Promise<string> => {
-    const ltm = new LongTermMemory()
-    const memories = await ltm.getMemory(uid, text)
-    
-    if (!memories.length) return '';
-
-    const lines = memories.map((m) => `- ${m.text}`);
-
-    return `
-        MEMORIA LARGA DEL USUARIO (hechos recordados; si algo contradice al usuario hoy, dale prioridad a lo que diga hoy):
-        ${lines.join("\n")}
-        `.trim();
-}
-
 export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent, chatId: number, text: string) => void, abortController?: AbortController) => {
     await withTrace('Elber workflow', async() => {
         const {chatId, text, user, timeStamp, timeZone, isVoiceMode, location} = request
@@ -52,9 +38,9 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
             const conversationId = `${user.uid}_${chatId.toString()}`
 
             const session = ShortTermMemory.getInstance().getSession(conversationId)
-            const [midMemory, longMemory] = await Promise.all([
+            const [midMemory, userProfile] = await Promise.all([
                 MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId),
-                formatMemories(user.uid, text)
+                loadProfile(user.uid)
             ])
             
             const userContext: UserContext = {
@@ -65,9 +51,9 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
             
             const context: ChatPromptContext = {
                 name: user.name,
-                longTermMemory: longMemory,
                 summary: midMemory.summary,
-                timeStamp
+                timeStamp,
+                userProfile
             }
             
             const chat_agent = chatAgent(context)

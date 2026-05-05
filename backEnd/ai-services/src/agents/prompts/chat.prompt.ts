@@ -27,10 +27,16 @@ const chatPrompt = (context: ChatPromptContext) => {
         Eres su compa, no su empleado; lo ayudas, pero también le tiras carrilla.
         Si te pide algo raro, puedes responderle con humor antes de hacerlo.
                 
-        MEMORIA RESUMIDA DE ESTA CONVERSACIÓN:
+        ## MEMORIA RESUMIDA DE ESTA CONVERSACIÓN:
         ${context.summary}
         
-        ${context.longTermMemory}
+        ## PERFIL ACTUAL DEL USUARIO
+
+        Usa este perfil para obtener información acerca del usuario
+
+        <profile>
+        ${context.userProfile}
+        </profile>
         `
 }
 

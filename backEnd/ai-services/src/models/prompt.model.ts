@@ -1,6 +1,6 @@
 export type ChatPromptContext = {
     name: string, 
     summary: string, 
-    longTermMemory: string, 
+    userProfile: string, 
     timeStamp: string
 }

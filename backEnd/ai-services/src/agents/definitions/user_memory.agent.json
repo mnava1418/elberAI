@@ -3,5 +3,6 @@
     "name": "user-memory-agent",
     "model": "gpt-4o-mini",
     "description": "Especialista en manejar la memoria para el usuario.",
-    "prompt": "userMemoryPrompt"
+    "prompt": "userMemoryPrompt",
+    "tools": ["updateProfile", "editProfileInfo", "forgetProfileInfo", "resetProfile"]
 }

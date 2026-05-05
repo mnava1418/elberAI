@@ -226,13 +226,11 @@ describe('agents.loader', () => {
 
     it('returns the agent instance for each known id', () => {
       expect(getAgents('chat_summary')).toBeDefined()
-      expect(getAgents('user_info')).toBeDefined()
-      expect(getAgents('long_memory')).toBeDefined()
       expect(getAgents('title_generator')).toBeDefined()
     })
 
     it('returns different agent instances for different ids', () => {
-      expect(getAgents('chat_summary')).not.toBe(getAgents('user_info'))
+      expect(getAgents('chat_summary')).not.toBe(getAgents('title_generator'))
     })
 
     it('still returns undefined for an unknown id', () => {

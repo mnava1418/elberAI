@@ -6,6 +6,7 @@ import LongTermMemory from '../../models/longTermMemory.model'
 import * as chatService from '../../services/chat.service'
 import { ElberResponse } from '../../models/elber.model'
 import { getAgents } from '../../loaders/agents.loader'
+import userMemoryAgent from '../../agents/builders/userMemory.agent'
 
 jest.mock('@openai/agents', () => ({
   __esModule: true,
@@ -32,6 +33,11 @@ jest.mock('../../services/chat.service')
 jest.mock('../../loaders/agents.loader', () => ({
   __esModule: true,
   getAgents: jest.fn(),
+  default: jest.fn(),
+}))
+
+jest.mock('../../agents/builders/userMemory.agent', () => ({
+  __esModule: true,
   default: jest.fn(),
 }))
 
@@ -64,7 +70,7 @@ const buildElberResponse = (): ElberResponse => ({
 })
 
 const mockSummaryAgent = { name: 'chat_summary' }
-const mockUserInfoAgent = { name: 'user_info' }
+const mockUserMemoryAgentInstance = { name: 'user-memory-agent' }
 const mockLongMemoryAgent = { name: 'long_memory' }
 
 describe('memory.service', () => {
@@ -84,10 +90,11 @@ describe('memory.service', () => {
 
     ;(getAgents as jest.Mock).mockImplementation((id: string) => {
       if (id === 'chat_summary') return mockSummaryAgent
-      if (id === 'user_info') return mockUserInfoAgent
       if (id === 'long_memory') return mockLongMemoryAgent
       return undefined
     })
+
+    ;(userMemoryAgent as jest.Mock).mockResolvedValue(mockUserMemoryAgentInstance)
 
     ;(MidTermMemory.getInstance as jest.Mock).mockReturnValue({
       addTurn: mockAddTurn,
@@ -131,7 +138,11 @@ describe('memory.service', () => {
       await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
 
-      expect(run).toHaveBeenCalledWith(mockUserInfoAgent, 'Usuario: user message\n Elber: Elber response')
+      expect(run).toHaveBeenCalledWith(
+        mockUserMemoryAgentInstance,
+        'Usuario: user message\n Elber: Elber response',
+        expect.objectContaining({ context: expect.any(Object) })
+      )
     })
 
     it('should not trigger summary when shouldSummarize is false', async () => {
@@ -164,9 +175,11 @@ describe('memory.service', () => {
 
     it('should update MTM, clear STM session, and persist to Firebase after summary', async () => {
       mockShouldSummarize.mockReturnValue(true)
+      // With the async builder, generateSummary reaches run() before
+      // handleUserRelevantInformation (which awaits the builder first)
       ;(run as jest.Mock)
-        .mockResolvedValueOnce({ finalOutput: { isRelevant: false } }) // relevantInfo
-        .mockResolvedValueOnce({ finalOutput: 'new summary text' })    // summary
+        .mockResolvedValueOnce({ finalOutput: 'new summary text' })    // summary (1st)
+        .mockResolvedValueOnce({ finalOutput: null })                   // user memory (2nd)
 
       await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
@@ -178,9 +191,10 @@ describe('memory.service', () => {
 
     it('should reset state to COLLECTING if summary generation fails', async () => {
       mockShouldSummarize.mockReturnValue(true)
+      // summary runs first (before async builder resolves), so reject it first
       ;(run as jest.Mock)
-        .mockResolvedValueOnce({ finalOutput: { isRelevant: false } })
-        .mockRejectedValueOnce(new Error('LLM failure'))
+        .mockRejectedValueOnce(new Error('LLM failure')) // summary (1st)
+        .mockResolvedValueOnce({ finalOutput: null })     // user memory (2nd)
 
       await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
@@ -188,20 +202,19 @@ describe('memory.service', () => {
       expect(mockResetToCollecting).toHaveBeenCalledWith('user1_1')
     })
 
-    it('should extract LTM when relevantInfo isRelevant is true', async () => {
+    it('should call user memory agent on every turn', async () => {
       mockShouldSummarize.mockReturnValue(false)
-      ;(run as jest.Mock)
-        .mockResolvedValueOnce({
-          finalOutput: { isRelevant: true, reasoning: 'User likes tacos' },
-        })
-        .mockResolvedValueOnce({
-          finalOutput: { memories: [{ text: 'likes tacos', type: 'preference', importance: 4 }] },
-        })
+      ;(run as jest.Mock).mockResolvedValue({ finalOutput: null })
 
       await handleMemory(buildElberResponse())
       await new Promise((r) => setImmediate(r))
 
-      expect(mockIngestLTM).toHaveBeenCalled()
+      expect(userMemoryAgent).toHaveBeenCalledWith('user1')
+      expect(run).toHaveBeenCalledWith(
+        mockUserMemoryAgentInstance,
+        'Usuario: user message\n Elber: Elber response',
+        expect.objectContaining({ context: expect.any(Object) })
+      )
     })
   })
 })

@@ -30,6 +30,10 @@ class DevicePermissions implements ElberPermissions{
     checkSpeechRecognitionPermission(): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
+
+    checkLocationPermission(): Promise<boolean> {
+        throw new Error("Method not implemented.");
+    }
 }
 
 export default DevicePermissions

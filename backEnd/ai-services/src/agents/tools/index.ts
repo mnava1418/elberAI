@@ -1,10 +1,27 @@
+import { updateProfile, editProfileInfo, forgetProfileInfo, resetProfile } from './profile.tools';
 import { webSearch } from './search.tools'
 import { getWeather, geocodeLocation } from './weather.tools'
 
-const toolRegistry: Record<string, any> = {
-    webSearch,
+const searchTools: Record<string, any> = {
+    webSearch
+} 
+
+const weatherTools: Record<string, any> = {
     getWeather,
-    geocodeLocation
+    geocodeLocation,
+}
+
+const userProfileTools: Record<string, any> = {
+    updateProfile,
+    editProfileInfo,
+    forgetProfileInfo,
+    resetProfile,
+}
+
+const toolRegistry: Record<string, any> = {
+    ...searchTools,
+    ...weatherTools,
+    ...userProfileTools
 };
 
 export default toolRegistry

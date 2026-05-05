@@ -26,6 +26,7 @@ jest.mock('../../config/index.config', () => ({
   },
   firebase: { cred: '/fake/path', db: 'https://test.db' },
   server: { port: 4040, host: 'http://localhost:4040' },
+  web: { origin: 'http://localhost:3000' },
 }))
 
 import app from '../../app'

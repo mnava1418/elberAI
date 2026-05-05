@@ -6,6 +6,8 @@ import handleChatResponse from "../services/elber.service";
 import { ElberMessage } from "./chat.model";
 import AudioQueue from "./AudioQueue.model";
 import getCurrentLocation from "../services/location.service";
+import { isWaitingForElber, showAlert } from "../store/actions/elber.actions";
+import { openSettings } from "react-native-permissions";
 
 class SocketModel {
     private socket: Socket | null
@@ -138,6 +140,22 @@ class SocketModel {
             });
 
             const location = await getCurrentLocation()
+
+            if(location === null) {
+                dispatch(showAlert({
+                    isVisible: true,
+                    title: 'Ubicación',
+                    text: 'Elber necesita acceso a tu ubicación. Ve a Configuración y habilítala.',
+                    btnText: 'Habilitar',
+                    onPress: () => {
+                        openSettings('application')
+                    }
+                }))
+
+                dispatch(isWaitingForElber(false))
+
+                return
+            }
 
             const elberRequest: ElberRequest = {
                 chatId,

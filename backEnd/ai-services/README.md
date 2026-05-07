@@ -23,14 +23,16 @@ When a message is sent with `isVoiceMode: true`, the service switches from text 
 
 The user can send a `user:cancel` event at any time to abort synthesis and stop playback.
 
-### Three-level memory system
-Elber remembers the user through three types of memory that are combined before generating each response:
+### Four-layer memory system
+Elber remembers the user through four layers of memory that are combined before generating each response:
 
-**Short-Term Memory (STM)** — The active conversation session with the AI. It is kept alive while the session is active (up to 24 hours). This allows Elber to remember what was discussed in recent exchanges without needing to resend the entire history.
+**Short-Term Memory (STM)** — The active OpenAI Agents session (tool call history, current turns). It is kept alive while the session is active (up to 24 hours) and is cleared after each MTM summary cycle to force fresh context on the next turn.
 
-**Mid-Term Memory (MTM)** — Stores the current conversation history as text, persisted turn-by-turn in PostgreSQL. When the accumulated turns exceed a token budget, a rolling summary is generated and the turns are cleared. This prevents context from growing indefinitely and survives service restarts. A state machine (`COLLECTING → SUMMARIZING → COLLECTING`) prevents concurrent summary generation.
+**Mid-Term Memory (MTM)** — Stores the current conversation history as text, persisted turn-by-turn in PostgreSQL. When the accumulated turns exceed a token budget (~2 500 tokens), a rolling summary is generated and the raw turns are discarded. This prevents context from growing indefinitely and survives service restarts. A state machine (`COLLECTING → SUMMARIZING → COLLECTING`) prevents concurrent summary generation.
 
-**Long-Term Memory (LTM)** — Persistent user memory stored in PostgreSQL with the pgvector extension. LTM extraction runs on two independent paths: on every turn (evaluating the user's message directly for relevant information) and after each summary is generated. Extracted facts are stored as vector embeddings. Before responding, this database is searched for the most relevant information to the current message using semantic search.
+**Profile (Markdown file)** — A structured Markdown file stored at `data/profiles/{userId}.md`, divided into seven sections (Datos Personales, Trabajo, Familia y Relaciones, Proyectos Activos, Preferencias, Hábitos y Rutina, Metas). It is managed by `src/services/profile.service.ts` with an in-memory cache. After every conversation turn, a background agent (`userMemory.agent.ts`) reads the last 3 turns and calls `update_profile` if the user shared new permanent facts. Duplicate detection runs at the code level using bidirectional word-overlap (70 % threshold) to prevent the same fact from being written twice.
+
+**Episodic Memory (PostgreSQL + pgvector)** — Specific events and moments stored as vector embeddings in the `user_memories` table with `type = 'event'`. This layer is only written when the user explicitly asks Elber to remember something ("remember that I had a tough meeting with Carlos"). The user can search, correct, or delete individual entries through conversation. Deduplication uses `findNearDuplicate` at the service level (threshold 0.85) to skip near-identical entries.
 
 ### AI agents
 The service uses OpenAI Agents. Agents are split into two categories based on how they are instantiated:
@@ -42,22 +44,37 @@ The service uses OpenAI Agents. Agents are split into two categories based on ho
 - **LTM agent** (`long_memory`) — Extracts structured memory items from conversation text and summaries; returns a typed list of facts.
 - **Title agent** (`title_generator`) — Automatically generates the title of a new conversation after the first message.
 
-**Per-request agent** — Built dynamically on each chat session in `src/agents/builders/chat.agent.ts` because it requires user-specific context (timezone, user ID) to personalize its prompt and tool behavior.
+**Per-request agents** — Built dynamically on each chat session because they require user-specific context (user ID, timezone) to personalize their prompts and tool behavior.
 
-- **Chat agent** — The main Elber agent. Responds to user messages with access to web search and user data tools. Its instructions are composed from the chat prompt plus injected skills.
+- **Chat agent** (`src/agents/builders/chat.agent.ts`) — The main Elber agent. Responds to user messages with access to web search, weather, profile editing, and episodic memory tools. Its instructions are composed from the chat prompt plus injected skills (`webSearchSkill`, `profileSkill`, `memorySkill`).
+- **UserMemory agent** (`src/agents/builders/userMemory.agent.ts`) — Runs automatically after every conversation turn. Reads the last 3 turns and decides whether the user shared stable, permanent personal facts worth saving to the profile Markdown file. Has a single tool: `updateProfile`. Does **not** save events, decisions, or episodic memories — only who the user **is**.
 
 ### Agent skills
 Skills are reusable instruction blocks injected into agent prompts at build time. Currently:
 
 - **Web search skill** (`src/agents/skills/web_search.skill.ts`) — Defines the absolute rule for when the chat agent must call `webSearch`: any factual claim (numbers, names, dates, statistics) requires a search; only definitions, math, general advice, and user-specific questions are exempt.
+- **Profile skill** (`src/agents/skills/profile.skill.ts`) — Documents when the chat agent must call the profile-editing tools (`editProfileInfo`, `forgetProfileInfo`, `resetProfile`): only when the user explicitly asks to correct, delete, or wipe their profile. The automatic background agent handles passive updates.
+- **Memory skill** (`src/agents/skills/memory.skill.ts`) — Documents when the chat agent must call each episodic memory tool. Key rule for `saveMemory`: only when the user explicitly asks Elber to remember something. Search, update, delete, and clear operations follow similar explicit-request rules.
 
 ### Agent tools
-The chat agent has access to the following tools during a conversation:
+
+**Chat agent tools** (user-triggered, available during conversation):
 
 - **Web search** (Serper API) — Used for any factual query. The search includes the user's timezone to localize results (e.g., local times, country-specific data).
-- **User data management** — The agent can retrieve the user's saved memories (up to 10 most recent items) and can delete specific entries or the entire profile if the user requests it.
 - **getWeather** — Fetches current conditions, 12-hour hourly forecast, and 7-day daily forecast from the OpenWeather One Call API 3.0. If the user does not specify a city, the tool uses the `location` coordinates sent with the request (device GPS). All dates and times are formatted in the user's timezone.
 - **geocodeLocation** — Converts a city or place name to coordinates using the OpenWeather Geocoding API. The agent must call this before `getWeather` whenever the user mentions a specific location by name.
+- **Profile management** (`editProfileInfo`, `forgetProfileInfo`, `resetProfile`) — Let the user explicitly correct, delete individual entries, or wipe the entire profile Markdown file through conversation.
+- **Episodic memory management**:
+  - `saveMemory` — Saves a specific event or moment to PostgreSQL with a vector embedding. Called **only** when the user explicitly asks Elber to remember something. Includes near-duplicate detection (0.85 cosine similarity) to prevent repeated saves.
+  - `searchMemory` — Semantic search over the user's saved memories (top 5 results).
+  - `updateMemory` — Finds the closest matching memory and replaces its text and embedding with a correction.
+  - `deleteMemory` — Finds the closest matching memory and removes it.
+  - `clearAllMemories` — Deletes all episodic memories for the user.
+- **User data** (`getUserData`, `deleteAllUserData`, `deleteUserData`) — Retrieve or remove entries from the LTM table populated by the automatic extraction pipeline.
+
+**UserMemory agent tools** (automatic, runs after every turn):
+
+- **updateProfile** — Adds a permanent personal fact to the profile Markdown file (`data/profiles/{userId}.md`). Includes bidirectional word-overlap deduplication (70% threshold) at the service level.
 
 ### Chat management
 In addition to WebSocket, the service exposes HTTP endpoints to:
@@ -159,7 +176,8 @@ npm start       # Production
 src/
 ├── agents/
 │   ├── builders/
-│   │   └── chat.agent.ts         # Elber chat agent — built per session with user context
+│   │   ├── chat.agent.ts         # Elber chat agent — built per session with user context
+│   │   └── userMemory.agent.ts   # Background agent — saves permanent facts to profile MD after each turn
 │   ├── definitions/              # JSON config files — one per pre-loaded agent
 │   │   ├── chat_summary.agent.json
 │   │   ├── user_info.agent.json
@@ -176,13 +194,18 @@ src/
 │   │   ├── relevantInfo.prompt.ts
 │   │   ├── longTermMemory.prompt.ts
 │   │   ├── title_generator.prompt.ts
+│   │   ├── userMemory.prompt.ts  # Instructions for the background profile-saving agent
 │   │   └── index.ts              # prompt registry
 │   ├── skills/
-│   │   └── web_search.skill.ts   # Web search instruction block (injected into chat agent)
+│   │   ├── web_search.skill.ts   # Web search rules (injected into chat agent)
+│   │   ├── profile.skill.ts      # Profile editing rules (injected into chat agent)
+│   │   └── memory.skill.ts       # Episodic memory rules (injected into chat agent)
 │   └── tools/                    # Tool implementations
 │       ├── search.tools.ts       # Web search (Serper)
-│       ├── user.tools.ts         # User data management
+│       ├── user.tools.ts         # getUserData, deleteAllUserData, deleteUserData
 │       ├── weather.tools.ts      # getWeather + geocodeLocation (OpenWeather)
+│       ├── profile.tools.ts      # editProfileInfo, forgetProfileInfo, resetProfile, updateProfile
+│       ├── memory.tools.ts       # saveMemory, searchMemory, updateMemory, deleteMemory, clearAllMemories
 │       └── index.ts              # tool registry
 ├── loaders/
 │   └── agents.loader.ts          # Reads definitions/, resolves registries, pre-loads agents at startup
@@ -198,7 +221,8 @@ src/
 │   ├── elber.service.ts          # Main chat orchestration (text and voice modes)
 │   ├── weather.service.ts        # OpenWeather One Call API 3.0: fetch, normalize, geocode
 │   ├── polly.service.ts          # Amazon Polly TTS: sentence splitting, MP3 synthesis
-│   ├── memory.service.ts         # Memory processing pipeline
+│   ├── memory.service.ts         # Memory pipeline + episodic CRUD (saveMemoryEntry, searchMemoryEntries, …)
+│   ├── profile.service.ts        # Profile MD file CRUD with bidirectional deduplication
 │   ├── chat.service.ts           # Firebase operations (save/read messages)
 │   ├── ai.service.ts             # Embedding generation (text-embedding-3-small)
 │   └── user.service.ts           # Delete all user data

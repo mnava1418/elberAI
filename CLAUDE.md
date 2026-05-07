@@ -104,18 +104,19 @@ Both modes: `elber:error`, `elber:cancelled`
 
 ### AI Services — Memory Architecture
 
-Three-tier memory in PostgreSQL with pgvector:
+Four-layer memory system:
 
-| Tier | Model | Storage | Purpose |
-|---|---|---|---|
-| STM | `ShortTermMemory` (singleton) | In-memory Map | OpenAI Agents SDK session (tool call history, current turns); 24-hour TTL |
-| MTM | `MidTermMemory` (singleton) | In-memory cache + PostgreSQL | Recent turns + rolling summary; auto-compresses at ~2500 tokens |
-| LTM | `LongTermMemory` | PostgreSQL + pgvector | Persistent user facts via vector embeddings (text-embedding-3-small, 1536-dim) |
+| Layer | Storage | Purpose |
+|---|---|---|
+| STM | In-memory Map | OpenAI Agents SDK session (tool call history, current turns); 24-hour TTL |
+| MTM | In-memory cache + PostgreSQL | Recent turns + rolling summary; auto-compresses at ~2500 tokens |
+| Profile | Markdown file per user (`data/profiles/{userId}.md`) | Stable personal facts (name, job, family, preferences, routines, goals) — managed by `profile.service.ts` with in-memory cache; bidirectional word-overlap dedup (70% threshold) |
+| Episodic | PostgreSQL + pgvector | Specific events/moments explicitly asked to be remembered; near-duplicate detection at 0.85 cosine similarity |
 
-**LTM extraction pipeline** (runs every turn, fire-and-forget):
-1. `relevantInfoAgent` — evaluates last 3 conversation turns to detect if user shared personal info (uses conversational context, not just the isolated user message)
-2. `ltmAgent` — extracts structured memory items (`profile | preference | constraint | goal | plan | project | event`) with `subject` (snake_case canonical key) and `importance` (1–5)
-3. `LongTermMemory#ingestLTM()` — upserts by `subject` for profile facts, appends for episodic types; deduplication also via vector similarity (0.70 threshold)
+**Automatic LTM extraction pipeline** (runs every turn, fire-and-forget):
+1. `relevantInfoAgent` — evaluates last 3 conversation turns to detect if user shared personal info
+2. `ltmAgent` — extracts structured items (`profile | preference | constraint | goal | plan | project | event`) with `subject` (snake_case) and `importance` (1–5)
+3. `LongTermMemory#ingestLTM()` — upserts by `subject` for profile facts, appends for episodic types; vector dedup at 0.70 threshold
 
 **LTM semantic search**: topK=8, minImportance=2, minScore=0.75 — runs on every turn before building agent context.
 
@@ -137,9 +138,14 @@ Each JSON definition references named entries in three registries resolved at lo
 - `toolRegistry` — maps tool name → tool (`src/agents/tools/`)
 - `outputTypesRegistry` — maps type name → Zod schema (`src/agents/outputTypes/`)
 
-**Per-request agent** (`chat`): built dynamically in `agents/builders/chat.agent.ts` with injected user context (name, timezone, MTM summary, LTM results) and web search skill. Tools: `webSearch`, `getUserData`, `deleteAllUserData`, `deleteUserData`, `getWeather`, `geocodeLocation`.
+**Per-request agents** — two builders, both instantiated dynamically on each chat session:
+
+- **Chat agent** (`agents/builders/chat.agent.ts`): handles user messages. Injected context: user name, timezone, MTM summary, LTM results. Skills: `webSearchSkill`, `profileSkill`, `memorySkill`. Tools: `webSearch`, `getWeather`, `geocodeLocation`, `getUserData`, `deleteAllUserData`, `deleteUserData`, `editProfileInfo`, `forgetProfileInfo`, `resetProfile`, `saveMemory`, `searchMemory`, `updateMemory`, `deleteMemory`, `clearAllMemories`.
+- **UserMemory agent** (`agents/builders/userMemory.agent.ts`): runs automatically after every turn. Reads the last 3 turns and decides whether the user shared stable personal facts to save to the profile MD file. Single tool: `updateProfile`. Does **not** save events or episodic memories.
 
 `getWeather` — fetches current conditions + 12h hourly + 7-day daily from OpenWeather One Call API 3.0. Uses `location` from the request when the user doesn't name a city. `geocodeLocation` — resolves a city name to coordinates; must be called before `getWeather` whenever the user mentions a specific place.
+
+`saveMemory` — only called when the user **explicitly** asks Elber to remember something; near-duplicate check (0.85) prevents re-saving the same event. `updateMemory` / `deleteMemory` find the target by semantic search (score ≥ 0.5).
 
 Prompts live in `src/agents/prompts/`. Key rule in `chat.prompt.ts`: default to web search for any specific factual claim; skip only for definitions, math, and general advice.
 
@@ -152,7 +158,8 @@ src/
 │   └── socket.listener.ts      # routes Socket.io events
 ├── services/
 │   ├── elber.service.ts        # main orchestration, streaming, voice
-│   ├── memory.service.ts       # handleMemory() pipeline
+│   ├── memory.service.ts       # handleMemory() pipeline + episodic CRUD (saveMemoryEntry, searchMemoryEntries, updateMemoryEntry, deleteMemoryEntry, clearAllMemoryEntries)
+│   ├── profile.service.ts      # profile MD file CRUD with bidirectional dedup (addProfileEntry, editProfileEntry, forgetProfileEntries, resetProfileData)
 │   ├── chat.service.ts         # Firebase chat operations
 │   ├── ai.service.ts           # OpenAI embeddings
 │   ├── polly.service.ts        # AWS Polly TTS synthesis
@@ -167,12 +174,23 @@ src/
 │   ├── longTermMemory.model.ts
 │   └── weather.model.ts        # OneCallApiResponse + normalized output types
 ├── agents/
-│   ├── builders/chat.agent.ts  # per-request chat agent
+│   ├── builders/
+│   │   ├── chat.agent.ts       # per-request chat agent (user messages)
+│   │   └── userMemory.agent.ts # per-request background agent (profile MD updates)
 │   ├── definitions/*.agent.json
-│   ├── prompts/                # all prompt functions
-│   ├── tools/                  # webSearch, getUserData, getWeather, geocodeLocation
+│   ├── prompts/                # all prompt functions (including userMemory.prompt.ts)
+│   ├── tools/
+│   │   ├── search.tools.ts     # webSearch (Serper)
+│   │   ├── user.tools.ts       # getUserData, deleteAllUserData, deleteUserData
+│   │   ├── weather.tools.ts    # getWeather, geocodeLocation
+│   │   ├── profile.tools.ts    # editProfileInfo, forgetProfileInfo, resetProfile, updateProfile
+│   │   ├── memory.tools.ts     # saveMemory, searchMemory, updateMemory, deleteMemory, clearAllMemories
+│   │   └── index.ts            # tool registry
 │   ├── outputTypes/            # Zod schemas for structured outputs
-│   └── skills/web_search.skill.ts
+│   └── skills/
+│       ├── web_search.skill.ts # when to call webSearch
+│       ├── profile.skill.ts    # when to call profile editing tools
+│       └── memory.skill.ts     # when to call episodic memory tools
 ├── loaders/
 │   ├── agents.loader.ts        # startup: reads definitions, resolves registries
 │   ├── socket.loader.ts        # Socket.io init + Firebase token validation

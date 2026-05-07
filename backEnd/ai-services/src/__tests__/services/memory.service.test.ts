@@ -1,4 +1,11 @@
-import { handleMemory } from '../../services/memory.service'
+import {
+  handleMemory,
+  saveMemoryEntry,
+  searchMemoryEntries,
+  updateMemoryEntry,
+  deleteMemoryEntry,
+  clearAllMemoryEntries,
+} from '../../services/memory.service'
 import { run } from '@openai/agents'
 import MidTermMemory from '../../models/midTermMemory.model'
 import ShortTermMemory from '../../models/shortTermMemory.model'
@@ -7,6 +14,8 @@ import * as chatService from '../../services/chat.service'
 import { ElberResponse } from '../../models/elber.model'
 import { getAgents } from '../../loaders/agents.loader'
 import userMemoryAgent from '../../agents/builders/userMemory.agent'
+import PgVectorMemoryStore from '../../services/ltm/vectoreStore.service'
+import { embedText } from '../../services/ai.service'
 
 jest.mock('@openai/agents', () => ({
   __esModule: true,
@@ -53,6 +62,7 @@ jest.mock('../../services/ltm/ltmDB.service', () => ({ pgPool: { query: jest.fn(
 jest.mock('../../services/ltm/vectoreStore.service')
 jest.mock('../../services/ltm/ltmReader.service')
 jest.mock('../../services/ltm/ltmWriter.service')
+jest.mock('../../services/ai.service', () => ({ embedText: jest.fn() }))
 
 const buildElberResponse = (): ElberResponse => ({
   conversationId: 'user1_1',
@@ -215,6 +225,198 @@ describe('memory.service', () => {
         'Usuario: user message\n Elber: Elber response',
         expect.objectContaining({ context: expect.any(Object) })
       )
+    })
+  })
+
+  // ── Episodic memory CRUD ─────────────────────────────────────────────────────
+
+  const DUMMY_EMBEDDING = [0.1, 0.2, 0.3]
+  const mockEmbedText = embedText as jest.Mock
+
+  const mockStore = {
+    insert: jest.fn(),
+    search: jest.fn(),
+    update: jest.fn(),
+    deleteMemories: jest.fn(),
+    deleteAll: jest.fn(),
+    findNearDuplicate: jest.fn(),
+  }
+
+  beforeEach(() => {
+    ;(PgVectorMemoryStore as jest.Mock).mockImplementation(() => mockStore)
+    mockEmbedText.mockResolvedValue(DUMMY_EMBEDDING)
+    mockStore.insert.mockResolvedValue(undefined)
+    mockStore.search.mockResolvedValue([])
+    mockStore.update.mockResolvedValue(undefined)
+    mockStore.deleteMemories.mockResolvedValue(undefined)
+    mockStore.deleteAll.mockResolvedValue(0)
+    mockStore.findNearDuplicate.mockResolvedValue(null)
+  })
+
+  describe('saveMemoryEntry', () => {
+    it('embeds the memory and inserts it when no duplicate exists', async () => {
+      mockStore.findNearDuplicate.mockResolvedValue(null)
+
+      const result = await saveMemoryEntry('user1', 'El usuario tuvo una reunión con Carlos')
+
+      expect(mockEmbedText).toHaveBeenCalledWith('El usuario tuvo una reunión con Carlos')
+      expect(mockStore.insert).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'user1', type: 'event', importance: 4, subject: null })
+      )
+      expect(result).toBe('Recuerdo guardado correctamente.')
+    })
+
+    it('skips insert and returns success when a near-duplicate is found', async () => {
+      mockStore.findNearDuplicate.mockResolvedValue({ id: 'existing-id', score: 0.92 })
+
+      const result = await saveMemoryEntry('user1', 'El usuario tuvo una reunión con Carlos')
+
+      expect(mockStore.insert).not.toHaveBeenCalled()
+      expect(result).toBe('Recuerdo guardado correctamente.')
+    })
+
+    it('throws when an exception occurs', async () => {
+      mockEmbedText.mockRejectedValue(new Error('OpenAI error'))
+
+      await expect(saveMemoryEntry('user1', 'algo')).rejects.toThrow('OpenAI error')
+    })
+  })
+
+  describe('searchMemoryEntries', () => {
+    it('returns formatted list with dates when results are found', async () => {
+      mockStore.search.mockResolvedValue([
+        { id: '1', text: 'Reunión con Carlos', score: 0.9, updatedAt: new Date('2026-05-05'), type: 'event', importance: 4 },
+        { id: '2', text: 'Entrevista en Google', score: 0.8, updatedAt: new Date('2026-05-06'), type: 'event', importance: 4 },
+      ])
+
+      const result = await searchMemoryEntries('user1', 'reunión')
+
+      expect(mockEmbedText).toHaveBeenCalledWith('reunión')
+      expect(mockStore.search).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'user1', topK: 5, minImportance: 1 })
+      )
+      expect(result).toContain('Reunión con Carlos')
+      expect(result).toContain('Entrevista en Google')
+    })
+
+    it('returns not-found message when no results', async () => {
+      mockStore.search.mockResolvedValue([])
+
+      const result = await searchMemoryEntries('user1', 'algo inexistente')
+
+      expect(result).toBe('No encontré recuerdos relacionados con esa búsqueda.')
+    })
+
+    it('throws when an exception occurs', async () => {
+      mockEmbedText.mockRejectedValue(new Error('OpenAI error'))
+
+      await expect(searchMemoryEntries('user1', 'algo')).rejects.toThrow('OpenAI error')
+    })
+  })
+
+  describe('updateMemoryEntry', () => {
+    it('finds the closest match, embeds the correction, and updates it', async () => {
+      mockStore.search.mockResolvedValue([
+        { id: 'mem-1', text: 'Reunión con Carlos el 5 de mayo', score: 0.88, updatedAt: new Date(), type: 'event', importance: 4 },
+      ])
+
+      const result = await updateMemoryEntry('user1', 'reunión con Carlos el 5 de mayo', 'Reunión con Carlos el 6 de mayo')
+
+      expect(mockEmbedText).toHaveBeenCalledTimes(2)
+      expect(mockStore.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'mem-1', text: 'Reunión con Carlos el 6 de mayo' })
+      )
+      expect(result).toBe('Recuerdo actualizado: "Reunión con Carlos el 6 de mayo"')
+    })
+
+    it('returns not-found when top result score is below 0.5', async () => {
+      mockStore.search.mockResolvedValue([
+        { id: 'mem-1', text: 'Algo diferente', score: 0.3, updatedAt: new Date(), type: 'event', importance: 4 },
+      ])
+
+      const result = await updateMemoryEntry('user1', 'reunión con Carlos', 'corrección')
+
+      expect(mockStore.update).not.toHaveBeenCalled()
+      expect(result).toBe('No encontré un recuerdo que coincida con esa descripción.')
+    })
+
+    it('returns not-found when search returns no results', async () => {
+      mockStore.search.mockResolvedValue([])
+
+      const result = await updateMemoryEntry('user1', 'reunión con Carlos', 'corrección')
+
+      expect(mockStore.update).not.toHaveBeenCalled()
+      expect(result).toBe('No encontré un recuerdo que coincida con esa descripción.')
+    })
+
+    it('throws when an exception occurs', async () => {
+      mockEmbedText.mockRejectedValue(new Error('OpenAI error'))
+
+      await expect(updateMemoryEntry('user1', 'algo', 'corrección')).rejects.toThrow('OpenAI error')
+    })
+  })
+
+  describe('deleteMemoryEntry', () => {
+    it('finds the closest match and deletes it', async () => {
+      mockStore.search.mockResolvedValue([
+        { id: 'mem-1', text: 'Viaje a Miami', score: 0.91, updatedAt: new Date(), type: 'event', importance: 4 },
+      ])
+
+      const result = await deleteMemoryEntry('user1', 'viaje a Miami')
+
+      expect(mockStore.deleteMemories).toHaveBeenCalledWith('user1', ['mem-1'])
+      expect(result).toBe('He olvidado: "Viaje a Miami"')
+    })
+
+    it('returns not-found when top result score is below 0.5', async () => {
+      mockStore.search.mockResolvedValue([
+        { id: 'mem-1', text: 'Algo muy diferente', score: 0.2, updatedAt: new Date(), type: 'event', importance: 4 },
+      ])
+
+      const result = await deleteMemoryEntry('user1', 'viaje a Miami')
+
+      expect(mockStore.deleteMemories).not.toHaveBeenCalled()
+      expect(result).toBe('No encontré un recuerdo que coincida con esa descripción.')
+    })
+
+    it('returns not-found when search returns no results', async () => {
+      mockStore.search.mockResolvedValue([])
+
+      const result = await deleteMemoryEntry('user1', 'viaje a Miami')
+
+      expect(mockStore.deleteMemories).not.toHaveBeenCalled()
+      expect(result).toBe('No encontré un recuerdo que coincida con esa descripción.')
+    })
+
+    it('throws when an exception occurs', async () => {
+      mockEmbedText.mockRejectedValue(new Error('OpenAI error'))
+
+      await expect(deleteMemoryEntry('user1', 'algo')).rejects.toThrow('OpenAI error')
+    })
+  })
+
+  describe('clearAllMemoryEntries', () => {
+    it('deletes all memories and returns the count', async () => {
+      mockStore.deleteAll.mockResolvedValue(7)
+
+      const result = await clearAllMemoryEntries('user1')
+
+      expect(mockStore.deleteAll).toHaveBeenCalledWith('user1')
+      expect(result).toBe('He borrado 7 recuerdo(s) de tu historial.')
+    })
+
+    it('returns zero count when the table is already empty', async () => {
+      mockStore.deleteAll.mockResolvedValue(0)
+
+      const result = await clearAllMemoryEntries('user1')
+
+      expect(result).toBe('He borrado 0 recuerdo(s) de tu historial.')
+    })
+
+    it('throws when an exception occurs', async () => {
+      mockStore.deleteAll.mockRejectedValue(new Error('DB error'))
+
+      await expect(clearAllMemoryEntries('user1')).rejects.toThrow('DB error')
     })
   })
 })

@@ -90,3 +90,71 @@ const handleUserRelevantInformation = async (originalRequest: ElberRequest, conv
     const agent = await userMemoryAgent(uid)
     await run(agent, conversationContext, {context: userContext})
 }
+
+// ── Episodic memory CRUD ───────────────────────────────────────────────────────
+
+import { embedText } from './ai.service'
+import PgVectorMemoryStore from './ltm/vectoreStore.service'
+
+export const saveMemoryEntry = async (userId: string, memory: string): Promise<string> => {
+    const store = new PgVectorMemoryStore()
+    const embedding = await embedText(memory)
+
+    const duplicate = await store.findNearDuplicate({ userId, candidateEmbedding: embedding, threshold: 0.85 })
+    if (duplicate) return 'Recuerdo guardado correctamente.'
+
+    await store.insert({ userId, type: 'event', importance: 4, subject: null, text: memory, embedding })
+    return 'Recuerdo guardado correctamente.'
+}
+
+export const searchMemoryEntries = async (userId: string, query: string): Promise<string> => {
+    const store = new PgVectorMemoryStore()
+    const queryEmbedding = await embedText(query)
+    const results = await store.search({ userId, queryEmbedding, topK: 5, minImportance: 1 })
+
+    if (!results.length) return 'No encontré recuerdos relacionados con esa búsqueda.'
+
+    return results
+        .map((r) => {
+            const date = new Date(r.updatedAt).toLocaleDateString('es-MX', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            })
+            return `- ${r.text} (${date})`
+        })
+        .join('\n')
+}
+
+export const updateMemoryEntry = async (userId: string, original: string, correction: string): Promise<string> => {
+    const store = new PgVectorMemoryStore()
+    const originalEmbedding = await embedText(original)
+    const results = await store.search({ userId, queryEmbedding: originalEmbedding, topK: 1, minImportance: 1 })
+
+    if (!results.length || results[0].score < 0.5) {
+        return 'No encontré un recuerdo que coincida con esa descripción.'
+    }
+
+    const newEmbedding = await embedText(correction)
+    await store.update({ id: results[0].id, text: correction, embedding: newEmbedding })
+    return `Recuerdo actualizado: "${correction}"`
+}
+
+export const deleteMemoryEntry = async (userId: string, description: string): Promise<string> => {
+    const store = new PgVectorMemoryStore()
+    const embedding = await embedText(description)
+    const results = await store.search({ userId, queryEmbedding: embedding, topK: 1, minImportance: 1 })
+
+    if (!results.length || results[0].score < 0.5) {
+        return 'No encontré un recuerdo que coincida con esa descripción.'
+    }
+
+    await store.deleteMemories(userId, [results[0].id])
+    return `He olvidado: "${results[0].text}"`
+}
+
+export const clearAllMemoryEntries = async (userId: string): Promise<string> => {
+    const store = new PgVectorMemoryStore()
+    const count = await store.deleteAll(userId)
+    return `He borrado ${count} recuerdo(s) de tu historial.`
+}

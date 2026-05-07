@@ -31,6 +31,30 @@ export type ProfileSection =
 
 const profileCache = new Map<string, string>();
 
+const tokenize = (text: string): string[] =>
+    text.toLowerCase()
+        .split(/[\s,.:;]+/)
+        .filter(w => w.length > 3);
+
+const isDuplicateBullet = (content: string, newInfo: string): boolean => {
+    const bullets = content
+        .split('\n')
+        .filter(l => l.trimStart().startsWith('- '))
+        .map(l => l.replace(/^[\s-]+/, '').trim());
+
+    const newTokens = tokenize(newInfo);
+    if (newTokens.length === 0) return false;
+
+    return bullets.some(bullet => {
+        const bulletTokens = tokenize(bullet);
+        if (bulletTokens.length === 0) return false;
+        const matches = newTokens.filter(t => bulletTokens.includes(t));
+        // Duplicate if 70%+ of either set is covered by the other (bidirectional)
+        return matches.length / newTokens.length >= 0.7 ||
+               matches.length / bulletTokens.length >= 0.7;
+    });
+};
+
 const getProfilePath = (userId: string): string =>
     path.join(PROFILES_DIR, `${userId}.md`);
 
@@ -76,6 +100,10 @@ export const addProfileEntry = async (
         } else {
             throw error;
         }
+    }
+
+    if (isDuplicateBullet(content, info)) {
+        return `Perfil actualizado: información agregada en "${section}".`;
     }
 
     const sectionHeader = `## ${section}`;

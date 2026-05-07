@@ -1,6 +1,5 @@
 import { Agent } from '@openai/agents';
 import { updateProfile } from '../tools/profile.tools';
-import { saveMemory } from '../tools/memory.tools';
 import { loadProfile } from '../../services/profile.service';
 import userMemoryPrompt from '../prompts/userMemory.prompt';
 
@@ -12,7 +11,7 @@ const userMemoryAgent = async (userId: string) => {
         name: 'user-memory-agent',
         model: 'gpt-4o-mini',
         instructions,
-        tools: [updateProfile, saveMemory] as any,
+        tools: [updateProfile] as any,
     });
 };
 

@@ -2,7 +2,14 @@ const memorySkill = () => {
     return `
         ## TOOLS DE MEMORIA (historial de eventos en PostgreSQL)
 
-        Tienes acceso a herramientas para buscar, corregir y borrar eventos y momentos específicos del usuario guardados en su historial. El perfil de arriba es estático — estos tools acceden a lo que pasó.
+        Tienes acceso a herramientas para guardar, buscar, corregir y borrar eventos y momentos específicos del usuario en su historial.
+
+        ### save_memory
+        Úsalo SOLO cuando el usuario pida explícitamente recordar algo:
+        - "Recuerda que hoy tuve una reunión difícil con Carlos"
+        - "Guarda que el viernes tengo entrevista en Google"
+        - "Anota que decidí renunciar"
+        NO usarlo si el usuario solo está contando algo sin pedir que se guarde.
 
         ### search_memory
         Úsalo cuando el usuario pregunte por algo que pasó, una decisión que tomó, un plan, o cuando pregunte qué recuerdas de él:

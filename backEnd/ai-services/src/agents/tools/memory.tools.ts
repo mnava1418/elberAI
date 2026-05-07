@@ -12,17 +12,16 @@ import {
 export const saveMemory = tool({
     name: 'save_memory',
     description: `
-        Guarda un evento o momento específico del usuario: algo que pasó, una decisión que tomó,
-        un plan futuro, una reunión, un recuerdo importante.
+        Guarda un evento o momento específico en el historial del usuario en PostgreSQL.
 
-        **Usar cuando el usuario comparta algo que ocurrió o que planea hacer, por ejemplo:**
-        - "Hoy tuve una reunión difícil con mi socio Carlos sobre el presupuesto"
-        - "Decidí cambiar de carrera"
-        - "El viernes tengo una entrevista en Google"
-        - "Fui al médico y me dijeron que tengo presión alta"
+        **Usar SOLO cuando el usuario pida explícitamente recordar algo:**
+        - "Recuerda que hoy tuve una reunión difícil con Carlos"
+        - "Guarda que el viernes tengo entrevista en Google"
+        - "No olvides que fui al médico y me dijeron que tengo presión alta"
+        - "Anota que decidí renunciar"
 
-        NO usar para información permanente del usuario como preferencias, trabajo o datos personales
-        — eso va en update_profile. Este tool guarda eventos y momentos en PostgreSQL.
+        NO usar si el usuario solo está contando algo sin pedir que se guarde.
+        NO usar para información permanente como preferencias, trabajo o datos personales — eso va en update_profile.
 
         Redactar el recuerdo en tercera persona, conciso, una sola oración.
     `,

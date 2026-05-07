@@ -154,11 +154,12 @@ class PgVectorMemoryStore {
         return mapRow(result.rows[0]);
     }
 
-    async deleteAll(userId: string) {
-        await pgPool.query(
+    async deleteAll(userId: string): Promise<number> {
+        const result = await pgPool.query(
             db.deleteAll,
             [userId]
         )
+        return result.rowCount ?? 0
     }
 
     async deleteMemories(userId: string, memoryIds: string[]) {

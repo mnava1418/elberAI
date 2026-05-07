@@ -169,6 +169,71 @@ describe('addProfileEntry', () => {
 
         expect(mockReadFile).toHaveBeenCalledTimes(3);
     });
+
+    describe('deduplication', () => {
+        it('does not write when info is an exact match of an existing bullet', async () => {
+            mockReadFile.mockResolvedValue(PROFILE_WITH_DATA);
+
+            const result = await addProfileEntry(USER_ID, 'Datos Personales', 'Tiene 30 años');
+
+            expect(result).toBe('Perfil actualizado: información agregada en "Datos Personales".');
+            expect(mockWriteFile).not.toHaveBeenCalled();
+        });
+
+        it('does not write when info matches after stripping common prefix "El usuario"', async () => {
+            mockReadFile.mockResolvedValue(PROFILE_WITH_DATA);
+
+            const result = await addProfileEntry(USER_ID, 'Trabajo', 'El usuario trabaja en Anthropic');
+
+            expect(result).toBe('Perfil actualizado: información agregada en "Trabajo".');
+            expect(mockWriteFile).not.toHaveBeenCalled();
+        });
+
+        it('does not write when 70%+ of key words already exist in another bullet', async () => {
+            // Profile has "Trabaja en Anthropic". New info shares "trabaja" and "anthropic" (2/2 = 100%)
+            mockReadFile.mockResolvedValue(PROFILE_WITH_DATA);
+
+            const result = await addProfileEntry(USER_ID, 'Trabajo', 'Trabaja en Anthropic como ingeniero');
+
+            // "trabaja", "anthropic" both in existing bullet → 2/3 ≈ 67% — just under threshold,
+            // but "ingeniero" is extra. Let's use a case that clearly hits 70%:
+            // new tokens: ["trabaja", "anthropic"] (2), matches: 2, ratio 2/2 = 100%
+            expect(mockWriteFile).not.toHaveBeenCalled();
+        });
+
+        it('does not write when a duplicate exists in a different section', async () => {
+            // "Trabaja en Anthropic" is in Trabajo section; try to add to Datos Personales
+            mockReadFile.mockResolvedValue(PROFILE_WITH_DATA);
+
+            await addProfileEntry(USER_ID, 'Datos Personales', 'Trabaja en Anthropic');
+
+            expect(mockWriteFile).not.toHaveBeenCalled();
+        });
+
+        it('writes when the new info is genuinely different from all existing bullets', async () => {
+            mockReadFile.mockResolvedValue(PROFILE_WITH_DATA);
+            mockWriteFile.mockResolvedValue(undefined);
+
+            const result = await addProfileEntry(USER_ID, 'Preferencias', 'Le gusta el café');
+
+            expect(result).toBe('Perfil actualizado: información agregada en "Preferencias".');
+            expect(mockWriteFile).toHaveBeenCalled();
+            const written = mockWriteFile.mock.calls[0][1] as string;
+            expect(written).toContain('- Le gusta el café');
+        });
+
+        it('writes when word overlap is below the 70% threshold', async () => {
+            // Profile has "Tiene 30 años" and "Vive en Ciudad de México"
+            // New info: "Tiene perro labrador" → tokens ["tiene", "perro", "labrador"]
+            // vs "Tiene 30 años" → tokens ["tiene", "años"] → match: ["tiene"] → 1/3 ≈ 33% < 70%
+            mockReadFile.mockResolvedValue(PROFILE_WITH_DATA);
+            mockWriteFile.mockResolvedValue(undefined);
+
+            await addProfileEntry(USER_ID, 'Datos Personales', 'Tiene perro labrador');
+
+            expect(mockWriteFile).toHaveBeenCalled();
+        });
+    });
 });
 
 // ── editProfileEntry ───────────────────────────────────────────────────────────

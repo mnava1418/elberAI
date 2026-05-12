@@ -1,7 +1,8 @@
 import admin from 'firebase-admin'
-import { deleteProfile } from '../../services/user.service'
+import { deleteProfile, fetchUserData, deleteAllUserData, deleteUserDataByItems } from '../../services/user.service'
 import ShortTermMemory from '../../models/shortTermMemory.model'
 import MidTermMemory from '../../models/midTermMemory.model'
+import LongTermMemory from '../../models/longTermMemory.model'
 
 jest.mock('firebase-admin', () => ({
   __esModule: true,
@@ -17,6 +18,8 @@ jest.mock('../../models/midTermMemory.model', () => ({
   __esModule: true,
   default: { getInstance: jest.fn() },
 }))
+
+jest.mock('../../models/longTermMemory.model')
 
 jest.mock('../../config/index.config', () => ({
   gateway: { secret: 'test' },
@@ -51,6 +54,10 @@ describe('user.service', () => {
   const mockDeleteUserMemory = jest.fn()
   const mockRemove = jest.fn()
   const mockRef = jest.fn()
+  const mockGetUserData = jest.fn()
+  const mockResetMemory = jest.fn()
+  const mockGetMemory = jest.fn()
+  const mockDeleteMemories = jest.fn()
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -60,6 +67,12 @@ describe('user.service', () => {
     ;(MidTermMemory.getInstance as jest.Mock).mockReturnValue({
       deleteUserMemory: mockDeleteUserMemory,
     })
+    ;(LongTermMemory as jest.Mock).mockImplementation(() => ({
+      getUserData: mockGetUserData,
+      resetMemory: mockResetMemory,
+      getMemory: mockGetMemory,
+      deleteMemories: mockDeleteMemories,
+    }))
     mockResetProfileData.mockResolvedValue('He borrado todo tu perfil.')
     mockRemove.mockResolvedValue(undefined)
     mockRef.mockReturnValue({ remove: mockRemove })
@@ -81,6 +94,76 @@ describe('user.service', () => {
       mockResetProfileData.mockRejectedValue(new Error('DB error'))
 
       await expect(deleteProfile('user1')).rejects.toThrow('Unable to delete profile for:user1')
+    })
+  })
+
+  describe('fetchUserData', () => {
+    it('should return up to 10 items from LTM', async () => {
+      const data = Array.from({ length: 15 }, (_, i) => ({
+        type: 'profile',
+        importance: 3,
+        info: `fact ${i}`,
+        updatedAt: '',
+      }))
+      mockGetUserData.mockResolvedValue(data)
+
+      const result = await fetchUserData('user1')
+
+      expect(mockGetUserData).toHaveBeenCalledWith('user1')
+      expect(result).toHaveLength(10)
+    })
+
+    it('should return all items when fewer than 10 exist', async () => {
+      const data = [{ type: 'profile', importance: 3, info: 'fact', updatedAt: '' }]
+      mockGetUserData.mockResolvedValue(data)
+
+      const result = await fetchUserData('user1')
+
+      expect(result).toHaveLength(1)
+    })
+  })
+
+  describe('deleteAllUserData', () => {
+    it('should call resetMemory with the userId', async () => {
+      mockResetMemory.mockResolvedValue(undefined)
+
+      await deleteAllUserData('user1')
+
+      expect(mockResetMemory).toHaveBeenCalledWith('user1')
+    })
+  })
+
+  describe('deleteUserDataByItems', () => {
+    it('should delete found memories and return true', async () => {
+      mockGetMemory.mockResolvedValue([{ id: 'id-1' }, { id: 'id-2' }])
+      mockDeleteMemories.mockResolvedValue(undefined)
+
+      const result = await deleteUserDataByItems('user1', ['where I work'])
+
+      expect(mockGetMemory).toHaveBeenCalledWith('user1', 'where I work')
+      expect(mockDeleteMemories).toHaveBeenCalledWith('user1', ['id-1', 'id-2'])
+      expect(result).toBe(true)
+    })
+
+    it('should accumulate ids across multiple items', async () => {
+      mockGetMemory
+        .mockResolvedValueOnce([{ id: 'id-1' }])
+        .mockResolvedValueOnce([{ id: 'id-2' }, { id: 'id-3' }])
+      mockDeleteMemories.mockResolvedValue(undefined)
+
+      const result = await deleteUserDataByItems('user1', ['job', 'city'])
+
+      expect(mockDeleteMemories).toHaveBeenCalledWith('user1', ['id-1', 'id-2', 'id-3'])
+      expect(result).toBe(true)
+    })
+
+    it('should return false when no memories match', async () => {
+      mockGetMemory.mockResolvedValue([])
+
+      const result = await deleteUserDataByItems('user1', ['nonexistent'])
+
+      expect(mockDeleteMemories).not.toHaveBeenCalled()
+      expect(result).toBe(false)
     })
   })
 })

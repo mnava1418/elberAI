@@ -8,9 +8,6 @@ import {
 const getUserData = getUserDataTool as any
 const deleteAllUserData = deleteAllUserDataTool as any
 const deleteUserData = deleteUserDataTool as any
-import LongTermMemory from '../../models/longTermMemory.model'
-
-jest.mock('../../models/longTermMemory.model')
 
 jest.mock('@openai/agents', () => ({
   __esModule: true,
@@ -29,20 +26,19 @@ jest.mock('../../services/ltm/vectoreStore.service')
 jest.mock('../../services/ltm/ltmReader.service')
 jest.mock('../../services/ltm/ltmWriter.service')
 
-describe('user.tools', () => {
-  const mockGetUserData = jest.fn()
-  const mockResetMemory = jest.fn()
-  const mockGetMemory = jest.fn()
-  const mockDeleteMemories = jest.fn()
+const mockFetchUserData = jest.fn()
+const mockDeleteAllUserData = jest.fn()
+const mockDeleteUserDataByItems = jest.fn()
 
+jest.mock('../../services/user.service', () => ({
+  fetchUserData: (...args: any[]) => mockFetchUserData(...args),
+  deleteAllUserData: (...args: any[]) => mockDeleteAllUserData(...args),
+  deleteUserDataByItems: (...args: any[]) => mockDeleteUserDataByItems(...args),
+}))
+
+describe('user.tools', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(LongTermMemory as jest.Mock).mockImplementation(() => ({
-      getUserData: mockGetUserData,
-      resetMemory: mockResetMemory,
-      getMemory: mockGetMemory,
-      deleteMemories: mockDeleteMemories,
-    }))
   })
 
   describe('getUserData tool', () => {
@@ -56,25 +52,26 @@ describe('user.tools', () => {
       expect(result).toContain('No pude identificar al usuario')
     })
 
-    it('should return user data sliced to 10 items', async () => {
-      const data = Array.from({ length: 15 }, (_, i) => ({
+    it('should return user data from service', async () => {
+      const data = Array.from({ length: 10 }, (_, i) => ({
         type: 'profile',
         importance: 3,
         info: `fact ${i}`,
         updatedAt: '',
       }))
-      mockGetUserData.mockResolvedValue(data)
+      mockFetchUserData.mockResolvedValue(data)
 
       const result = await getUserData.execute(
         {},
         { context: { userId: 'user1', timeZone: 'UTC' } } as any
       )
 
+      expect(mockFetchUserData).toHaveBeenCalledWith('user1')
       expect(result).toHaveLength(10)
     })
 
     it('should return error message on exception', async () => {
-      mockGetUserData.mockRejectedValue(new Error('DB error'))
+      mockFetchUserData.mockRejectedValue(new Error('DB error'))
       const result = await getUserData.execute(
         {},
         { context: { userId: 'user1', timeZone: 'UTC' } } as any
@@ -89,18 +86,18 @@ describe('user.tools', () => {
       expect(result).toContain('No pude identificar al usuario')
     })
 
-    it('should reset memory and return success message', async () => {
-      mockResetMemory.mockResolvedValue(undefined)
+    it('should call service and return success message', async () => {
+      mockDeleteAllUserData.mockResolvedValue(undefined)
       const result = await deleteAllUserData.execute(
         {},
         { context: { userId: 'user1', timeZone: 'UTC' } } as any
       )
-      expect(mockResetMemory).toHaveBeenCalledWith('user1')
+      expect(mockDeleteAllUserData).toHaveBeenCalledWith('user1')
       expect(result).toBe('He borrado toda la memoria')
     })
 
     it('should return error message on exception', async () => {
-      mockResetMemory.mockRejectedValue(new Error('DB error'))
+      mockDeleteAllUserData.mockRejectedValue(new Error('DB error'))
       const result = await deleteAllUserData.execute(
         {},
         { context: { userId: 'user1', timeZone: 'UTC' } } as any
@@ -126,21 +123,20 @@ describe('user.tools', () => {
       expect(result).toContain('No se especificaron datos')
     })
 
-    it('should delete found memories and return success message', async () => {
-      mockGetMemory.mockResolvedValue([{ id: 'id-1' }, { id: 'id-2' }])
-      mockDeleteMemories.mockResolvedValue(undefined)
+    it('should return success message when service returns true', async () => {
+      mockDeleteUserDataByItems.mockResolvedValue(true)
 
       const result = await deleteUserData.execute(
         { dataToDelete: ['where I work'] },
         { context: { userId: 'user1', timeZone: 'UTC' } } as any
       )
 
-      expect(mockDeleteMemories).toHaveBeenCalledWith('user1', ['id-1', 'id-2'])
+      expect(mockDeleteUserDataByItems).toHaveBeenCalledWith('user1', ['where I work'])
       expect(result).toBe('He borrado los datos')
     })
 
-    it('should return not found message when no memories match', async () => {
-      mockGetMemory.mockResolvedValue([])
+    it('should return not found message when service returns false', async () => {
+      mockDeleteUserDataByItems.mockResolvedValue(false)
 
       const result = await deleteUserData.execute(
         { dataToDelete: ['nonexistent'] },
@@ -151,7 +147,7 @@ describe('user.tools', () => {
     })
 
     it('should return error message on exception', async () => {
-      mockGetMemory.mockRejectedValue(new Error('DB error'))
+      mockDeleteUserDataByItems.mockRejectedValue(new Error('DB error'))
 
       const result = await deleteUserData.execute(
         { dataToDelete: ['job'] },

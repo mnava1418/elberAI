@@ -1,7 +1,11 @@
 import { RunContext, tool } from '@openai/agents';
 import { z } from 'zod';
 import { UserContext } from '../../models/elber.model';
-import LongTermMemory from '../../models/longTermMemory.model';
+import {
+    fetchUserData,
+    deleteAllUserData as deleteAllUserDataService,
+    deleteUserDataByItems,
+} from '../../services/user.service';
 
 export const getUserData = tool({
     name: 'get_user_data',
@@ -9,7 +13,7 @@ export const getUserData = tool({
         Obtiene y retorna toda la información personal almacenada del usuario.
         La información se presenta en orden cronológico (más reciente primero).
         En caso de datos duplicados, prevalece la información más reciente.
-        
+
         **Se ejecuta cuando el usuario pregunta:**
         - ¿Qué sabes de mí?
         - ¿Qué información tienes sobre mí?
@@ -24,15 +28,12 @@ export const getUserData = tool({
         if(!userContext?.userId) {
             return "No pude identificar al usuario"
         }
-        
+
         try {
-            const ltm = new LongTermMemory()
-            let data = await ltm.getUserData(userContext.userId)
-            data = data.slice(0,10)
-            return data            
+            return await fetchUserData(userContext.userId)
         } catch (error) {
-            return "Hubo un error al buscar información del usuario."   
-        }        
+            return "Hubo un error al buscar información del usuario."
+        }
     }
 })
 
@@ -41,7 +42,7 @@ export const deleteAllUserData = tool({
     description: `
         Elimina permanentemente toda la información personal almacenada del usuario.
         Esta acción es irreversible y borra completamente la memoria a largo plazo.
-        
+
         **Se ejecuta cuando el usuario solicita:**
         - Olvida todo lo que sabes de mí
         - Borra toda tu memoria sobre mí
@@ -59,12 +60,11 @@ export const deleteAllUserData = tool({
         }
 
         try {
-            const ltm = new LongTermMemory()    
-            await ltm.resetMemory(userContext.userId)
+            await deleteAllUserDataService(userContext.userId)
             return 'He borrado toda la memoria'
         } catch (error) {
             return 'Hubo un error al borrar la memoria'
-        }       
+        }
     }
 })
 
@@ -73,7 +73,7 @@ export const deleteUserData = tool({
     description: `
         Elimina información específica del usuario de la memoria a largo plazo.
         Permite borrar datos particulares sin eliminar todo el perfil del usuario.
-        
+
         **Se ejecuta cuando el usuario solicita:**
         - Olvida dónde trabajo y dónde vivo
         - Borra mi información laboral
@@ -97,21 +97,10 @@ export const deleteUserData = tool({
         }
 
         try {
-            let memoryIds: string[] = []
-            const ltm = new LongTermMemory()    
-            
-            for (let i = 0; i < dataToDelete.length; i++) {
-                const memories = await ltm.getMemory(userContext.userId, dataToDelete[i])
-                const ids = memories.map((memory) => memory.id)
-                memoryIds = [...memoryIds, ...ids]
-            }
-
-            if(memoryIds.length > 0) {
-                await ltm.deleteMemories(userContext.userId, memoryIds)
-                return "He borrado los datos"
-            } else {
-                return "No encontre lo que me has pedido en mi memoria"
-            }            
+            const deleted = await deleteUserDataByItems(userContext.userId, dataToDelete)
+            return deleted
+                ? "He borrado los datos"
+                : "No encontre lo que me has pedido en mi memoria"
         } catch (error) {
             return "Hubo un error al olvidar lo que me has pedido."
         }

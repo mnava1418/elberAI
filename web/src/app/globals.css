@@ -88,6 +88,10 @@ body {
   50% { opacity: 0; }
 }
 
+@keyframes elber-spin {
+  to { transform: rotate(360deg); }
+}
+
 .anim-float { animation: elber-float 5s ease-in-out infinite; }
 .anim-pulse { animation: elber-pulse 1.2s ease-in-out infinite; }
 .anim-blink { animation: elber-blink 1s steps(2) infinite; }

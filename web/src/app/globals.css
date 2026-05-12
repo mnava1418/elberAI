@@ -1,15 +1,102 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-primary: #000000;
-  --color-secondary: #2b2b2b;
-  --color-contrast: #ffffff;
-  --color-text: #ffffff;
-  --color-subtitle: #a0a0a0;
+  /* ── Surfaces ─────────────────────────────────── */
+  --color-bg:           #06070d;
+  --color-bg-2:         #0d0f1a;
+  --color-panel:        rgba(255, 255, 255, 0.04);
+  --color-panel-strong: rgba(255, 255, 255, 0.07);
+  --color-border:       rgba(255, 255, 255, 0.08);
+  --color-border-strong:rgba(255, 255, 255, 0.14);
+
+  /* ── Text ─────────────────────────────────────── */
+  --color-text:         #f5f7ff;
+  --color-dim:          #8a91a6;
+  --color-dimmer:       #5f6478;
+
+  /* ── Accents ──────────────────────────────────── */
+  --color-cyan:         #7df9ff;
+  --color-violet:       #b18cff;
+  --color-glow:         rgba(125, 249, 255, 0.35);
+  --color-glow-soft:    rgba(125, 249, 255, 0.12);
+
+  /* ── Legacy aliases (kept for backwards compat) ── */
+  --color-primary:      #06070d;
+  --color-secondary:    rgba(255, 255, 255, 0.04);
+  --color-contrast:     #f5f7ff;
+  --color-subtitle:     #8a91a6;
+
+  /* ── Fonts ────────────────────────────────────── */
+  --font-sans:    var(--font-geist-sans), -apple-system, sans-serif;
+  --font-mono:    var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-fraunces), "Fraunces", Georgia, serif;
 }
 
 body {
-  background-color: var(--color-primary);
+  background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
+
+/* ── Reusable utilities ────────────────────────── */
+.gradient-accent {
+  background: linear-gradient(135deg, var(--color-cyan), var(--color-violet));
+}
+
+.gradient-text {
+  background: linear-gradient(120deg, var(--color-cyan), var(--color-violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.glass {
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-strong {
+  background: var(--color-panel-strong);
+  border: 1px solid var(--color-border-strong);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Animations ────────────────────────────────── */
+@keyframes elber-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes elber-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+
+@keyframes elber-blink {
+  50% { opacity: 0; }
+}
+
+.anim-float { animation: elber-float 5s ease-in-out infinite; }
+.anim-pulse { animation: elber-pulse 1.2s ease-in-out infinite; }
+.anim-blink { animation: elber-blink 1s steps(2) infinite; }
+
+/* Subtle scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-dimmer); }
+::-webkit-scrollbar-track { background: var(--color-bg); }

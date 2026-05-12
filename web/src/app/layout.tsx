@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 
@@ -13,9 +13,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  axes: ["opsz"],
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
-  title: "ElberAI",
-  description: "Your AI personal assistant",
+  title: "Elber — Tu Asistente Personal de IA",
+  description:
+    "Elber recuerda quién eres, conversa en tiempo real y aprende de ti. Tu asistente con bigote y gafas.",
 };
 
 export default function RootLayout({
@@ -25,10 +33,10 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="es"
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

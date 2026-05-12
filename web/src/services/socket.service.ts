@@ -98,7 +98,19 @@ class SocketManager {
     })
   }
 
-  sendMessage(chatId: number, title: string, message: string) {
+  private getCurrentLocation(): Promise<{ lat: number; lon: number } | null> {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) return resolve(null)
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
+        () => resolve(null),
+        { enableHighAccuracy: false, timeout: 5000 }
+      )
+    })
+  }
+
+  async sendMessage(chatId: number, title: string, message: string) {
     const currentUser = auth.currentUser
 
     if (!this.socket?.connected || !currentUser) {
@@ -112,17 +124,22 @@ class SocketManager {
       return
     }
 
-    const timeStamp = new Date().toLocaleString('es-MX', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    })
+    const [location, timeStamp] = await Promise.all([
+      this.getCurrentLocation(),
+      Promise.resolve(
+        new Date().toLocaleString('es-MX', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        })
+      ),
+    ])
 
     const request: ElberRequest = {
       chatId,
@@ -135,7 +152,7 @@ class SocketManager {
       timeStamp,
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       isVoiceMode: false,
-      location: null,
+      location,
     }
 
     this.socket.emit('user:ask', request)

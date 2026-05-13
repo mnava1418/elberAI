@@ -26,7 +26,7 @@ const textStyles = StyleSheet.create({
     error: {
       fontSize: 18,
       fontWeight: '500',
-      color: appColors.text,
+      color: appColors.error,
       letterSpacing: 0.1,
       lineHeight: 22,
     },

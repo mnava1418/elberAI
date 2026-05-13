@@ -9,6 +9,7 @@ import { selectUserProfile } from '../../../store/selectors/user.selector'
 import settingsStyle from '../../../styles/settings.style'
 import { DrawerActions, useNavigation } from '@react-navigation/native'
 import AppIcon from '../../components/ui/AppIcon'
+import { appColors } from '../../../styles/main.style'
 import { showAlert } from '../../../store/actions/elber.actions'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { SettingsStackParamList } from './SettingsNavigator'
@@ -62,14 +63,14 @@ const SettingsScreen = ({navigation}: SettingsProps) => {
         >
             <View style={settingsStyle.settingItemLeft}>
                 <View style={settingsStyle.iconContainer}>
-                    <AppIcon name={icon} size={24} color='#fff' />
+                    <AppIcon name={icon} size={24} color={appColors.text} />
                 </View>
                 <View style={settingsStyle.settingItemContent}>
                     <CustomText type='subtitle' text={title} style={settingsStyle.settingTitle} />
                     {subtitle && <CustomText type='text' text={subtitle} style={settingsStyle.settingSubtitle} />}
                 </View>
             </View>
-            {rightComponent || <AppIcon name='chevron-forward-outline' size={20} color='#A0A0A0' />}
+            {rightComponent || <AppIcon name='chevron-forward-outline' size={20} color={appColors.subtitle} />}
         </Pressable>
     )
 

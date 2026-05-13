@@ -1,19 +1,19 @@
 import { StyleSheet } from "react-native";
 import { appColors } from "./main.style";
 
-const buttonStyles = StyleSheet.create({    
+const buttonStyles = StyleSheet.create({
     primary: {
-        fontSize: 18,
         borderRadius: 50,
+        width: '100%',
+        marginVertical: 12,
+        overflow: 'hidden',
+        margin: 8,
+    },
+    gradient: {
         paddingVertical: 20,
         paddingHorizontal: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%',
-        alignSelf: 'center',
-        marginVertical: 12,
-        backgroundColor: appColors.contrast,
-        margin: 8,
     },
     secondary: {
         backgroundColor: 'transparent',

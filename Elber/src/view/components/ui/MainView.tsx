@@ -1,6 +1,5 @@
 import React, { PropsWithChildren } from 'react'
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { appColors } from '../../../styles/main.style';
+import { StyleProp, View, ViewStyle } from 'react-native';
 import NavBar from '../navBar/NavBar';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -27,20 +26,13 @@ const MainView = ({
     rightIcon = ''
 }: MainViewProps) => {
     return (
-        <LinearGradient 
-            colors={['#D16BA5', '#000000']} 
+        <LinearGradient
+            colors={['#06070d', '#0d0f1a']}
             locations={[0, 1]}
             style={{flex: 1, position: 'relative'}}
-            start={{ x: 1, y: 0 }}
-            end={{ x: 0, y: 1 }}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
         >
-            <View
-                style={[
-                    StyleSheet.absoluteFillObject,
-                    {backgroundColor: appColors.primary,zIndex: 1, opacity: 0.65}
-                ]}
-                pointerEvents="none"
-            />
             { showNavBar ? <NavBar title={navBarTitle} leftAction={leftAction} leftIcon={leftIcon} rightAction={rightAction} rightIcon={rightIcon} /> : <></>}
             <View style={[{flex: 1, paddingHorizontal: applyPadding ? 20 : 0, zIndex: 2}, style]}>
                 {children}

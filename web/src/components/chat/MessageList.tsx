@@ -45,7 +45,7 @@ export default function MessageList() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col px-4 sm:px-6 py-5 max-w-[760px] mx-auto w-full">
+      <div className="relative z-10 min-h-full flex flex-col justify-end px-4 sm:px-6 py-5 max-w-[760px] mx-auto w-full">
         {sorted.map((message) => (
           <MessageBubble
             key={message.id}

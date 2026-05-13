@@ -11,28 +11,25 @@ export default function MessageList() {
   const selectedChatId = useChatStore((state) => state.selectedChatId)
   const isWaiting = useElberStore((state) => state.isWaiting)
   const isStreaming = useElberStore((state) => state.isStreaming)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
 
   const messages =
     selectedChatId !== -1 ? chats.get(selectedChatId)?.messages ?? [] : []
 
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = 0
-    }
-  }, [messages.length, isWaiting])
+  // messages[0] is the newest — reverse for top-to-bottom display
+  const sorted = [...messages].reverse()
 
-  // First message in the array is the latest (column-reverse layout).
   // Mark the latest assistant message as streaming so the cursor shows.
   const latest = messages[0]
   const showStreamingOn =
     isStreaming && latest && latest.role === 'assistant' ? latest.id : null
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'instant' })
+  }, [messages.length, isWaiting, isStreaming])
+
   return (
-    <div
-      ref={containerRef}
-      className="relative flex-1 overflow-y-auto"
-    >
+    <div className="relative flex-1 overflow-y-auto">
       <span
         aria-hidden
         className="orb"
@@ -48,15 +45,16 @@ export default function MessageList() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col-reverse px-4 sm:px-6 py-5 max-w-[760px] mx-auto w-full">
-        {isWaiting && <IsWaiting />}
-        {messages.map((message) => (
+      <div className="relative z-10 flex flex-col px-4 sm:px-6 py-5 max-w-[760px] mx-auto w-full">
+        {sorted.map((message) => (
           <MessageBubble
             key={message.id}
             message={message}
             streaming={message.id === showStreamingOn}
           />
         ))}
+        {isWaiting && <IsWaiting />}
+        <div ref={bottomRef} />
       </div>
     </div>
   )

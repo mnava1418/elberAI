@@ -8,7 +8,7 @@ export default function ChatLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--color-bg)]">
+    <div className="flex h-dvh overflow-hidden bg-[var(--color-bg)]">
       {/* Desktop sidebar */}
       <div className="hidden md:flex">
         <Sidebar />

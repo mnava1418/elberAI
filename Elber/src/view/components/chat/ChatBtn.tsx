@@ -1,12 +1,13 @@
 import React from 'react'
 import { Pressable, View } from 'react-native'
+import LinearGradient from 'react-native-linear-gradient'
 import AppIcon from '../ui/AppIcon'
 import chatStyles from '../../../styles/chat.style'
 import { appColors } from '../../../styles/main.style'
 
 type ChatBtnProps = {
-    type: 'primary' | 'secondary'   
-    icon: string 
+    type: 'primary' | 'secondary'
+    icon: string
     onPress: () => void
 }
 
@@ -18,9 +19,24 @@ const ChatBtn = ({type, icon, onPress}: ChatBtnProps) => {
             ])}
             onPress={onPress}
         >
-            <View style={[chatStyles.btn, {backgroundColor: type == 'primary' ? appColors.contrast : appColors.secondary}]}>
-                <AppIcon name={icon} size={24} color={type == 'primary' ? appColors.primary : appColors.subtitle} />
-            </View>
+            {type === 'primary' ? (
+                <LinearGradient
+                    colors={[appColors.cyan, appColors.violet]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={[chatStyles.btn]}
+                >
+                    <AppIcon name={icon} size={20} color={appColors.primary} />
+                </LinearGradient>
+            ) : (
+                <View style={[chatStyles.btn, {
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderColor: appColors.borderStrong,
+                }]}>
+                    <AppIcon name={icon} size={20} color={appColors.dim} />
+                </View>
+            )}
         </Pressable>
     )
 }

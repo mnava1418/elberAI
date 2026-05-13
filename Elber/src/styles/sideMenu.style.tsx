@@ -7,12 +7,14 @@ const sideMenuStyles = StyleSheet.create({
     },
 
     header: {
-        backgroundColor: appColors.secondary, 
-        marginRight: 8, 
-        flexDirection: 'column', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        borderRadius: 100
+        backgroundColor: appColors.panelStrong,
+        marginRight: 8,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 100,
+        borderWidth: 1,
+        borderColor: appColors.border,
     },
 
     logo: {

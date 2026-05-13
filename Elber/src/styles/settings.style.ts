@@ -11,7 +11,7 @@ const settingsStyle = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 20,
         paddingHorizontal: 16,
-        borderBottomColor: '#333',
+        borderBottomColor: appColors.border,
         marginBottom: 8,
     },
     
@@ -73,7 +73,7 @@ const settingsStyle = StyleSheet.create({
         justifyContent: 'space-between',
         paddingVertical: 16,
         paddingHorizontal: 16,
-        borderBottomColor: '#404040',
+        borderBottomColor: appColors.border,
     },
 
     settingItemLeft: {
@@ -86,7 +86,7 @@ const settingsStyle = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#404040',
+        backgroundColor: 'rgba(255,255,255,0.07)',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,

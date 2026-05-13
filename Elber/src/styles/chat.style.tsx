@@ -17,8 +17,10 @@ const chatStyles = StyleSheet.create({
         justifyContent: 'flex-end',
         alignItems: 'flex-end',
         margin: 12,
-        backgroundColor: appColors.secondary,
+        backgroundColor: 'transparent',
         borderRadius: 25,
+        borderWidth: 1,
+        borderColor: appColors.borderStrong,
         paddingHorizontal: 8,
     },
     inputText: {
@@ -38,17 +40,21 @@ const chatStyles = StyleSheet.create({
     },
     bubbleUser: {
         maxWidth: '65%',
-        backgroundColor: appColors.contrast
+        borderWidth: 1,
+        borderColor: 'rgba(125,249,255,0.35)',
+        overflow: 'hidden',
     },
     bubbleElber: {
         maxWidth: '90%',
-        backgroundColor: appColors.secondary
+        backgroundColor: appColors.panel,
+        borderWidth: 1,
+        borderColor: appColors.border,
     },
     bubbleText: {
         fontSize: 18,
         fontWeight: '400',
         lineHeight: 24,
-        color: appColors.primary
+        color: appColors.text,
     },
     actionsContainer: {
         borderRadius: 15, 

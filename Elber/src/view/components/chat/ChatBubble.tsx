@@ -1,5 +1,6 @@
 import React, { useContext, useRef } from 'react'
-import { Pressable, StyleProp, Text, View, ViewStyle } from 'react-native'
+import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import LinearGradient from 'react-native-linear-gradient'
 import chatStyles, { markdownStyle } from '../../../styles/chat.style'
 import { GlobalContext } from '../../../store/GlobalProvider'
 import Markdown from 'react-native-markdown-display'
@@ -17,30 +18,36 @@ type ChatBubbleProps = {
 const ChatBubble = ({message, align, setShowActions, style = {}, isStatic = false}: ChatBubbleProps) => {
     const messageRef = useRef<View>(null)
     const { dispatch } = useContext(GlobalContext);
+
     const handleLongPress = () => {
         if (messageRef.current && setShowActions) {
             messageRef.current.measure((fx, fy, width, height, px, py) => {
                 dispatch(selectMessage({
-                    layout: {height, px, py, pv: align}, 
+                    layout: {height, px, py, pv: align},
                     message
                 }))
             })
-
             setShowActions(true)
         }
     }
 
-    const generateElberMessage = ( 
+    const generateElberMessage = (
         <View style={[{flexDirection: 'row', justifyContent: 'flex-start'}, style]}>
             <View ref={messageRef} style={[chatStyles.bubble, chatStyles.bubbleElber]}>
                 <Markdown style={markdownStyle}>{message.content}</Markdown>
             </View>
         </View>
     )
-    
+
     const generateUserMessage = (
         <View style={[{flexDirection: 'row', justifyContent: 'flex-end'}, style]}>
             <View ref={messageRef} style={[chatStyles.bubble, chatStyles.bubbleUser]}>
+                <LinearGradient
+                    colors={['rgba(125,249,255,0.28)', 'rgba(177,140,255,0.22)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={StyleSheet.absoluteFillObject}
+                />
                 <Text style={chatStyles.bubbleText}>{message.content}</Text>
             </View>
         </View>

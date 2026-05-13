@@ -11,13 +11,15 @@ const alertStyles = StyleSheet.create({
     },
 
     container: {
-        flexDirection: 'column', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        maxWidth: '80%', 
-        backgroundColor: appColors.secondary, 
-        padding: 24, 
-        borderRadius: 25
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        maxWidth: '80%',
+        backgroundColor: appColors.secondary,
+        borderWidth: 1,
+        borderColor: appColors.borderStrong,
+        padding: 24,
+        borderRadius: 25,
     },
 
     text: {

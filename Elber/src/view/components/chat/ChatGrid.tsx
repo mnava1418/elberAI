@@ -4,6 +4,7 @@ import { selectIsWaitingForElber } from '../../../store/selectors/elber.selector
 import { GlobalContext } from '../../../store/GlobalProvider';
 import ChatBubble from './ChatBubble';
 import IsWaiting from './IsWaiting';
+import EmptyChat from './EmptyChat';
 import { selectChatInfo } from '../../../store/selectors/chat.selector';
 
 type ChatGridProps = {
@@ -16,6 +17,10 @@ const ChatGrid = ({setShowActions, flatListRef}: ChatGridProps) => {
     const chatInfo = selectChatInfo(state.chat)
     const isWaiting = selectIsWaitingForElber(state.elber)
     
+    if (chatInfo.messages.length === 0 && !isWaiting) {
+        return <EmptyChat />
+    }
+
     return (
         <>
             <View style={{flex: 1, flexDirection: 'column', justifyContent: 'flex-end', paddingHorizontal: 10}}>
@@ -28,9 +33,9 @@ const ChatGrid = ({setShowActions, flatListRef}: ChatGridProps) => {
                         <ChatBubble align={item.role == 'assistant' ? 'left' : 'right'} message={item} setShowActions={setShowActions} />
                     )}
                     showsVerticalScrollIndicator={false}
-                />           
+                />
                 {isWaiting ? <IsWaiting /> : <></>}
-            </View>            
+            </View>
         </>
     )
 }

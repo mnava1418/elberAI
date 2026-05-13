@@ -135,14 +135,14 @@ const VoiceSphere = ({ isWaiting, isTalking }: VoiceSphereProps) => {
             <Animated.View style={[styles.sphere, pulseStyle, thinkingStyle]}>
                 {/* Base layer */}
                 <LinearGradient
-                    colors={['#D16BA5', '#E080A8']}
+                    colors={['#7df9ff', '#b18cff']}
                     style={StyleSheet.absoluteFillObject}
                 />
 
                 {/* Layer 1 — clockwise */}
                 <Animated.View style={[StyleSheet.absoluteFillObject, animStyle1]}>
                     <LinearGradient
-                        colors={['#D16BA5', '#FFB8D8', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']}
+                        colors={['#7df9ff', 'rgba(125,249,255,0.6)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                         style={StyleSheet.absoluteFillObject}
@@ -152,7 +152,7 @@ const VoiceSphere = ({ isWaiting, isTalking }: VoiceSphereProps) => {
                 {/* Layer 2 — counter-clockwise */}
                 <Animated.View style={[StyleSheet.absoluteFillObject, animStyle2]}>
                     <LinearGradient
-                        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#E080A8', '#D16BA5']}
+                        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#b18cff', '#7df9ff']}
                         start={{ x: 1, y: 0 }}
                         end={{ x: 0, y: 1 }}
                         style={[StyleSheet.absoluteFillObject, { opacity: 0.9 }]}
@@ -162,7 +162,7 @@ const VoiceSphere = ({ isWaiting, isTalking }: VoiceSphereProps) => {
                 {/* Layer 3 — slow swirl */}
                 <Animated.View style={[StyleSheet.absoluteFillObject, animStyle3]}>
                     <LinearGradient
-                        colors={['#FFA0C8', 'rgba(0,0,0,0)', '#D16BA5', 'rgba(0,0,0,0)']}
+                        colors={['rgba(177,140,255,0.9)', 'rgba(0,0,0,0)', '#7df9ff', 'rgba(0,0,0,0)']}
                         start={{ x: 0.5, y: 0 }}
                         end={{ x: 0.5, y: 1 }}
                         style={[StyleSheet.absoluteFillObject, { opacity: 0.85 }]}
@@ -209,7 +209,7 @@ const VoiceSphere = ({ isWaiting, isTalking }: VoiceSphereProps) => {
 const styles = StyleSheet.create({
     overlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 1.0)',
+        backgroundColor: 'rgba(6,7,13,1.0)',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 100,
@@ -220,14 +220,14 @@ const styles = StyleSheet.create({
         height: SPHERE_SIZE,
         borderRadius: SPHERE_SIZE / 2,
         borderWidth: 2,
-        borderColor: '#D16BA5',
+        borderColor: '#7df9ff',
     },
     sphere: {
         width: SPHERE_SIZE,
         height: SPHERE_SIZE,
         borderRadius: SPHERE_SIZE / 2,
         overflow: 'hidden',
-        shadowColor: '#D16BA5',
+        shadowColor: '#7df9ff',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.9,
         shadowRadius: 25,

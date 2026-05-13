@@ -64,6 +64,8 @@ export const loadProfile = async (userId: string): Promise<string> => {
 
     const profilePath = getProfilePath(userId);
 
+    console.info('PROFILE', profilePath)
+
     try {
         const content = await fs.readFile(profilePath, 'utf-8');
         profileCache.set(userId, content);

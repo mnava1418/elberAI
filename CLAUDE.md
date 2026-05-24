@@ -80,12 +80,12 @@ In `useVoice.ts`, auto-send only triggers when the silence timer expires (not on
 ### AI Services — Request Lifecycle (`ai-services`)
 
 1. Socket event received → `listeners/elber.listener.ts`
-2. `services/elber.service.ts#chat()` — loads STM session + fetches MTM and LTM in parallel
+2. `services/elber.service.ts#chat()` — loads STM session + fetches MTM summary and user memory document in parallel
 3. `agents/builders/chat.agent.ts` — builds per-request OpenAI Agents SDK agent with user context, tools, and web search skill
 4. Response streamed (text) or returned whole (voice) → `handleResponse()`
 5. `services/memory.service.ts#handleMemory()` — runs asynchronously after response:
    - Persists turn to MTM (PostgreSQL + in-memory cache)
-   - Fires LTM extraction pipeline (independent of summary cycle)
+   - Fires keeper agent to update memory document (independent of summary cycle)
    - Triggers MTM rolling summary if token budget (~2500 tokens) exceeded
 
 **`conversationId`** format: `${uid}_${chatId}` — used as the key for all memory caches.
@@ -104,23 +104,19 @@ Both modes: `elber:error`, `elber:cancelled`
 
 ### AI Services — Memory Architecture
 
-Four-layer memory system:
+Three-layer memory system:
 
 | Layer | Storage | Purpose |
 |---|---|---|
 | STM | In-memory Map | OpenAI Agents SDK session (tool call history, current turns); 24-hour TTL |
 | MTM | In-memory cache + PostgreSQL | Recent turns + rolling summary; auto-compresses at ~2500 tokens |
-| Profile | Markdown file per user (`data/profiles/{userId}.md`) | Stable personal facts (name, job, family, preferences, routines, goals) — managed by `profile.service.ts` with in-memory cache; bidirectional word-overlap dedup (70% threshold) |
-| Episodic | PostgreSQL + pgvector | Specific events/moments explicitly asked to be remembered; near-duplicate detection at 0.85 cosine similarity |
+| Memory document | Markdown file per user (`data/memory/{userId}.md`) | Everything known about the user: 9 sections (Identidad, Familia y relaciones, Amistades, Trabajo y estudios, Preferencias e intereses, Rutinas y hábitos, Metas y proyectos, Preocupaciones, Bitácora de eventos) — managed by `userMemory.service.ts` with in-memory cache; bidirectional token-overlap dedup (75% threshold); write lock per user prevents race conditions |
 
-**Automatic LTM extraction pipeline** (runs every turn, fire-and-forget):
-1. `relevantInfoAgent` — evaluates last 3 conversation turns to detect if user shared personal info
-2. `ltmAgent` — extracts structured items (`profile | preference | constraint | goal | plan | project | event`) with `subject` (snake_case) and `importance` (1–5)
-3. `LongTermMemory#ingestLTM()` — upserts by `subject` for profile facts, appends for episodic types; vector dedup at 0.70 threshold
+**Keeper agent** (runs every turn, fire-and-forget): `handleUserMemory()` in `memory.service.ts` passes the last 3 turns + current date to `userMemoryAgent`. The keeper adds new facts via `record_memory` or corrects existing ones via `update_memory`. Notable events go to "Bitácora de eventos" with a `YYYY-MM-DD` date prefix. The keeper does NOT delete entries — only explicit user requests trigger `forget_memory` or `reset_memory`.
 
-**LTM semantic search**: topK=8, minImportance=2, minScore=0.75 — runs on every turn before building agent context.
+**Memory document in context**: the full `data/memory/{userId}.md` is injected as `context.userMemory` into the chat prompt on every turn. The chat agent answers questions about the user directly from context — no tool call needed.
 
-**MTM summary cycle**: state machine (`COLLECTING` → `SUMMARIZING` → `COLLECTING`). When summarizing, STM session is cleared to force fresh context on next turn. Summary also triggers a second LTM extraction pass on the compressed text.
+**MTM summary cycle**: state machine (`COLLECTING` → `SUMMARIZING` → `COLLECTING`). When summarizing, STM session is cleared to force fresh context on next turn.
 
 ### AI Services — Agents & Prompts
 
@@ -129,8 +125,6 @@ Four-layer memory system:
 | Agent ID | Model | Purpose |
 |---|---|---|
 | `chat_summary` | gpt-4o-mini | Rolling MTM compression |
-| `user_info` | gpt-4o-mini | Detects if user shared personal info (output: `IsRelevantType`) |
-| `long_memory` | gpt-4o-mini | Extracts structured LTM items (output: `LTMList`) |
 | `title_generator` | gpt-4o-mini | Auto-generates chat titles on first message |
 
 Each JSON definition references named entries in three registries resolved at load time:
@@ -140,12 +134,12 @@ Each JSON definition references named entries in three registries resolved at lo
 
 **Per-request agents** — two builders, both instantiated dynamically on each chat session:
 
-- **Chat agent** (`agents/builders/chat.agent.ts`): handles user messages. Injected context: user name, timezone, MTM summary, LTM results. Skills: `webSearchSkill`, `profileSkill`, `memorySkill`. Tools: `webSearch`, `getWeather`, `geocodeLocation`, `getUserData`, `deleteAllUserData`, `deleteUserData`, `editProfileInfo`, `forgetProfileInfo`, `resetProfile`, `saveMemory`, `searchMemory`, `updateMemory`, `deleteMemory`, `clearAllMemories`.
-- **UserMemory agent** (`agents/builders/userMemory.agent.ts`): runs automatically after every turn. Reads the last 3 turns and decides whether the user shared stable personal facts to save to the profile MD file. Single tool: `updateProfile`. Does **not** save events or episodic memories.
+- **Chat agent** (`agents/builders/chat.agent.ts`): handles user messages. Injected context: user name, timezone, MTM summary, full memory document. Skills: `webSearchSkill`, `memorySkill`. Tools: `webSearch`, `getWeather`, `geocodeLocation`, `getUserData`, `deleteAllUserData`, `deleteUserData`, `recordMemory`, `updateMemory`, `forgetMemory`, `resetMemory`.
+- **UserMemory agent** (`agents/builders/userMemory.agent.ts`): the keeper — runs automatically after every turn. Receives last 3 turns + current date, updates the memory document via `record_memory` (new facts) or `update_memory` (corrections). Handles all information types: stable facts, preferences, concerns, and dated events.
 
 `getWeather` — fetches current conditions + 12h hourly + 7-day daily from OpenWeather One Call API 3.0. Uses `location` from the request when the user doesn't name a city. `geocodeLocation` — resolves a city name to coordinates; must be called before `getWeather` whenever the user mentions a specific place.
 
-`saveMemory` — only called when the user **explicitly** asks Elber to remember something; near-duplicate check (0.85) prevents re-saving the same event. `updateMemory` / `deleteMemory` find the target by semantic search (score ≥ 0.5).
+`recordMemory` — adds a fact to a specific section of the memory document; called by the chat agent when the user explicitly asks to remember something, or by the keeper for new facts. `updateMemory` — corrects by exact text match (section + `old_info` → `new_info`). `forgetMemory` — keyword-based removal across all sections, explicit user request only. `resetMemory` — wipes the entire document.
 
 Prompts live in `src/agents/prompts/`. Key rule in `chat.prompt.ts`: default to web search for any specific factual claim; skip only for definitions, math, and general advice.
 
@@ -158,16 +152,13 @@ src/
 │   └── socket.listener.ts      # routes Socket.io events
 ├── services/
 │   ├── elber.service.ts        # main orchestration, streaming, voice
-│   ├── memory.service.ts       # handleMemory() pipeline + episodic CRUD (saveMemoryEntry, searchMemoryEntries, updateMemoryEntry, deleteMemoryEntry, clearAllMemoryEntries)
-│   ├── profile.service.ts      # profile MD file CRUD with bidirectional dedup (addProfileEntry, editProfileEntry, forgetProfileEntries, resetProfileData)
+│   ├── memory.service.ts       # handleMemory() pipeline: MTM persistence, keeper trigger, summary cycle
+│   ├── userMemory.service.ts   # memory doc CRUD: recordMemoryFact, editMemoryFact, forgetMemoryFacts, resetMemoryData; write lock per user
 │   ├── chat.service.ts         # Firebase chat operations
 │   ├── ai.service.ts           # OpenAI embeddings
 │   ├── polly.service.ts        # AWS Polly TTS synthesis
 │   ├── weather.service.ts      # OpenWeather fetch, normalize, geocode
-│   └── ltm/
-│       ├── ltmWriter.service.ts
-│       ├── ltmReader.service.ts
-│       └── vectoreStore.service.ts   # pgvector queries
+│   └── ltm/                    # legacy pgvector layer (still used by MTM DB pool; user_memories table not written by memory tools)
 ├── models/
 │   ├── shortTermMemory.model.ts
 │   ├── midTermMemory.model.ts
@@ -183,14 +174,12 @@ src/
 │   │   ├── search.tools.ts     # webSearch (Serper)
 │   │   ├── user.tools.ts       # getUserData, deleteAllUserData, deleteUserData
 │   │   ├── weather.tools.ts    # getWeather, geocodeLocation
-│   │   ├── profile.tools.ts    # editProfileInfo, forgetProfileInfo, resetProfile, updateProfile
-│   │   ├── memory.tools.ts     # saveMemory, searchMemory, updateMemory, deleteMemory, clearAllMemories
+│   │   ├── memory.tools.ts     # recordMemory, updateMemory, forgetMemory, resetMemory (backed by userMemory.service.ts)
 │   │   └── index.ts            # tool registry
 │   ├── outputTypes/            # Zod schemas for structured outputs
 │   └── skills/
 │       ├── web_search.skill.ts # when to call webSearch
-│       ├── profile.skill.ts    # when to call profile editing tools
-│       └── memory.skill.ts     # when to call episodic memory tools
+│       └── memory.skill.ts     # when to use memory tools vs. answer directly from context
 ├── loaders/
 │   ├── agents.loader.ts        # startup: reads definitions, resolves registries
 │   ├── socket.loader.ts        # Socket.io init + Firebase token validation
@@ -202,10 +191,8 @@ src/
 
 ### AI Services — Database Schema
 
-**`user_memories`** — LTM storage with pgvector:
+**`user_memories`** — legacy pgvector table (no longer written by memory tools; kept for Fase B cleanup):
 - Columns: `user_id`, `subject` (snake_case, nullable), `type`, `importance`, `text`, `embedding[1536]`
-- Unique constraint: `(user_id, subject) WHERE subject IS NOT NULL` — enables profile fact upserts
-- IVFFLAT index on embedding (cosine distance)
 
 **`conversation_turns`** — MTM persistence:
 - Columns: `conversation_id` (`${uid}_${chatId}`), `user_id`, `chat_id`, `user_message`, `assistant_message`, `token_estimate`

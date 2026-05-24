@@ -10,11 +10,11 @@ Access to Elber is intentionally controlled. New users must request access and b
 
 ## What Elber can do
 
-- **Remember who you are** — After every message, a background agent reads the conversation and updates a persistent profile with stable facts about you: where you work, your family, your preferences, your routines. This profile is always included as context. Duplicates are detected and filtered out automatically.
+- **Remember you** — After every message, a background agent reads the conversation and updates a persistent memory document with everything it learns about you: identity, family, friends, work, preferences, routines, goals, concerns, and notable events. This document is always included as context. Duplicates are detected and filtered out automatically.
 
-- **Remember what happened** — You can explicitly ask Elber to remember a specific event ("remember that I had a tough meeting with Carlos today"). It saves that moment as a vector embedding in PostgreSQL and can retrieve it later using semantic search. You can also correct, delete, or clear your event history.
+- **Remember what happened** — You can explicitly ask Elber to remember a specific event ("remember that I had a tough interview at Google today"). It saves that moment in the "Bitácora de eventos" section of your memory document with the date, so it can surface it in future conversations.
 
-- **Manage your profile** — You can ask Elber to correct or forget specific facts in your profile at any time ("forget where I work", "update — I'm now 32, not 31"). These changes take effect immediately.
+- **Manage your memory** — You can ask Elber to correct or forget any specific fact at any time ("forget where I work", "update — I'm now 32, not 31", "forget everything you know about me"). These changes take effect immediately.
 
 - **Search the web** — When you ask about recent events or news, Elber searches the internet in real time and incorporates the results into its response.
 
@@ -92,19 +92,17 @@ News Services (cron job)            ← Daily newsletter pipeline, runs independ
 
 ## How memory works
 
-Elber maintains four layers of memory that are combined before every response:
+Elber maintains three layers of memory that are combined before every response:
 
 | Layer | What it stores | Storage | Updated by |
 |---|---|---|---|
 | **Short-Term (STM)** | Active OpenAI Agents session (tool calls, current turns) | In-memory | Automatically, every turn |
 | **Mid-Term (MTM)** | Current conversation history as text | PostgreSQL | Automatically, every turn; summarized when token budget exceeded |
-| **Profile** | Permanent facts about the user: job, family, preferences, routines | Markdown file per user | Background agent after every turn |
-| **Episodic memory** | Specific events and moments the user asks to remember | PostgreSQL + pgvector | Explicitly requested by the user |
+| **Memory document** | Everything known about the user: identity, family, friends, work, preferences, routines, goals, concerns, and notable events | Markdown file per user (`data/memory/{userId}.md`) | Background agent after every turn; user can also modify explicitly |
 
 **How each layer works:**
 
 - **STM** holds the live OpenAI Agents session. It expires after 24 hours and is cleared when MTM generates a new summary, so the agent always reads fresh context.
 - **MTM** persists every turn to PostgreSQL. When accumulated turns exceed a token budget (~2 500 tokens), a rolling summary is generated and the raw turns are discarded. The summary survives restarts and is injected into every new session.
-- **Profile** is a structured Markdown file (`data/profiles/{userId}.md`) divided into sections (Personal Data, Work, Family, Preferences, etc.). A background agent reads the last 3 turns after every exchange and adds new permanent facts. Duplicate detection runs at the code level using bidirectional word-overlap to prevent the same fact from being written twice.
-- **Episodic memory** stores specific events and moments as vector embeddings in PostgreSQL. It is only written when the user explicitly asks ("remember that I had a tough meeting with Carlos today"). The user can search, correct, delete individual entries, or clear the entire history through conversation.
+- **Memory document** is a structured Markdown file divided into nine sections: Identidad, Familia y relaciones, Amistades, Trabajo y estudios, Preferencias e intereses, Rutinas y hábitos, Metas y proyectos, Preocupaciones, and Bitácora de eventos. After every turn, a background agent reads the last 3 turns and adds new facts to the appropriate section. Notable events (meetings, interviews, decisions) go into the Bitácora de eventos section with the date. The full document is injected into the agent's context on every turn — no semantic search required. Duplicate detection uses bidirectional word-overlap (75% threshold) at the code level to prevent re-writing the same fact. Write operations are serialized per user with an in-memory lock to prevent race conditions between the foreground agent and the background keeper.
 

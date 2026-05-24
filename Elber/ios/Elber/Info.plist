@@ -47,6 +47,8 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Elber necesita tu ubicación para darte información de tu zona.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Elber necesita tu ubicación para ofrecerte información relevante y personalizada según tu zona, incluso cuando la app está en segundo plano.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Elber necesita acceso al micrófono para comunicarse contigo.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

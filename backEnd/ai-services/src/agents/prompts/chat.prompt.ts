@@ -29,14 +29,6 @@ const chatPrompt = (context: ChatPromptContext) => {
                 
         ## MEMORIA RESUMIDA DE ESTA CONVERSACIÓN:
         ${context.summary}
-
-        ## PERFIL ACTUAL DEL USUARIO
-
-        Usa este perfil para obtener información acerca del usuario
-
-        <profile>
-        ${context.userProfile}
-        </profile>
         `
 }
 

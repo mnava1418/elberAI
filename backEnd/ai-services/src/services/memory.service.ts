@@ -1,10 +1,9 @@
-import { ElberRequest, ElberResponse, UserContext } from "../models/elber.model";
+import { ElberResponse } from "../models/elber.model";
 import MidTermMemory from "../models/midTermMemory.model";
 import ShortTermMemory from "../models/shortTermMemory.model";
 import { updateChatSummary } from "./chat.service";
 import { run } from '@openai/agents';
 import { getAgents } from "../loaders/agents.loader";
-import userMemoryAgent from "../agents/builders/userMemory.agent";
 
 // ── Entry point ────────────────────────────────────────────────────────────────
 
@@ -21,14 +20,7 @@ export const handleMemory = async (elberResponse: ElberResponse): Promise<void> 
         agentResponse
     )
 
-    // 2. Extracción LTM en cada turno (pipeline independiente del ciclo de summary)
-    // Pasamos los últimos 3 turnos para que el agente tenga contexto conversacional
-    // (ej: si el usuario responde "El 30 de abril" a "¿Cuándo es tu cumpleaños?")
-    const recentContext = MidTermMemory.getInstance().formatLastTurns(conversationId, 3)
-    handleUserRelevantInformation(originalRequest, recentContext, user.uid, originalRequest.chatId)
-        .catch(error => console.error('Error extrayendo LTM por turno:', error))
-
-    // 3. Verificar si corresponde generar un nuevo summary (state machine)
+    // 2. Verificar si corresponde generar un nuevo summary (state machine)
     const mtm = MidTermMemory.getInstance()
     if (mtm.shouldSummarize(conversationId)) {
         mtm.startSummarizing(conversationId)
@@ -77,18 +69,6 @@ const generateSummary = async (conversationId: string, uid: string, chatId: numb
 
     updateChatSummary(uid, chatId, result.finalOutput)
         .catch(error => console.error('Error actualizando summary en Firebase:', error))
-}
-
-const handleUserRelevantInformation = async (originalRequest: ElberRequest, conversationContext: string, uid: string, chatId: number): Promise<void> => {
-    const {timeZone, location} = originalRequest
-    const userContext: UserContext = {
-        userId: uid,
-        timeZone,
-        location
-    }
-
-    const agent = await userMemoryAgent(uid)
-    await run(agent, conversationContext, {context: userContext})
 }
 
 // ── Episodic memory CRUD ───────────────────────────────────────────────────────

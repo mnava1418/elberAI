@@ -1,4 +1,3 @@
-import { updateProfile, editProfileInfo, forgetProfileInfo, resetProfile } from './profile.tools';
 import { webSearch } from './search.tools'
 import { getWeather, geocodeLocation } from './weather.tools'
 import { saveMemory, searchMemory, updateMemory, deleteMemory, clearAllMemories } from './memory.tools'
@@ -12,13 +11,6 @@ const weatherTools: Record<string, any> = {
     geocodeLocation,
 }
 
-const userProfileTools: Record<string, any> = {
-    updateProfile,
-    editProfileInfo,
-    forgetProfileInfo,
-    resetProfile,
-}
-
 const memoryTools: Record<string, any> = {
     saveMemory,
     searchMemory,
@@ -30,7 +22,6 @@ const memoryTools: Record<string, any> = {
 const toolRegistry: Record<string, any> = {
     ...searchTools,
     ...weatherTools,
-    ...userProfileTools,
     ...memoryTools,
 };
 

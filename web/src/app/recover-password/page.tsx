@@ -3,24 +3,25 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { signIn } from '@/services/auth.service'
+import { resetPassword } from '@/services/auth.service'
 
-export default function LoginPage() {
+export default function RecoverPasswordPage() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setMessage('')
     setLoading(true)
     try {
-      await signIn(email, password)
+      const msg = await resetPassword(email)
+      setMessage(msg)
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'Error al iniciar sesión'
-      setError(message)
+      const text = err instanceof Error ? err.message : 'Error al recuperar contraseña'
+      setError(text)
     } finally {
       setLoading(false)
     }
@@ -28,9 +29,8 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex flex-1 overflow-hidden bg-[var(--color-bg)]">
-      {/* ── Brand panel (left on desktop, top on mobile) ───────── */}
+      {/* ── Brand panel ───────────────────────────────────────────── */}
       <div className="relative overflow-hidden hidden md:flex md:flex-1 lg:flex-[1.1] flex-col px-8 lg:px-14 py-10 lg:py-14 border-r border-[var(--color-border)]">
-        {/* Glow orbs */}
         <span
           aria-hidden
           className="orb"
@@ -61,7 +61,6 @@ export default function LoginPage() {
         />
 
         <div className="relative z-10 flex flex-col h-full">
-          {/* Logo */}
           <Link href="/" className="inline-flex items-center gap-2.5 text-[var(--color-text)] w-fit">
             <span className="relative inline-block w-9 h-9">
               <Image
@@ -88,49 +87,18 @@ export default function LoginPage() {
             </span>
           </Link>
 
-          {/* Greeting */}
           <div className="flex-1 flex flex-col justify-center mt-12">
             <h1
               className="text-5xl lg:text-[64px] leading-[0.95] tracking-[-0.03em] font-medium text-[var(--color-text)]"
               style={{ fontFamily: 'var(--font-display)' }}
             >
-              qué bueno
+              tranquilo,
               <br />
-              <span className="italic gradient-text">verte por acá.</span>
+              <span className="italic gradient-text">pasa.</span>
             </h1>
             <p className="mt-5 max-w-[360px] text-base leading-relaxed text-[var(--color-dim)]">
-              Entra con tu cuenta y Elber retoma justo donde lo dejaron. Sin
-              presentaciones de cero.
+              Mándanos tu correo y te enviamos el link para recuperar tu acceso. En un momento estás de vuelta.
             </p>
-
-            {/* Feature list */}
-            <div className="mt-9 flex flex-col gap-3.5">
-              {[
-                { i: '◈', t: 'Memoria persistente', d: 'Lo que platicaron sigue ahí.' },
-                { i: '⟢', t: 'Streaming en vivo', d: 'Responde mientras piensa.' },
-                { i: '⌖', t: 'Búsqueda integrada', d: 'Sin abrir 7 pestañas.' },
-              ].map((f) => (
-                <div key={f.t} className="flex items-start gap-3.5">
-                  <span
-                    className="glass flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-base"
-                    style={{
-                      color: 'var(--color-cyan)',
-                      textShadow: '0 0 12px var(--color-glow)',
-                    }}
-                  >
-                    {f.i}
-                  </span>
-                  <div>
-                    <div className="text-sm font-medium text-[var(--color-text)]">
-                      {f.t}
-                    </div>
-                    <div className="text-[13px] text-[var(--color-dim)] mt-0.5">
-                      {f.d}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           <div
@@ -142,9 +110,8 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ── Form panel ─────────────────────────────────────────── */}
+      {/* ── Form panel ─────────────────────────────────────────────── */}
       <div className="relative flex flex-1 items-center justify-center px-5 sm:px-10 py-10 sm:py-14 bg-[var(--color-bg)]">
-        {/* Mobile-only orb for some color */}
         <span
           aria-hidden
           className="orb md:hidden"
@@ -161,7 +128,7 @@ export default function LoginPage() {
         />
 
         <div className="relative z-10 w-full max-w-[380px]">
-          {/* Mobile logo (hidden on md+) */}
+          {/* Mobile logo */}
           <Link
             href="/"
             className="md:hidden inline-flex items-center gap-2.5 mb-7 text-[var(--color-text)]"
@@ -195,104 +162,81 @@ export default function LoginPage() {
             className="text-3xl font-medium tracking-[-0.03em] text-[var(--color-text)]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            Iniciar <span className="italic text-[var(--color-cyan)]">sesión</span>
+            Recuperar{' '}
+            <span className="italic text-[var(--color-cyan)]">contraseña</span>
           </h2>
           <p className="mt-2 mb-7 text-sm text-[var(--color-dim)]">
-            Continúa donde lo dejamos.
+            Te mandamos el link por correo.
           </p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <Field
-              id="email"
-              label="Email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={setEmail}
-              placeholder="tu@email.com"
-            />
-
-            <div>
-              <Field
-                id="password"
-                label="Contraseña"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={setPassword}
-                placeholder="••••••••"
-              />
-              <div className="mt-2 text-right">
-                <Link
-                  href="/recover-password"
-                  className="text-[12.5px] text-[var(--color-dim)] hover:text-[var(--color-cyan)] transition border-b border-dashed border-[var(--color-border)] pb-px"
-                >
-                  ¿olvidaste la contraseña?
-                </Link>
-              </div>
-            </div>
-
-            {error && (
-              <div
-                className="flex items-start gap-2 rounded-xl px-3.5 py-2.5 text-sm leading-snug"
-                style={{
-                  background: 'rgba(255,122,142,0.08)',
-                  border: '1px solid rgba(255,122,142,0.2)',
-                  color: '#ff7a8e',
-                }}
-              >
-                <span className="mt-px">⚠</span>
-                <span>{error}</span>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="gradient-accent mt-2 inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full text-[var(--color-bg)] text-[15px] font-semibold disabled:opacity-70 disabled:cursor-wait hover:opacity-95 transition"
-              style={{ boxShadow: '0 10px 36px var(--color-glow)' }}
+          {message ? (
+            <div
+              className="flex items-start gap-2 rounded-xl px-3.5 py-3 text-sm leading-snug"
+              style={{
+                background: 'rgba(0,230,180,0.07)',
+                border: '1px solid rgba(0,230,180,0.2)',
+                color: 'var(--color-cyan)',
+              }}
             >
-              {loading ? (
-                <>
-                  <span
-                    aria-hidden
-                    className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent"
-                    style={{ animation: 'elber-spin 0.7s linear infinite' }}
-                  />
-                  Iniciando sesión...
-                </>
-              ) : (
-                <>
-                  Entrar <span>→</span>
-                </>
-              )}
-            </button>
-
-            <div className="text-center text-[13px] text-[var(--color-dim)] mt-1">
-              ¿Aún no tienes cuenta?{' '}
-              <a
-                href="#"
-                className="text-[var(--color-cyan)] font-medium hover:underline"
-              >
-                regístrate →
-              </a>
+              <span className="mt-px">✓</span>
+              <span>{message}</span>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <Field
+                id="email"
+                label="Email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={setEmail}
+                placeholder="tu@email.com"
+              />
+
+              {error && (
+                <div
+                  className="flex items-start gap-2 rounded-xl px-3.5 py-2.5 text-sm leading-snug"
+                  style={{
+                    background: 'rgba(255,122,142,0.08)',
+                    border: '1px solid rgba(255,122,142,0.2)',
+                    color: '#ff7a8e',
+                  }}
+                >
+                  <span className="mt-px">⚠</span>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="gradient-accent mt-2 inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full text-[var(--color-bg)] text-[15px] font-semibold disabled:opacity-70 disabled:cursor-wait hover:opacity-95 transition"
+                style={{ boxShadow: '0 10px 36px var(--color-glow)' }}
+              >
+                {loading ? (
+                  <>
+                    <span
+                      aria-hidden
+                      className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent"
+                      style={{ animation: 'elber-spin 0.7s linear infinite' }}
+                    />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    Recuperar contraseña <span>→</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
 
           <div
             className="mt-8 pt-5 border-t border-[var(--color-border)] text-center text-[11.5px] tracking-wider text-[var(--color-dimmer)]"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            <a href="#" className="hover:text-[var(--color-dim)] transition">
-              privacidad
-            </a>
-            <span className="mx-2.5">·</span>
-            <a href="#" className="hover:text-[var(--color-dim)] transition">
-              términos
-            </a>
-            <span className="mx-2.5">·</span>
-            <Link href="/" className="hover:text-[var(--color-dim)] transition">
-              ← volver
+            <Link href="/login" className="hover:text-[var(--color-dim)] transition">
+              ← volver al login
             </Link>
           </div>
         </div>
@@ -301,7 +245,6 @@ export default function LoginPage() {
   )
 }
 
-// ── Field ───────────────────────────────────────────────────────
 function Field({
   id,
   label,
@@ -328,9 +271,7 @@ function Field({
       >
         {label}
       </label>
-      <div
-        className="relative rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-2)] transition focus-within:border-[var(--color-cyan)] focus-within:[box-shadow:0_0_0_4px_var(--color-glow-soft)]"
-      >
+      <div className="relative rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-2)] transition focus-within:border-[var(--color-cyan)] focus-within:[box-shadow:0_0_0_4px_var(--color-glow-soft)]">
         <input
           id={id}
           type={type}

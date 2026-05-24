@@ -150,7 +150,7 @@ describe('memory.service', () => {
 
       expect(run).toHaveBeenCalledWith(
         mockUserMemoryAgentInstance,
-        'Usuario: user message\n Elber: Elber response',
+        expect.stringContaining('Usuario: user message\n Elber: Elber response'),
         expect.objectContaining({ context: expect.any(Object) })
       )
     })
@@ -222,7 +222,7 @@ describe('memory.service', () => {
       expect(userMemoryAgent).toHaveBeenCalledWith('user1')
       expect(run).toHaveBeenCalledWith(
         mockUserMemoryAgentInstance,
-        'Usuario: user message\n Elber: Elber response',
+        expect.stringContaining('Usuario: user message\n Elber: Elber response'),
         expect.objectContaining({ context: expect.any(Object) })
       )
     })

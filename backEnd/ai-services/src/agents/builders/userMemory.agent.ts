@@ -1,17 +1,17 @@
 import { Agent } from '@openai/agents';
-import { updateProfile } from '../tools/profile.tools';
-import { loadProfile } from '../../services/profile.service';
+import { recordMemory, updateMemory } from '../tools/memory.tools';
+import { loadUserMemory } from '../../services/userMemory.service';
 import userMemoryPrompt from '../prompts/userMemory.prompt';
 
 const userMemoryAgent = async (userId: string) => {
-    const currentProfile = await loadProfile(userId);
-    const instructions = userMemoryPrompt(currentProfile);
+    const currentMemory = await loadUserMemory(userId);
+    const instructions = userMemoryPrompt(currentMemory);
 
     return Agent.create({
         name: 'user-memory-agent',
         model: 'gpt-4o-mini',
         instructions,
-        tools: [updateProfile] as any,
+        tools: [recordMemory, updateMemory] as any,
     });
 };
 

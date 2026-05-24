@@ -8,7 +8,7 @@ import { textToSpeech, splitIntoSentences } from "./polly.service";
 import chatAgent from "../agents/builders/chat.agent";
 import { ChatPromptContext } from "../models/prompt.model";
 import { getAgents } from "../loaders/agents.loader";
-import { loadProfile } from "./profile.service";
+import { loadUserMemory } from "./userMemory.service";
 
 const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     const { originalRequest, agentResponse } = elberResponse
@@ -26,7 +26,7 @@ const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: Elber
         console.error('Error guardando respuesta', error)
     })    
 
-    /***Manejamos la memoria medio y largo plazo***/
+    /***Manejamos la memoria medio***/
     handleMemory(elberResponse)
         .catch(error => console.error('Error en handleMemory:', error))
 }
@@ -38,22 +38,22 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
             const conversationId = `${user.uid}_${chatId.toString()}`
 
             const session = ShortTermMemory.getInstance().getSession(conversationId)
-            const [midMemory, userProfile] = await Promise.all([
+            const [midMemory, userMemory] = await Promise.all([
                 MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId),
-                loadProfile(user.uid)
+                loadUserMemory(user.uid),
             ])
-            
+
             const userContext: UserContext = {
                 userId: user.uid,
                 timeZone,
                 location
             }
-            
+
             const context: ChatPromptContext = {
                 name: user.name,
                 summary: midMemory.summary,
                 timeStamp,
-                userProfile
+                userMemory,
             }
             
             const chat_agent = chatAgent(context)

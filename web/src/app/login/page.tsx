@@ -270,12 +270,12 @@ export default function LoginPage() {
 
             <div className="text-center text-[13px] text-[var(--color-dim)] mt-1">
               ¿Aún no tienes cuenta?{' '}
-              <a
-                href="#"
+              <Link
+                href="/signup"
                 className="text-[var(--color-cyan)] font-medium hover:underline"
               >
                 regístrate →
-              </a>
+              </Link>
             </div>
           </form>
 

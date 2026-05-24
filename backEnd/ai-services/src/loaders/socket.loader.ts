@@ -38,12 +38,7 @@ const socketLoader = (httpServer: http.Server<typeof http.IncomingMessage, typeo
 
     io.on('connection', (socket) => {
         const uid = socket.data.user.uid
-        console.info('User connected:', uid)
-
-        if (uid) {
-            socket.join(uid);
-            console.info('Private room created:', uid);
-        }
+        console.info('User connected:', uid, socket.id)
 
         socket.on('disconnect', (reason) => {
             console.info(`User disconnected: ${uid} | Reason: ${reason}`)            
@@ -57,7 +52,7 @@ const socketLoader = (httpServer: http.Server<typeof http.IncomingMessage, typeo
             }
         })
 
-        socketSetListeners(io, socket)
+        socketSetListeners(socket)
     })
 
     console.info('Socket Ready!')

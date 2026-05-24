@@ -67,6 +67,7 @@ services:
       NODE_OPTIONS: "--max-old-space-size=320"
     volumes:
       - /home/ubuntu/creds/elber/googleCred.json:/usr/src/elber/ai-services/creds/googleCred.json:ro
+      - elber_memory:/usr/src/elber/ai-services/data
     expose:
       - "4042"
     mem_limit: 550m
@@ -117,3 +118,4 @@ networks:
 
 volumes:
   elber_pgdata:
+  elber_memory:

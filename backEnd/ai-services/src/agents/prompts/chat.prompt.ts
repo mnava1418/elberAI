@@ -29,6 +29,20 @@ const chatPrompt = (context: ChatPromptContext) => {
                 
         ## MEMORIA RESUMIDA DE ESTA CONVERSACIÓN:
         ${context.summary}
+
+        ## LO QUE SABES DE ${context.name.toUpperCase()}
+
+        Este es tu conocimiento acumulado sobre el usuario (familia, amigos, trabajo,
+        preferencias, preocupaciones, eventos importantes). Úsalo para personalizar tus
+        respuestas y demostrar que lo conoces.
+
+        Cuando te pregunte qué sabes de él, qué le preocupa, o cualquier cosa sobre su
+        vida personal, responde DIRECTAMENTE desde esta sección — NO uses ninguna tool
+        de memoria para consultar; la información ya está aquí.
+
+        <memoria_usuario>
+        ${context.userMemory}
+        </memoria_usuario>
         `
 }
 

@@ -44,9 +44,9 @@ jest.mock('@openai/agents', () => ({
   tool: jest.fn((c: any) => c),
 }))
 
-const mockResetProfileData = jest.fn()
-jest.mock('../../services/profile.service', () => ({
-  resetProfileData: (...args: any[]) => mockResetProfileData(...args),
+const mockResetMemoryData = jest.fn()
+jest.mock('../../services/userMemory.service', () => ({
+  resetMemoryData: (...args: any[]) => mockResetMemoryData(...args),
 }))
 
 describe('user.service', () => {
@@ -73,25 +73,25 @@ describe('user.service', () => {
       getMemory: mockGetMemory,
       deleteMemories: mockDeleteMemories,
     }))
-    mockResetProfileData.mockResolvedValue('He borrado todo tu perfil.')
+    mockResetMemoryData.mockResolvedValue('He borrado toda tu memoria.')
     mockRemove.mockResolvedValue(undefined)
     mockRef.mockReturnValue({ remove: mockRemove })
     ;(admin.database as unknown as jest.Mock).mockReturnValue({ ref: mockRef })
   })
 
   describe('deleteProfile', () => {
-    it('should clear STM, MTM, profile, and Firebase data', async () => {
+    it('should clear STM, MTM, memory, and Firebase data', async () => {
       await deleteProfile('user1')
 
       expect(mockDeleteUserSessions).toHaveBeenCalledWith('user1')
       expect(mockDeleteUserMemory).toHaveBeenCalledWith('user1')
-      expect(mockResetProfileData).toHaveBeenCalledWith('user1')
+      expect(mockResetMemoryData).toHaveBeenCalledWith('user1')
       expect(mockRef).toHaveBeenCalledWith('/user1')
       expect(mockRemove).toHaveBeenCalled()
     })
 
     it('should throw with the uid in the message when an error occurs', async () => {
-      mockResetProfileData.mockRejectedValue(new Error('DB error'))
+      mockResetMemoryData.mockRejectedValue(new Error('DB error'))
 
       await expect(deleteProfile('user1')).rejects.toThrow('Unable to delete profile for:user1')
     })

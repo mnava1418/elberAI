@@ -1,9 +1,10 @@
-import { ElberResponse } from "../models/elber.model";
+import { ElberRequest, ElberResponse, UserContext } from "../models/elber.model";
 import MidTermMemory from "../models/midTermMemory.model";
 import ShortTermMemory from "../models/shortTermMemory.model";
 import { updateChatSummary } from "./chat.service";
 import { run } from '@openai/agents';
 import { getAgents } from "../loaders/agents.loader";
+import userMemoryAgent from "../agents/builders/userMemory.agent";
 
 // ── Entry point ────────────────────────────────────────────────────────────────
 
@@ -20,7 +21,13 @@ export const handleMemory = async (elberResponse: ElberResponse): Promise<void> 
         agentResponse
     )
 
-    // 2. Verificar si corresponde generar un nuevo summary (state machine)
+    // 2. Aprendizaje automático: el keeper revisa los últimos turnos y actualiza la memoria
+    // del usuario (perfil + eventos). Fire-and-forget, independiente del ciclo de summary.
+    const recentContext = MidTermMemory.getInstance().formatLastTurns(conversationId, 3)
+    handleUserMemory(originalRequest, recentContext, user.uid)
+        .catch(error => console.error('Error actualizando memoria del usuario:', error))
+
+    // 3. Verificar si corresponde generar un nuevo summary (state machine)
     const mtm = MidTermMemory.getInstance()
     if (mtm.shouldSummarize(conversationId)) {
         mtm.startSummarizing(conversationId)
@@ -69,6 +76,19 @@ const generateSummary = async (conversationId: string, uid: string, chatId: numb
 
     updateChatSummary(uid, chatId, result.finalOutput)
         .catch(error => console.error('Error actualizando summary en Firebase:', error))
+}
+
+// ── Keeper: aprendizaje automático de la memoria del usuario ────────────────────
+
+const handleUserMemory = async (originalRequest: ElberRequest, conversationContext: string, uid: string): Promise<void> => {
+    if (!conversationContext.trim()) return
+
+    const { timeStamp, timeZone, location } = originalRequest
+    const userContext: UserContext = { userId: uid, timeZone, location }
+
+    const agent = await userMemoryAgent(uid)
+    const input = `FECHA ACTUAL: ${timeStamp}\n\nÚLTIMOS TURNOS:\n${conversationContext}`
+    await run(agent, input, { context: userContext })
 }
 
 // ── Episodic memory CRUD ───────────────────────────────────────────────────────

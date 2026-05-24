@@ -1,7 +1,7 @@
 import { Agent } from "@openai/agents";
 import { webSearch } from "../tools/search.tools";
 import { getWeather, geocodeLocation } from "../tools/weather.tools";
-import { saveMemory, searchMemory, updateMemory, deleteMemory, clearAllMemories } from "../tools/memory.tools";
+import { recordMemory, updateMemory, forgetMemory, resetMemory } from "../tools/memory.tools";
 import chatPrompt from "../prompts/chat.prompt";
 import { ChatPromptContext } from "../../models/prompt.model";
 import webSearchSkill from "../skills/web_search.skill";
@@ -10,7 +10,7 @@ import memorySkill from "../skills/memory.skill";
 const chatAgent = (context: ChatPromptContext) => {
     const searchTools = [webSearch]
     const weatherTools = [getWeather, geocodeLocation]
-    const memoryTools = [saveMemory, searchMemory, updateMemory, deleteMemory, clearAllMemories]
+    const memoryTools = [recordMemory, updateMemory, forgetMemory, resetMemory]
     const tools = [...searchTools, ...weatherTools, ...memoryTools]
 
     const prompt = chatPrompt(context)

@@ -8,6 +8,7 @@ import { textToSpeech, splitIntoSentences } from "./polly.service";
 import chatAgent from "../agents/builders/chat.agent";
 import { ChatPromptContext } from "../models/prompt.model";
 import { getAgents } from "../loaders/agents.loader";
+import { loadUserMemory } from "./userMemory.service";
 
 const handleResponse = (elberResponse: ElberResponse, emitMessage: (event: ElberEvent, chatId: number, text: string) => void) => {
     const { originalRequest, agentResponse } = elberResponse
@@ -37,20 +38,22 @@ export const chat = async(request: ElberRequest, emitMessage: (event: ElberEvent
             const conversationId = `${user.uid}_${chatId.toString()}`
 
             const session = ShortTermMemory.getInstance().getSession(conversationId)
-            const [midMemory] = await Promise.all([
+            const [midMemory, userMemory] = await Promise.all([
                 MidTermMemory.getInstance().getMemory(conversationId, user.uid, chatId),
+                loadUserMemory(user.uid),
             ])
-            
+
             const userContext: UserContext = {
                 userId: user.uid,
                 timeZone,
                 location
             }
-            
+
             const context: ChatPromptContext = {
                 name: user.name,
                 summary: midMemory.summary,
                 timeStamp,
+                userMemory,
             }
             
             const chat_agent = chatAgent(context)

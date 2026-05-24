@@ -1,9 +1,9 @@
 import admin from 'firebase-admin'
 import ShortTermMemory from '../models/shortTermMemory.model'
 import MidTermMemory from '../models/midTermMemory.model'
-import { resetProfileData } from './profile.service'
 import LongTermMemory from '../models/longTermMemory.model'
 import { UserData } from '../models/elber.model'
+import { resetMemoryData } from './userMemory.service'
 
 export const fetchUserData = async (userId: string): Promise<UserData[]> => {
     const ltm = new LongTermMemory()
@@ -40,9 +40,9 @@ export const deleteProfile = async (uid: string) => {
 
         const db = admin.database()
         const ref = db.ref(`/${uid}`)
-        
+
         await Promise.all([
-            resetProfileData(uid),
+            resetMemoryData(uid),
             ref.remove()
         ])
     } catch (error) {

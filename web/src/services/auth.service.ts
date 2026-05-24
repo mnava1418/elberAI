@@ -1,5 +1,6 @@
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
+import { BACK_URL } from '@/lib/constants'
 
 export const signIn = async (email: string, password: string) => {
   try {
@@ -24,4 +25,15 @@ export const logOut = async () => {
     console.error('Error al cerrar sesión:', error)
     throw new Error('Error al cerrar sesión.')
   }
+}
+
+export const resetPassword = async (email: string): Promise<string> => {
+  const res = await fetch(`${BACK_URL}/auth/user/resetPassword`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Error al recuperar contraseña')
+  return data.message
 }

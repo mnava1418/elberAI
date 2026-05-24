@@ -37,3 +37,43 @@ export const resetPassword = async (email: string): Promise<string> => {
   if (!res.ok) throw new Error(data.error || 'Error al recuperar contraseña')
   return data.message
 }
+
+export const requestAccess = async (email: string): Promise<string> => {
+  const res = await fetch(`${BACK_URL}/auth/access/request`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Error al solicitar acceso')
+  return data.message
+}
+
+export const validateAccessCode = async (
+  email: string,
+  accessCode: string
+): Promise<{ isValid: boolean; message: string }> => {
+  const res = await fetch(`${BACK_URL}/auth/access/validateCode`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, accessCode }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Error al validar el código')
+  return data
+}
+
+export const signUp = async (
+  email: string,
+  password: string,
+  displayName: string
+): Promise<{ registered: boolean; message: string }> => {
+  const res = await fetch(`${BACK_URL}/auth/user/signUp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, displayName }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Error al registrar cuenta')
+  return data
+}

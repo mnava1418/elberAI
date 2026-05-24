@@ -45,13 +45,7 @@ const createMockSocket = (uid: string) => {
   }
 }
 
-const createMockIo = () => ({
-  to: jest.fn().mockReturnThis(),
-  emit: jest.fn(),
-})
-
 describe('elberListener', () => {
-  let mockIo: ReturnType<typeof createMockIo>
   let mockSocket: ReturnType<typeof createMockSocket>
 
   const basePayload = {
@@ -65,21 +59,20 @@ describe('elberListener', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockIo = createMockIo()
     mockSocket = createMockSocket('user1')
     ;(chatService.saveChatMessage as jest.Mock).mockResolvedValue(undefined)
     ;(elberService.chat as jest.Mock).mockResolvedValue(undefined)
   })
 
   it('should register handlers for user:ask and user:cancel', () => {
-    elberListener(mockIo as any, mockSocket as any)
+    elberListener(mockSocket as any)
     expect(mockSocket.on).toHaveBeenCalledWith('user:ask', expect.any(Function))
     expect(mockSocket.on).toHaveBeenCalledWith('user:cancel', expect.any(Function))
   })
 
   describe('user:ask', () => {
     it('should save the user message and call chat service', async () => {
-      elberListener(mockIo as any, mockSocket as any)
+      elberListener(mockSocket as any)
       mockSocket._trigger('user:ask', { ...basePayload })
 
       await new Promise((r) => setImmediate(r))
@@ -93,7 +86,7 @@ describe('elberListener', () => {
     })
 
     it('should override payload uid with the socket uid', async () => {
-      elberListener(mockIo as any, mockSocket as any)
+      elberListener(mockSocket as any)
       const payload = { ...basePayload, user: { uid: 'other-uid', name: 'Someone' } }
       mockSocket._trigger('user:ask', payload)
 
@@ -106,10 +99,9 @@ describe('elberListener', () => {
       )
     })
 
-    it('emitChatResponse should emit to the user room', async () => {
-      elberListener(mockIo as any, mockSocket as any)
+    it('emitChatResponse should emit via socket', async () => {
+      elberListener(mockSocket as any)
 
-      // Capture the emitMessage callback passed to chat
       let capturedEmit: Function | undefined
       ;(elberService.chat as jest.Mock).mockImplementation((_req, emit) => {
         capturedEmit = emit
@@ -121,16 +113,14 @@ describe('elberListener', () => {
 
       capturedEmit?.('elber:stream', 42, 'Hello')
 
-      expect(mockIo.to).toHaveBeenCalledWith('user1')
-      expect(mockIo.emit).toHaveBeenCalledWith('elber:stream', 42, 'Hello')
+      expect(mockSocket.emit).toHaveBeenCalledWith('elber:stream', 42, 'Hello')
     })
 
     it('should clean up the AbortController after chat resolves', async () => {
-      elberListener(mockIo as any, mockSocket as any)
+      elberListener(mockSocket as any)
       mockSocket._trigger('user:ask', { ...basePayload })
       await new Promise((r) => setImmediate(r))
 
-      // After chat resolves, cancel should be a no-op (no abort controller stored)
       expect(() => mockSocket._trigger('user:cancel', 42)).not.toThrow()
     })
   })
@@ -143,7 +133,7 @@ describe('elberListener', () => {
         return new Promise(() => {}) // never resolves — keeps the chat active
       })
 
-      elberListener(mockIo as any, mockSocket as any)
+      elberListener(mockSocket as any)
       mockSocket._trigger('user:ask', { ...basePayload })
 
       await new Promise((r) => setImmediate(r))
@@ -154,7 +144,7 @@ describe('elberListener', () => {
     })
 
     it('should be a no-op when chatId has no active controller', () => {
-      elberListener(mockIo as any, mockSocket as any)
+      elberListener(mockSocket as any)
       expect(() => mockSocket._trigger('user:cancel', 999)).not.toThrow()
     })
   })

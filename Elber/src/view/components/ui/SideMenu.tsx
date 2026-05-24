@@ -7,7 +7,7 @@ import sideMenuStyles from '../../../styles/sideMenu.style';
 import { appColors } from '../../../styles/main.style';
 import { GlobalContext } from '../../../store/GlobalProvider';
 import { useContext } from 'react';
-import { deleteAllChatsAction, selectChat } from '../../../store/actions/chat.actions';
+import { deleteAllChatsAction, selectChat, setChats } from '../../../store/actions/chat.actions';
 import { showAlert } from '../../../store/actions/elber.actions';
 import * as chatServices from '../../../services/chat.service'
 
@@ -69,7 +69,7 @@ const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) =>
                 <CustomText type='text' text='Elber' style={{fontSize: 20, fontWeight: '600'}} />
             </View>     
 
-            <DrawerItem                
+            <DrawerItem
                 label="Chat Nuevo"
                 onPress={() => navigateToScreen('Chat Nuevo', {id: -1})}
                 icon={({ focused, size }) => (
@@ -85,6 +85,23 @@ const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) =>
   
             {chatEntries.length > 0 ? 
                 <>
+                    <DrawerItem
+                        label="Recargar Chats"
+                        onPress={() => {
+                            chatServices.getChats()
+                                .then(chats => context.dispatch(setChats(chats)))
+                                .catch(error => console.error(error))
+                        }}
+                        icon={({ size }) => (
+                            <Icon
+                                name="refresh-outline"
+                                size={size}
+                                color={appColors.subtitle}
+                            />
+                        )}
+                        labelStyle={sideMenuStyles.itemLabel}
+                        style={sideMenuStyles.item}
+                    />
                     <DrawerItem                
                         label="Eliminar Chats"
                         onPress={confirmDeleteChat}

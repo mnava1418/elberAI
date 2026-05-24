@@ -3,13 +3,13 @@ import { ElberEvent, ElberRequest } from "../models/elber.model";
 import { chat } from "../services/elber.service";
 import { saveChatMessage } from "../services/chat.service";
 
-const elberListener = (io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
+const elberListener = (socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
     
     const uid = socket.data.user.uid
     const activeChats = new Map<number, AbortController>()
 
     const emitChatResponse = (event: ElberEvent, chatId: number, text: string) => {        
-        io.to(uid).emit(event, chatId, text);
+        socket.emit(event, chatId, text);
     };
     
     socket.on('user:ask', (payload: ElberRequest) => {

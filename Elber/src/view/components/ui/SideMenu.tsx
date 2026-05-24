@@ -70,24 +70,6 @@ const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) =>
             </View>     
 
             <DrawerItem
-                label="Recargar Chats"
-                onPress={() => {
-                    chatServices.getChats()
-                        .then(chats => context.dispatch(setChats(chats)))
-                        .catch(error => console.error(error))
-                }}
-                icon={({ size }) => (
-                    <Icon
-                        name="refresh-outline"
-                        size={size}
-                        color={appColors.subtitle}
-                    />
-                )}
-                labelStyle={sideMenuStyles.itemLabel}
-                style={sideMenuStyles.item}
-            />
-
-            <DrawerItem
                 label="Chat Nuevo"
                 onPress={() => navigateToScreen('Chat Nuevo', {id: -1})}
                 icon={({ focused, size }) => (
@@ -103,6 +85,23 @@ const SideMenuContent = ({props, chatEntries, selectedChatId}: SideMenuProps) =>
   
             {chatEntries.length > 0 ? 
                 <>
+                    <DrawerItem
+                        label="Recargar Chats"
+                        onPress={() => {
+                            chatServices.getChats()
+                                .then(chats => context.dispatch(setChats(chats)))
+                                .catch(error => console.error(error))
+                        }}
+                        icon={({ size }) => (
+                            <Icon
+                                name="refresh-outline"
+                                size={size}
+                                color={appColors.subtitle}
+                            />
+                        )}
+                        labelStyle={sideMenuStyles.itemLabel}
+                        style={sideMenuStyles.item}
+                    />
                     <DrawerItem                
                         label="Eliminar Chats"
                         onPress={confirmDeleteChat}

@@ -5,6 +5,7 @@ import useChatStore from '@/store/useChatStore'
 import useElberStore from '@/store/useElberStore'
 import { ElberMessage } from '@/types/chat.types'
 import { ElberRequest } from '@/types/elber.types'
+import AudioQueue from '@/services/audioQueue.service'
 
 class SocketManager {
   private socket: Socket | null = null
@@ -92,7 +93,26 @@ class SocketManager {
       useElberStore.getState().setWaiting(false)
     })
 
+    this.socket.on('elber:audio_chunk', (_chatId: number, base64: string) => {
+      AudioQueue.getInstance().reset()
+      AudioQueue.getInstance().addChunk(base64)
+      useElberStore.getState().setTalking(true)
+      useElberStore.getState().setWaiting(false)
+    })
+
+    this.socket.on('elber:audio_end', (chatId: number, text: string) => {
+      const assistantMessage: ElberMessage = {
+        id: `assistant:${Date.now()}`,
+        createdAt: Date.now(),
+        role: 'assistant',
+        content: text,
+      }
+      useChatStore.getState().addChatMessage(chatId, assistantMessage)
+      useElberStore.getState().setWaiting(false)
+    })
+
     this.socket.on('elber:cancelled', () => {
+      AudioQueue.getInstance().stop()
       useElberStore.getState().setStreaming(false)
       useElberStore.getState().setWaiting(false)
     })
@@ -110,7 +130,7 @@ class SocketManager {
     })
   }
 
-  async sendMessage(chatId: number, title: string, message: string) {
+  async sendMessage(chatId: number, title: string, message: string, isVoiceMode = false) {
     const currentUser = auth.currentUser
 
     if (!this.socket?.connected || !currentUser) {
@@ -151,7 +171,7 @@ class SocketManager {
       title,
       timeStamp,
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      isVoiceMode: false,
+      isVoiceMode,
       location,
     }
 

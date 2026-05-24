@@ -1,10 +1,12 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import useChatStore from '@/store/useChatStore'
 import useElberStore from '@/store/useElberStore'
 import { ElberMessage } from '@/types/chat.types'
 import SocketManager from '@/services/socket.service'
+import AudioQueue from '@/services/audioQueue.service'
+import { useVoice } from '@/hooks/useVoice'
 
 export default function InputToolBar({
   standalone,
@@ -13,15 +15,24 @@ export default function InputToolBar({
 }) {
   const [inputText, setInputText] = useState('')
   const [focused, setFocused] = useState(false)
-  const [voiceMode, setVoiceMode] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const selectedChatId = useChatStore((state) => state.selectedChatId)
   const chats = useChatStore((state) => state.chats)
   const isWaiting = useElberStore((state) => state.isWaiting)
   const isStreaming = useElberStore((state) => state.isStreaming)
+  const isTalking = useElberStore((state) => state.isTalking)
+  const voiceMode = useElberStore((state) => state.voiceMode)
+  const setVoiceMode = useElberStore((state) => state.setVoiceMode)
 
-  const canSend = inputText.trim() !== '' && !isWaiting && !isStreaming
+  const { isListening, readyToSend, isSupported, startListening, stopListening, clearReadyToSend } =
+    useVoice({
+      onResult: useCallback((text: string) => {
+        setInputText(text)
+      }, []),
+    })
+
+  const canSend = inputText.trim() !== '' && !isWaiting && !isStreaming && !isTalking
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(e.target.value)
@@ -32,7 +43,7 @@ export default function InputToolBar({
     }
   }
 
-  const handleSend = () => {
+  const handleSend = useCallback(() => {
     const text = inputText.trim()
     if (!text) return
 
@@ -51,15 +62,16 @@ export default function InputToolBar({
 
     useChatStore.getState().addChatMessage(chatId, userMessage)
     useElberStore.getState().setWaiting(true)
-    SocketManager.getInstance().sendMessage(chatId, title, text)
+    SocketManager.getInstance().sendMessage(chatId, title, text, voiceMode)
 
     setInputText('')
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
-  }
+  }, [inputText, selectedChatId, chats, voiceMode])
 
   const handleCancel = () => {
+    AudioQueue.getInstance().stop()
     SocketManager.getInstance().cancelMessage(selectedChatId)
   }
 
@@ -69,6 +81,46 @@ export default function InputToolBar({
       if (canSend) handleSend()
     }
   }
+
+  const handleToggleVoiceMode = () => {
+    if (!isSupported) return
+    const next = !voiceMode
+    setVoiceMode(next)
+    if (!next && isListening) {
+      stopListening()
+    }
+  }
+
+  // Auto-send when silence detected in voice mode
+  useEffect(() => {
+    if (readyToSend && voiceMode && inputText.trim()) {
+      clearReadyToSend()
+      handleSend()
+    } else if (readyToSend) {
+      clearReadyToSend()
+    }
+  }, [readyToSend]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-restart listening after Elber finishes talking
+  useEffect(() => {
+    if (!isTalking && voiceMode && !isWaiting && !isStreaming && !isListening) {
+      startListening()
+    }
+  }, [isTalking]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Start listening immediately when voice mode is activated
+  useEffect(() => {
+    if (voiceMode && !isListening && !isWaiting && !isStreaming && !isTalking) {
+      startListening()
+    }
+  }, [voiceMode]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const showCancel = isStreaming || isTalking
+  const placeholder = isListening
+    ? 'Escuchando...'
+    : voiceMode
+    ? 'Habla con Elber...'
+    : 'Escríbele a Elber...'
 
   return (
     <div
@@ -87,20 +139,25 @@ export default function InputToolBar({
             boxShadow: focused ? '0 0 0 4px var(--color-glow-soft)' : 'none',
           }}
         >
-          {/* Voice toggle (UI only — wire to isVoiceMode in your request when ready) */}
           <button
             type="button"
-            onClick={() => setVoiceMode((v) => !v)}
+            onClick={handleToggleVoiceMode}
+            disabled={!isSupported}
             className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition"
             style={{
-              background: voiceMode
-                ? 'linear-gradient(135deg, var(--color-cyan), var(--color-violet))'
-                : 'transparent',
+              background:
+                voiceMode
+                  ? isListening
+                    ? 'linear-gradient(135deg, #ff7a8e, var(--color-violet))'
+                    : 'linear-gradient(135deg, var(--color-cyan), var(--color-violet))'
+                  : 'transparent',
               border: voiceMode ? 'none' : '1px solid var(--color-border)',
-              color: voiceMode ? 'var(--color-bg)' : 'var(--color-dim)',
+              color: voiceMode ? 'var(--color-bg)' : isSupported ? 'var(--color-dim)' : 'var(--color-dimmer)',
               boxShadow: voiceMode ? '0 6px 20px var(--color-glow)' : 'none',
+              cursor: isSupported ? 'pointer' : 'not-allowed',
             }}
             aria-label={voiceMode ? 'Desactivar voz' : 'Activar voz'}
+            title={!isSupported ? 'Tu navegador no soporta reconocimiento de voz' : undefined}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
               <rect x="6" y="2" width="4" height="8" rx="2" />
@@ -115,12 +172,13 @@ export default function InputToolBar({
             onKeyDown={handleKeyDown}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            placeholder={voiceMode ? 'Habla con Elber...' : 'Escríbele a Elber...'}
+            placeholder={placeholder}
             rows={1}
+            readOnly={isListening}
             className="flex-1 resize-none bg-transparent text-[15px] leading-snug text-[var(--color-text)] placeholder-[var(--color-dimmer)] outline-none max-h-40 py-2"
           />
 
-          {isStreaming ? (
+          {showCancel ? (
             <button
               type="button"
               onClick={handleCancel}

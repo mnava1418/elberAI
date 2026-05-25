@@ -73,5 +73,8 @@ target 'Elber' do
         system("sed -i '' 's/FMT_GCC_VERSION >= 1002 || FMT_CLANG_VERSION >= 1101/(FMT_GCC_VERSION >= 1002 || FMT_CLANG_VERSION >= 1101) \\&\\& !defined(__apple_build_version__)/g' '#{fmt_base_h}'")
       end
     end
+
+    pbxproj = Pod::Config.instance.installation_root.to_s + '/Elber.xcodeproj/project.pbxproj'
+    system("sed -i '' '/BUILT_PRODUCTS_DIR.*INFOPLIST_PATH/d' '#{pbxproj}'")
   end
 end

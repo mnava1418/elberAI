@@ -9,6 +9,10 @@ import SwiftUI
 
 @main
 struct elberWatch_Watch_AppApp: App {
+    init() {
+        WatchSessionManager.shared.activate()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
